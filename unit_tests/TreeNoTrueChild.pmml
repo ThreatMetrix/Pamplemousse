@@ -1,0 +1,18 @@
+<PMML xmlns="http://www.dmg.org/PMML-4_4" version="4.4">
+  <Header copyright="www.dmg.org" description="A very small tree model to demonstrate no true child."/>
+  <DataDictionary numberOfFields="1">
+    <DataField name="prob1" optype="continuous" dataType="double"/>
+  </DataDictionary>
+  <TreeModel modelName="prob" functionName="regression" missingValueStrategy="defaultChild">
+    <MiningSchema>
+      <MiningField name="prob1"/>
+      <MiningField name="score" usageType="target"/>
+    </MiningSchema>
+    <Node id="N1" score="0">
+      <True/>
+      <Node id="T1" score="1">
+        <SimplePredicate field="prob1" operator="greaterThan" value="0.33"/>
+      </Node>
+    </Node>
+  </TreeModel>
+</PMML>
