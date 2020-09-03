@@ -21,6 +21,7 @@
 #include "conversioncontext.hpp"
 #include "document.hpp"
 #include "transformation.hpp"
+#include <algorithm>
 
 namespace
 {

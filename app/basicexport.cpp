@@ -22,6 +22,7 @@
 #include "luaconverter/luaconverter.hpp"
 #include "luaconverter/optimiser.hpp"
 #include <iostream>
+#include <algorithm>
 
 namespace
 {
