@@ -45,6 +45,10 @@ static void printUsage(const char * programName)
     std::cout << "\t\t-d\t--data <file>\t\t\t\tCSV input file\t\t\t\t\t\t\t\t\t\t(--test, mandatory)" << std::endl;
     std::cout << "\t\t-v\t--verify <file>\t\t\t\tCSV input file\t\t\t\t\t\t\t\t\t\t(--test, optional)" << std::endl;
     std::cout << "\t\t-e\t--epsilon <epsilon>\t\t\tPrecision to verify output.\t\t\t\t\t\t\t(--test, optional)" << std::endl;
+    std::cout << "\t\t\t--input_multi\t\t\t\tUse multiple parameters for inputs (default)\t\t(--convert, optional)" << std::endl;
+    std::cout << "\t\t\t--input_table\t\t\t\tUse table for inputs\t\t\t\t\t\t\t\t(--convert, optional)" << std::endl;
+    std::cout << "\t\t\t--output_multi\t\t\t\tUse multiple parameters for outputs (default)\t\t(--convert, optional)" << std::endl;
+    std::cout << "\t\t\t--output_table\t\t\t\tUse table for outputs\t\t\t\t\t\t\t\t(--convert, optional)" << std::endl;
     std::cout << std::endl;
     std::cout << "For any output, you may reference any target/predicted or output value from the model. Furthermore, you may access any neuron's activation value through \"neuron:<id>\"" << std::endl;
     std::cout << "You may also put expression using +, -, * and / after an model output, but not before." << std::endl;
