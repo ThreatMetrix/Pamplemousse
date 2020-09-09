@@ -111,7 +111,9 @@ Sure, take the following PMML for example:
 ```
 
 Running Pamplemousse without specifying any explicit outputs:
-./pamplemousse --convert --input_table --output_table example.xml
+```
+$ ./pamplemousse --convert --input_table --output_table example.xml
+```
 
 Will give something like the following:
 ```lua
@@ -149,7 +151,10 @@ end
 ```
 
 Alternatively, by specifying what you actually want, it will produce something much more concise and efficient
-./pamplemousse --convert --input_table --output_table example.xml
+```
+$ ./pamplemousse --convert --input_table --output_table --prediction class example.xml
+```
+
 ```lua
 function func ( input )
   local petal_length = input and input ["petal_length"]
