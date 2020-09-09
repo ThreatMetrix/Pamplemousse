@@ -351,13 +351,14 @@ class InlineVariableVisitor
     unsigned int currentDeclaration;
     int currentCost;
     // This is how many instructions it is willing to bloat by in order remove a variable.
-    static constexpr int PRICE_OF_VARIABLE = 5;
+    int m_priceOfVariable = 5;
     static constexpr int COST_OF_REF = 1;
     void clearCurrentDeclaration() { currentDeclaration = std::numeric_limits<unsigned int>::max(); }
 public:
-    InlineVariableVisitor(VariableInfoMap & map) :
+    InlineVariableVisitor(VariableInfoMap & map, int variablePrice) :
         m_map(map),
-        m_killedAnything(false)
+        m_killedAnything(false),
+        m_priceOfVariable(variablePrice)
     {
         clearCurrentDeclaration();
     }
@@ -405,6 +406,7 @@ public:
                 break;
                 
             case Function::CONSTANT:
+                currentCost += 1;
                 break;
                 
             default:
@@ -436,7 +438,7 @@ public:
                 int extraCost = currentCost - COST_OF_REF;
                 // Work out if we are better off without this variable.
                 // Subtract one from each count to make up for that we would be removing at one reference for every inlining
-                if (found->second.usedNTimes == 0 || extraCost * int(found->second.usedNTimes - 1) <= PRICE_OF_VARIABLE)
+                if (found->second.usedNTimes == 0 || extraCost * int(found->second.usedNTimes - 1) <= m_priceOfVariable)
                 {
                     m_replacements.emplace(node.content, std::make_pair(node.children.front(), extraCost));
                     m_killedAnything = true;
@@ -868,7 +870,8 @@ top:
     }
 
     // Take variables and replace them opportunistically with their constituant expressions.
-    InlineVariableVisitor gatherer(map);
+    // Inline much more aggressively if we're running short of variables.
+    InlineVariableVisitor gatherer(map, map.size() > outputter.getMaxVariables() ? 5 : 1);
     traverseTree<false>(context, node, gatherer);
     if (gatherer.hasKilledAnything())
     {

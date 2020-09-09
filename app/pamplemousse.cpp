@@ -55,6 +55,9 @@ int main(int argc, char * const * argv)
 {
     int isTest = 0;
     int isConvert = 0;
+    int inputFormat = int(PMMLExporter::Format::AS_MULTI_ARG);
+    int outputFormat = int(PMMLExporter::Format::AS_MULTI_ARG);
+    
     struct option longopts[] = {
         { "test",      no_argument,     &isTest,       1 },
         { "convert",   no_argument,     &isConvert,    1 },
@@ -66,6 +69,10 @@ int main(int argc, char * const * argv)
         { "prediction",required_argument,NULL,         'p' },
         { "help",      no_argument,      NULL,         'h' },
         { "epsilon",   required_argument,NULL,         'e' },
+        { "input_multi",no_argument,     &inputFormat, int(PMMLExporter::Format::AS_MULTI_ARG) },
+        { "input_table",no_argument,     &inputFormat, int(PMMLExporter::Format::AS_TABLE) },
+        { "output_multi",no_argument,    &outputFormat,int(PMMLExporter::Format::AS_MULTI_ARG) },
+        { "output_table",no_argument,    &outputFormat,int(PMMLExporter::Format::AS_TABLE) },
         { NULL,        0,                NULL,          0 }
     };
 
@@ -177,7 +184,7 @@ int main(int argc, char * const * argv)
     {
         LuaOutputter output(outputFile ? outFileStream : std::cout, insensitive ? LuaOutputter::OPTION_LOWERCASE : 0);
 
-        if (!PMMLExporter::createScript(sourceFile, output, inputs, outputs))
+        if (!PMMLExporter::createScript(sourceFile, output, inputs, outputs, PMMLExporter::Format(inputFormat), PMMLExporter::Format(outputFormat)))
         {
             return -1;
         }

@@ -7,7 +7,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
 
 find_package( Lua REQUIRED )
-if (not ${TinyXML2_DIR})
+if (NOT DEFINED TinyXML2_DIR)
   find_package( TinyXML2 REQUIRED )
 endif()
 
