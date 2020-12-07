@@ -1,6 +1,6 @@
 # Pamplemousse
 ## What is Pamplemousse?
-Pamplemousse is an optimizing transpiler for converting PMML models to Lua scripts.
+Pamplemousse is an optimizing transpiler for converting [PMML](http://dmg.org/pmml/v4-4-1/GeneralStructure.html) models to [Lua](https://www.lua.org/) scripts.
 It aims to generate Lua that faithfully represents the exact behaviour of a model, as specified by the PMML standard, while being efficient and readable.
 
 ## Who is it for?
@@ -32,6 +32,15 @@ Start off by trying the included conversion application.
 You can see a help message by running pamplemousse without parameters.
 
 Alternatively, if your requirements become more complex, you may use pamplemousse as a library and implement your own input/output logic to the model.
+
+## How much of PMML does it support?
+* [Trees](http://dmg.org/pmml/v4-3/TreeModel.html)
+* [Neural Networks](http://dmg.org/pmml/v4-3/NeuralNetwork.html)
+* [Naïve Bayes](http://dmg.org/pmml/v4-3/NaiveBayes.html)
+* [Regression](http://dmg.org/pmml/v4-3/Regression.html)
+* [Scorecard](http://dmg.org/pmml/v4-3/Scorecard.html)
+* [Support Vector Machines](http://dmg.org/pmml/v4-3/SupportVectorMachine.html)
+* [Model Composition, Ensembles, and Segmentation](http://dmg.org/pmml/v4-4-1/MultipleModels.html)
 
 ## Can I see it in action:
 Sure, take the following PMML for example:
