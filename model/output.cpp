@@ -316,7 +316,7 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
                             }
                             else
                             {
-                                for (const auto pair : modelConfig.probabilityValueName)
+                                for (const auto &pair : modelConfig.probabilityValueName)
                                 {
                                     builder.field(pair.second);
                                     builder.defaultValue("0");
@@ -355,7 +355,7 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
                     }
                     else
                     {
-                        for (const auto pair : modelConfig.confidenceValues)
+                        for (const auto &pair : modelConfig.confidenceValues)
                         {
                             builder.field(pair.second);
                             builder.defaultValue("0");

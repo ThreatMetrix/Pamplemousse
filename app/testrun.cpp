@@ -580,7 +580,7 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
     }
     
     size_t nOutputs = 0;
-    for (const auto output : outputs)
+    for (const auto &output : outputs)
     {
         if (output.field)
         {
