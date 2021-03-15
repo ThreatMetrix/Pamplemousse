@@ -84,7 +84,7 @@ namespace Function
 
     struct Definition
     {
-        Definition(const char * l, FunctionType t, PMMLDocument::FieldType o, int ol, MissingValueRule n) :
+        constexpr Definition(const char * l, FunctionType t, PMMLDocument::FieldType o, int ol, MissingValueRule n) :
             luaFunction(l),
             functionType(t),
             outputType(o),

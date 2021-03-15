@@ -84,7 +84,7 @@ namespace PMMLDocument
     
     ConstFieldDescriptionPtr ConversionContext::createVariable(FieldType type, const std::string & name, FieldOrigin origin)
     {
-        std::string variableName = makeSaneAndUniqueVariable(name, origin);
+        std::string variableName = makeSaneAndUniqueVariable(name);
         return std::make_shared<FieldDescription>(type, origin, OPTYPE_INVALID, variableName);
     }
 
@@ -93,7 +93,7 @@ namespace PMMLDocument
         m_transformationDictionary = dictionary;
     }
 
-    std::string ConversionContext::makeSaneAndUniqueVariable(const std::string & key, FieldOrigin)
+    std::string ConversionContext::makeSaneAndUniqueVariable(const std::string & key)
     {
         std::string sanitised;
         sanitised.reserve(key.length());

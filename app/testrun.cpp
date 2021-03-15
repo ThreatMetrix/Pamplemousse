@@ -432,24 +432,22 @@ namespace
     }
     
     // When something didn't work (verification failed, or exception thrown), we try to give a hint why.
-    // This is a debugging hook to find which lines were executed. This is particularly important for debugging complex trees on verification mismatch.
-    std::vector<bool> linesExecuted;
-    void myHook(lua_State *, lua_Debug *ar)
-    {
-        int line = ar->currentline;
-        if (int(linesExecuted.size()) <= line)
-        {
-            linesExecuted.resize(line + 1);
-        }
-        linesExecuted[line] = true;
-    }
-    
     // Like executeThisLine, but with tracing. Will print out annotated source code when it is done.
     bool debugThisLine(lua_State * L, const std::string & lineBuffer, const std::vector<PMMLExporter::ModelOutput> & inputColumns, const std::string & sourceCode, bool insensitive, bool hasOverflow, size_t nOutputs)
     {
+        static std::vector<bool> linesExecuted;
         linesExecuted.clear();
         // Do not pre-allocate since we haven't counted the number of lines.
-        lua_sethook(L, myHook, LUA_MASKLINE, 0);
+        lua_sethook(L,
+                    [](lua_State *, lua_Debug *ar)
+                    {
+                        int line = ar->currentline;
+                        if (int(linesExecuted.size()) <= line)
+                        {
+                            linesExecuted.resize(line + 1);
+                        }
+                        linesExecuted[line] = true;
+                    }, LUA_MASKLINE, 0);
         
         executeThisLine(L, lineBuffer, inputColumns, insensitive, hasOverflow, nOutputs);
         
@@ -546,7 +544,7 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
         std::vector<std::string> inputColumnNames;
         if (not readColumnNames(inputColumnNames, inputData, lowercase))
         {
-            return nullptr;
+            return false;
         }
         
         inputColumns.reserve(inputColumnNames.size());
@@ -580,7 +578,7 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
     }
     
     size_t nOutputs = 0;
-    for (const auto output : outputs)
+    for (const auto & output : outputs)
     {
         if (output.field)
         {

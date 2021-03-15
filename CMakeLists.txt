@@ -64,3 +64,29 @@ cuti_creates_test_target(libpamplemousse_test libpamplemousse
     unit_tests/test_transform.cpp
     unit_tests/test_tree.cpp)
 target_link_libraries(libpamplemousse_test PRIVATE ${LUA_LIBRARIES})
+
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+if(CMAKE_VERSION VERSION_LESS "3.7.0")
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+endif()
+
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+
+add_executable(pamplemousse_ui
+    app/pamplemousse_ui.cpp
+    app/outputtable.cpp app/outputtable.h
+    app/mainwindow.ui
+    app/testrun.cpp app/testrun.hpp
+    app/modeloutput.cpp app/modeloutput.hpp
+    app/basicexport.cpp app/basicexport.hpp
+    app/outputslist.cpp app/outputslist.h
+    app/resources.qrc)
+target_link_libraries(pamplemousse_ui Qt5::Widgets)
+target_link_libraries(pamplemousse_ui libpamplemousse)
+target_link_libraries(pamplemousse_ui ${LUA_LIBRARIES})
+target_include_directories(pamplemousse_ui PRIVATE app)
+target_compile_options(pamplemousse_ui PRIVATE -Wextra -Werror)

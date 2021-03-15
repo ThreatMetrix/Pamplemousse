@@ -56,7 +56,7 @@ bool bindInputColumns(std::vector<PMMLExporter::ModelOutput> & inputColumns, con
 }
 
 
-const Function::Definition ReturnStatement =
+static constexpr Function::Definition ReturnStatement =
 {
     nullptr,
     Function::RETURN_STATEMENT,

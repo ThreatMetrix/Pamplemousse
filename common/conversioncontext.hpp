@@ -43,12 +43,12 @@ namespace PMMLDocument
         // Declare a new field without scope.
         ConstFieldDescriptionPtr addUnscopedDataField(const std::string & key, const DataField & field, FieldOrigin origin)
         {
-            std::shared_ptr<FieldDescription> out = std::make_shared<FieldDescription>(field, origin, makeSaneAndUniqueVariable(key, origin));
+            std::shared_ptr<FieldDescription> out = std::make_shared<FieldDescription>(field, origin, makeSaneAndUniqueVariable(key));
             m_dataDictionary.emplace(key, out);
             return out;
         }
 
-        std::string makeSaneAndUniqueVariable(const std::string & key, FieldOrigin origin);
+        std::string makeSaneAndUniqueVariable(const std::string & key);
 
         const ConstFieldDescriptionPtr getFieldDescription(const char * field) const
         {
@@ -121,6 +121,10 @@ namespace PMMLDocument
         const std::string & getApplication() const { return m_application; }
         void setApplication(const std::string & application) { m_application = application; }
         
+        bool hasVariableNamed(const std::string & name) const
+        {
+            return m_variableNames.find(name) != m_variableNames.end();
+        }
     private:
         
         DataDictionary m_inputs;
@@ -161,7 +165,7 @@ namespace PMMLDocument
         }
         ConstFieldDescriptionPtr addDataField(const std::string & variable, FieldType type, FieldOrigin origin, OpType optype)
         {
-            std::string luaRepr = m_context.makeSaneAndUniqueVariable(variable, origin);
+            std::string luaRepr = m_context.makeSaneAndUniqueVariable(variable);
             std::shared_ptr<FieldDescription> field = std::make_shared<FieldDescription>(type, origin, optype, luaRepr);
             ConversionContext::Fields::iterator iter = m_context.m_dataDictionary.emplace(variable, field);
             m_fieldIterators.push_back(iter);
