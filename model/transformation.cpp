@@ -1498,7 +1498,7 @@ void Transformation::importTransformationDictionary(AstBuilder & builder, PMMLDo
     {
         return;
     }
-    for (const auto pair : *dict)
+    for (const auto &pair : *dict)
     {
         if (importElement(builder, pair.second))
         {

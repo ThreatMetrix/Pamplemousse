@@ -22,6 +22,7 @@
 #include "luaconverter/luaconverter.hpp"
 #include "luaconverter/optimiser.hpp"
 #include <iostream>
+#include <algorithm>
 
 namespace
 {
@@ -105,7 +106,25 @@ void addMultiReturnStatement(AstBuilder & builder, std::vector<PMMLExporter::Mod
         return false;
     });
     builder.function(ReturnStatement, goodOutputs);
-    builder.block(2);
+}
+
+void addTableReturnStatement(AstBuilder & builder, std::vector<PMMLExporter::ModelOutput> & customOutputs)
+{
+    auto var = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "output");
+    builder.declare(var, AstBuilder::NO_INITIAL_VALUE);
+    for (const PMMLExporter::ModelOutput & output : customOutputs)
+    {
+        if (output.field)
+        {
+            builder.field(output.field);
+            builder.constant(output.variableOrAttribute, PMMLDocument::TYPE_STRING);
+            builder.assignIndirect(var, 1);
+        }
+    };
+
+    builder.field(var);
+    
+    builder.function(ReturnStatement, 1);
 }
 
 void populateIOWithDictionary(std::vector<PMMLExporter::ModelOutput> & io, const PMMLDocument::DataDictionary & dictionary)
@@ -122,7 +141,8 @@ void populateIOWithDictionary(std::vector<PMMLExporter::ModelOutput> & io, const
 }
 
 bool PMMLExporter::createScript(const char * sourceFile, LuaOutputter & luaOutputter,
-                                std::vector<PMMLExporter::ModelOutput> & inputs, std::vector<PMMLExporter::ModelOutput> & outputs)
+                                std::vector<PMMLExporter::ModelOutput> & inputs, std::vector<PMMLExporter::ModelOutput> & outputs,
+                                Format inputFormat, Format outputFormat)
 {
     tinyxml2::XMLDocument doc(sourceFile);
     if (doc.LoadFile(sourceFile) != tinyxml2::XML_SUCCESS)
@@ -180,12 +200,54 @@ bool PMMLExporter::createScript(const char * sourceFile, LuaOutputter & luaOutpu
         return false;
     }
     
-    addMultiReturnStatement(builder, outputs);
+    // This is a custom field that is a table containing all other attributes if you are passing them as a table.
+    std::vector<PMMLExporter::ModelOutput> tableInput;
+    if (inputFormat == Format::AS_TABLE)
+    {
+        // Put this in front of the model
+        AstNode model = builder.popNode();
+        
+        auto inputVar = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "input", PMMLDocument::ORIGIN_DATA_DICTIONARY);
+        tableInput.emplace_back("input", "input");
+        tableInput.back().field = inputVar;
+        
+        // Add declarations to build the model's inputs from the fields of the table
+        for (const auto & input : inputs)
+        {
+            if (auto field = input.field)
+            {
+                builder.constant(input.variableOrAttribute, PMMLDocument::TYPE_STRING);
+                builder.fieldIndirect(inputVar, 1);
+                builder.declare(field, AstBuilder::HAS_INITIAL_VALUE);
+            }
+        }
+        
+        builder.pushNode(std::move(model));
+    }
+    
+    if (outputFormat == Format::AS_MULTI_ARG)
+    {
+        addMultiReturnStatement(builder, outputs);
+    }
+    else // outputFormat == Format::AS_TABLE
+    {
+        addTableReturnStatement(builder, outputs);
+    }
+    
+    // Put absolutely everything that's been added into a single block.
+    builder.block(builder.stackSize());
     
     AstNode astTree = builder.popNode();
     PMMLDocument::optimiseAST(astTree, luaOutputter);
     
-    addFunctionHeader(luaOutputter, inputs);
+    if (inputFormat == Format::AS_MULTI_ARG)
+    {
+        addFunctionHeader(luaOutputter, inputs);
+    }
+    else // inputFormat == Format::AS_TABLE
+    {
+        addFunctionHeader(luaOutputter, tableInput);
+    }
     
     LuaConverter::convertAstToLua(astTree, luaOutputter);
     luaOutputter.endBlock();

@@ -45,6 +45,10 @@ static void printUsage(const char * programName)
     std::cout << "\t\t-d\t--data <file>\t\t\t\tCSV input file\t\t\t\t\t\t\t\t\t\t(--test, mandatory)" << std::endl;
     std::cout << "\t\t-v\t--verify <file>\t\t\t\tCSV input file\t\t\t\t\t\t\t\t\t\t(--test, optional)" << std::endl;
     std::cout << "\t\t-e\t--epsilon <epsilon>\t\t\tPrecision to verify output.\t\t\t\t\t\t\t(--test, optional)" << std::endl;
+    std::cout << "\t\t\t--input_multi\t\t\t\tUse multiple parameters for inputs (default)\t\t(--convert, optional)" << std::endl;
+    std::cout << "\t\t\t--input_table\t\t\t\tUse table for inputs\t\t\t\t\t\t\t\t(--convert, optional)" << std::endl;
+    std::cout << "\t\t\t--output_multi\t\t\t\tUse multiple parameters for outputs (default)\t\t(--convert, optional)" << std::endl;
+    std::cout << "\t\t\t--output_table\t\t\t\tUse table for outputs\t\t\t\t\t\t\t\t(--convert, optional)" << std::endl;
     std::cout << std::endl;
     std::cout << "For any output, you may reference any target/predicted or output value from the model. Furthermore, you may access any neuron's activation value through \"neuron:<id>\"" << std::endl;
     std::cout << "You may also put expression using +, -, * and / after an model output, but not before." << std::endl;
@@ -55,6 +59,9 @@ int main(int argc, char * const * argv)
 {
     int isTest = 0;
     int isConvert = 0;
+    int inputFormat = int(PMMLExporter::Format::AS_MULTI_ARG);
+    int outputFormat = int(PMMLExporter::Format::AS_MULTI_ARG);
+    
     struct option longopts[] = {
         { "test",      no_argument,     &isTest,       1 },
         { "convert",   no_argument,     &isConvert,    1 },
@@ -66,6 +73,10 @@ int main(int argc, char * const * argv)
         { "prediction",required_argument,NULL,         'p' },
         { "help",      no_argument,      NULL,         'h' },
         { "epsilon",   required_argument,NULL,         'e' },
+        { "input_multi",no_argument,     &inputFormat, int(PMMLExporter::Format::AS_MULTI_ARG) },
+        { "input_table",no_argument,     &inputFormat, int(PMMLExporter::Format::AS_TABLE) },
+        { "output_multi",no_argument,    &outputFormat,int(PMMLExporter::Format::AS_MULTI_ARG) },
+        { "output_table",no_argument,    &outputFormat,int(PMMLExporter::Format::AS_TABLE) },
         { NULL,        0,                NULL,          0 }
     };
 
@@ -177,7 +188,7 @@ int main(int argc, char * const * argv)
     {
         LuaOutputter output(outputFile ? outFileStream : std::cout, insensitive ? LuaOutputter::OPTION_LOWERCASE : 0);
 
-        if (!PMMLExporter::createScript(sourceFile, output, inputs, outputs))
+        if (!PMMLExporter::createScript(sourceFile, output, inputs, outputs, PMMLExporter::Format(inputFormat), PMMLExporter::Format(outputFormat)))
         {
             return -1;
         }
