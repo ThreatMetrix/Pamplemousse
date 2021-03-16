@@ -79,7 +79,8 @@ endif()
 find_package(Qt5 COMPONENTS Widgets)
 if (Qt5_FOUND)
     add_executable(pamplemousse_ui
-        app/pamplemousse_ui.cpp
+        app/pamplemousse.cpp
+        app/pamplemousse_ui.cpp app/pamplemousse_ui.h
         app/outputtable.cpp app/outputtable.h
         app/mainwindow.ui
         app/testrun.cpp app/testrun.hpp
@@ -92,4 +93,5 @@ if (Qt5_FOUND)
     target_link_libraries(pamplemousse_ui ${LUA_LIBRARIES})
     target_include_directories(pamplemousse_ui PRIVATE app)
     target_compile_options(pamplemousse_ui PRIVATE -Wextra -Werror)
+    target_compile_definitions(pamplemousse_ui PRIVATE INCLUDE_UI)
 endif()

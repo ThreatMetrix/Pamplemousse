@@ -29,6 +29,10 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+#ifdef INCLUDE_UI
+#include "pamplemousse_ui.h"
+#endif
+
 static void printUsage(const char * programName)
 {
     std::cout << "OVERVIEW:\tconverts PMML document to Lua" << std::endl;
@@ -55,7 +59,7 @@ static void printUsage(const char * programName)
     std::cout << "E.g. \"--prediction probability=predicted_value*100+3\" is acceptable, but \"--prediction probability=100*predicted_value+3\" is not" << std::endl;
 }
 
-int main(int argc, char * const * argv)
+int main(int argc, char *argv[])
 {
     int isTest = 0;
     int isConvert = 0;
@@ -145,6 +149,17 @@ int main(int argc, char * const * argv)
             return -1;
         }
     }
+
+#ifdef INCLUDE_UI
+    if (isTest == 0 && isConvert == 0)
+    {
+        QApplication app(argc, argv);
+        PamplemousseUI mainWindow;
+        mainWindow.show();
+
+        return app.exec();
+    }
+#endif
 
     if (isTest + isConvert != 1)
     {
