@@ -198,6 +198,8 @@ namespace Function
     extern const Definition unaryMinus;
     extern const Definition makeTuple;
     extern const Definition runLambda;
+    extern const Definition runLambdaArgsMissing;
+    extern const Definition runLambdaNeverMissing;
     extern const Definition sqrtFunction;
     
     extern const Definition surrogateFunction;
@@ -207,10 +209,13 @@ namespace Function
     extern const Definition insertToTableDef;
     extern const Definition listLengthDef;
     
-    struct CustomDefinition : public Definition
+    struct CustomDefinition
     {
-        CustomDefinition(const PMMLDocument::ConstFieldDescriptionPtr & d, PMMLDocument::FieldType ot, MissingValueRule nt);
-        PMMLDocument::ConstFieldDescriptionPtr definition;
+        CustomDefinition(const PMMLDocument::ConstFieldDescriptionPtr & d, PMMLDocument::FieldType ot,
+                         const Definition * ld, std::vector<PMMLDocument::FieldType> && parameterList);
+        PMMLDocument::FieldType outputType;
+        const Definition * lambdaDefinition;
+        PMMLDocument::ConstFieldDescriptionPtr functionVariable;
         std::vector<PMMLDocument::FieldType> parameters;
     };
 

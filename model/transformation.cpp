@@ -47,7 +47,7 @@ namespace
         const char * fieldName = node->Attribute("field");
         if (fieldName == nullptr)
         {
-            fprintf(stderr, "Missing field attribute for %s at %i\n", node->Name(), node->GetLineNum());
+            builder.parsingError("Missing field attribute for", node->Name(), node->GetLineNum());
             return false;
         }
         
@@ -59,7 +59,7 @@ namespace
             }
             else
             {
-                fprintf(stderr, "Unknown field %s referenced in %s at %i\n", fieldName, node->Name(), node->GetLineNum());
+                builder.parsingError("Unknown field", fieldName, node->GetLineNum());
                 return false;
             }
 
@@ -69,7 +69,7 @@ namespace
             const PMMLDocument::MiningField * fieldDefinition = builder.context().getMiningField(fieldName);
             if (fieldDefinition == nullptr)
             {
-                fprintf(stderr, "Unknown miningfield %s referenced in %s at %i\n", fieldName, node->Name(), node->GetLineNum());
+                builder.parsingError("Unknown miningfield", fieldName, node->GetLineNum());
                 return false;
             }
             
@@ -120,7 +120,7 @@ namespace
         const char * content = node->GetText();
         if (content == nullptr)
         {
-            fprintf(stderr, "Empty constant field at %i\n", node->GetLineNum());
+            builder.parsingError("Empty constant field", node->GetLineNum());
             return false;
         }
 
@@ -142,13 +142,13 @@ namespace
             PMMLDocument::FieldType specifiedType = PMMLDocument::dataTypeFromString(dataType);
             if (specifiedType == PMMLDocument::TYPE_INVALID)
             {
-                fprintf(stderr, "Invalid type name %s at %i\n", dataType, node->GetLineNum());
+                builder.parsingError("Invalid type name %s", dataType, node->GetLineNum());
                 return false;
             }
             // FieldType will be set to string if it contains non numbers. Casting the other way won't work.
             if (fieldType == PMMLDocument::TYPE_STRING && specifiedType == PMMLDocument::TYPE_NUMBER)
             {
-                fprintf(stderr, "Invalid numeric constant: %s at %i\n", content, node->GetLineNum());
+                builder.parsingError("Invalid numeric constant: %s", content, node->GetLineNum());
                 return false;
             }
             fieldType = specifiedType;
@@ -177,12 +177,12 @@ namespace
     }
 
     // This simply reads the value of a LinearNorm element as two doubles
-    bool readLinearNorm(const tinyxml2::XMLElement * node, double & orig, double & norm)
+    bool readLinearNorm(const AstBuilder & builder, const tinyxml2::XMLElement * node, double & orig, double & norm)
     {
         if (node->QueryDoubleAttribute("orig", &orig) ||
             node->QueryDoubleAttribute("norm", &norm))
         {
-            fprintf(stderr, "Linear norm needs a orig and norm at %i\n", node->GetLineNum());
+            builder.parsingError("Linear norm needs a orig and norm", node->GetLineNum());
             return false;
         }
         return true;
@@ -256,7 +256,7 @@ namespace
             outlierTreatment = PMMLDocument::outlierTreatmentFromString(outliers);
             if (outlierTreatment == PMMLDocument::OUTLIER_TREATMENT_INVALID)
             {
-                fprintf(stderr, "Invalid outlier treatment %s at %i\n", outliers, node->GetLineNum());
+                builder.parsingError("Invalid outlier treatment", outliers, node->GetLineNum());
                 return false;
             }
         }
@@ -267,7 +267,7 @@ namespace
         {
             double lastOrig;
             double lastNorm;
-            if (!readLinearNorm(nextLinearNorm, lastOrig, lastNorm))
+            if (!readLinearNorm(builder, nextLinearNorm, lastOrig, lastNorm))
             {
                 return false;
             }
@@ -284,7 +284,7 @@ namespace
         }
         if (origins.size() < 2)
         {
-            fprintf(stderr, "NormContinuous with less than two linear norms at %i\n", node->GetLineNum());
+            builder.parsingError("NormContinuous with less than two linear norms", node->GetLineNum());
             return false;
         }
         
@@ -392,7 +392,7 @@ namespace
         const char * value = node->Attribute("value");
         if (value == nullptr)
         {
-            fprintf(stderr, "Missing value attribute FieldRef at %i\n", node->GetLineNum());
+            builder.parsingError("Missing value attribute FieldRef", node->GetLineNum());
             return false;
         }
         
@@ -422,12 +422,12 @@ namespace
     }
 
     // This converts an interval (within Discretize) and pushes it as a boolean predicate to the top of builder
-    bool Interval::parse(const tinyxml2::XMLElement * interval)
+    bool Interval::parse(const AstBuilder & builder, const tinyxml2::XMLElement * interval)
     {
         const char * closure = interval->Attribute("closure");
         if (closure == nullptr)
         {
-            fprintf(stderr, "Missing closure at %i\n", interval->GetLineNum());
+            builder.parsingError("Missing closure", interval->GetLineNum());
             return false;
         }
 
@@ -441,7 +441,7 @@ namespace
         }
         else if (strncmp(closure, "closed", 6))
         {
-            fprintf(stderr, "Nonsence closure: %s at %i\n", closure, interval->GetLineNum());
+            builder.parsingError("Nonsence closure", closure, interval->GetLineNum());
             return false;
         }
         if (strncmp(closure + startOfNextSection, "Open", 4) == 0)
@@ -450,7 +450,7 @@ namespace
         }
         else if (strncmp(closure + startOfNextSection, "Closed", 6))
         {
-            fprintf(stderr, "Nonsence closure: %s at %i\n", closure, interval->GetLineNum());
+            builder.parsingError("Nonsence closure", closure, interval->GetLineNum());
             return false;
         }
 
@@ -465,7 +465,7 @@ namespace
         }
         else
         {
-            fprintf(stderr, "Invalid leftMargin at %i\n", interval->GetLineNum());
+            builder.parsingError("Invalid leftMargin", interval->GetLineNum());
             return false;
         }
         
@@ -480,7 +480,7 @@ namespace
         }
         else
         {
-            fprintf(stderr, "Invalid rightMargin at %i\n", interval->GetLineNum());
+            builder.parsingError("Invalid rightMargin", interval->GetLineNum());
             return false;
         }
         return true;
@@ -526,16 +526,16 @@ namespace
                 (rightClosure != OPEN || val < rightMargin));
     }
     
-    bool DiscretizeBin::parse(const tinyxml2::XMLElement * child)
+    bool DiscretizeBin::parse(const AstBuilder & builder, const tinyxml2::XMLElement * child)
     {
         const tinyxml2::XMLElement * intervalBin = child->FirstChildElement("Interval");
         if (intervalBin == nullptr)
         {
-            fprintf(stderr, "Missing Interval at %i\n", child->GetLineNum());
+            builder.parsingError("Missing Interval", child->GetLineNum());
             return false;
         }
         
-        if (!interval.parse(intervalBin))
+        if (!interval.parse(builder, intervalBin))
         {
             return false;
         }
@@ -546,18 +546,18 @@ namespace
         }
         else
         {
-            fprintf(stderr, "binValue required at %i\n", child->GetLineNum());
+            builder.parsingError("binValue required", child->GetLineNum());
             return false;
         }
         return true;
     }
     
-    bool parseDiscretizeBins(std::vector<DiscretizeBin> & bins, const tinyxml2::XMLElement * node)
+    bool parseDiscretizeBins(const AstBuilder & builder, std::vector<DiscretizeBin> & bins, const tinyxml2::XMLElement * node)
     {
         for (const tinyxml2::XMLElement * child = node->FirstChildElement("DiscretizeBin"); child; child = child->NextSiblingElement("DiscretizeBin"))
         {
             bins.emplace_back();
-            if (not bins.back().parse(child))
+            if (not bins.back().parse(builder, child))
             {
                 return false;
             }
@@ -646,7 +646,7 @@ namespace
     bool parseDiscretize(AstBuilder & builder, const tinyxml2::XMLElement * node)
     {
         std::vector<DiscretizeBin> bins;
-        if (not parseDiscretizeBins(bins, node))
+        if (not parseDiscretizeBins(builder, bins, node))
         {
             return false;
         }
@@ -694,7 +694,7 @@ namespace
             fieldType = PMMLDocument::dataTypeFromString(dataType);
             if (fieldType == PMMLDocument::TYPE_INVALID)
             {
-                fprintf(stderr, "Invalid type name %s at %i\n", dataType, node->GetLineNum());
+                builder.parsingError("Invalid type name", dataType, node->GetLineNum());
                 return false;
             }
         }
@@ -858,7 +858,7 @@ namespace
         const char * outputColumn = node->Attribute("outputColumn");
         if (outputColumn == nullptr)
         {
-            fprintf(stderr, "Missing outputColumn at %i\n", node->GetLineNum());
+            builder.parsingError("Missing outputColumn", node->GetLineNum());
             return false;
         }
         
@@ -869,7 +869,7 @@ namespace
             fieldType = PMMLDocument::dataTypeFromString(dataType);
             if (fieldType == PMMLDocument::TYPE_INVALID)
             {
-                fprintf(stderr, "Invalid type name %s at %i\n", dataType, node->GetLineNum());
+                builder.parsingError("Invalid type name", dataType, node->GetLineNum());
                 return false;
             }
         }
@@ -882,7 +882,7 @@ namespace
             const char * column = child->Attribute("column");
             if (column == nullptr)
             {
-                fprintf(stderr, "FieldColumnPair requires a column at %i\n", child->GetLineNum());
+                builder.parsingError("FieldColumnPair requires a column", child->GetLineNum());
                 return false;
             }
             // First load the columns onto the AST builder for now... this will verify that they are valid etc.
@@ -897,7 +897,7 @@ namespace
         const tinyxml2::XMLElement * inlineTable = node->FirstChildElement("InlineTable");
         if (inlineTable == nullptr)
         {
-            fprintf(stderr, "MapValues requires an InlineTable at %i\n", node->GetLineNum());
+            builder.parsingError("MapValues requires an InlineTable", node->GetLineNum());
             return false;
         }
         
@@ -915,7 +915,7 @@ namespace
                 }
                 else
                 {
-                    fprintf(stderr, "Missing column %s at %i\n", column.c_str(), row->GetLineNum());
+                    builder.parsingError("Missing column", column.c_str(), row->GetLineNum());
                     return false;
                 }
             }
@@ -923,7 +923,7 @@ namespace
             const tinyxml2::XMLElement * outputColumnNode = row->FirstChildElement(outputColumn);
             if (outputColumn == nullptr)
             {
-                fprintf(stderr, "Missing column %s at %i\n", outputColumn, row->GetLineNum());
+                builder.parsingError("Missing column", outputColumn, row->GetLineNum());
             }
             
             if (fieldType == PMMLDocument::TYPE_INVALID)
@@ -1007,21 +1007,21 @@ namespace
         const char * dataType = node->Attribute("dataType");
         if (dataType == nullptr)
         {
-            fprintf(stderr, "Derived field requires dataType at %i\n", node->GetLineNum());
+            builder.parsingError("Derived field requires dataType", node->GetLineNum());
             return false;
         }
 
         PMMLDocument::FieldType type = PMMLDocument::dataTypeFromString(dataType);
         if (type == PMMLDocument::TYPE_INVALID)
         {
-            fprintf(stderr, "Unknown type %s in derived field at %i\n", dataType, node->GetLineNum());
+            builder.parsingError("Unknown type in derived field", dataType, node->GetLineNum());
             return false;
         }
 
         const tinyxml2::XMLElement * expression = PMMLDocument::skipExtensions(node->FirstChildElement());
         if (expression == nullptr)
         {
-            fprintf(stderr, "No expression in derived field at %i\n", node->GetLineNum());
+            builder.parsingError("No expression in derived field", node->GetLineNum());
             return false;
         }
         
@@ -1042,7 +1042,7 @@ namespace
         const char * name = node->Attribute("name");
         if (name == nullptr)
         {
-            fprintf(stderr, "DefineFunction requires name at %i\n", node->GetLineNum());
+            builder.parsingError("DefineFunction requires name", node->GetLineNum());
             return false;
         }
 
@@ -1060,7 +1060,7 @@ namespace
                 const char * paramName = child->Attribute("name");
                 if (paramName == nullptr)
                 {
-                    fprintf(stderr, "ParameterField requires name at %i\n", child->GetLineNum());
+                    builder.parsingError("ParameterField requires name", child->GetLineNum());
                     return false;
                 }
                 PMMLDocument::FieldType paramType = PMMLDocument::TYPE_INVALID;
@@ -1070,7 +1070,7 @@ namespace
                     paramType = PMMLDocument::dataTypeFromString(dataType);
                     if (paramType == PMMLDocument::TYPE_INVALID)
                     {
-                        fprintf(stderr, "Unknown type %s in ParameterField at %i\n", dataType, child->GetLineNum());
+                        builder.parsingError("Unknown type in ParameterField", dataType, child->GetLineNum());
                         return false;
                     }
                 }
@@ -1095,7 +1095,7 @@ namespace
         
         if (expression == nullptr)
         {
-            fprintf(stderr, "No content for DefineFunction at %i\n", node->GetLineNum());
+            builder.parsingError("No content for DefineFunction", node->GetLineNum());
             return false;
         }
         
@@ -1112,7 +1112,7 @@ namespace
             type = PMMLDocument::dataTypeFromString(dataType);
             if (type == PMMLDocument::TYPE_INVALID)
             {
-                fprintf(stderr, "Unknown type %s in DefineFunction at %i\n", dataType, node->GetLineNum());
+                builder.parsingError("Unknown type in DefineFunction", dataType, node->GetLineNum());
                 return false;
             }
             // We ignore the return value here because the specifier has asked for this type and they probably know what they are doing.
@@ -1125,11 +1125,11 @@ namespace
         
         // Find out the nullity properties of this function.
         // We can do this by fiddling with assertions
-        Function::MissingValueRule nullityType = Function::MAYBE_MISSING;
+        const Function::Definition * myRunLambda = &Function::runLambda;
         Analyser::AnalyserContext context;
         if (!context.mightBeMissing(builder.topNode()))
         {
-            nullityType = Function::NEVER_MISSING;
+            myRunLambda = &Function::runLambdaNeverMissing;
         }
         else
         {
@@ -1141,14 +1141,14 @@ namespace
             }
             if (!context.mightBeMissing(builder.topNode()))
             {
-                nullityType = Function::MAYBE_MISSING_IF_ANY_ARGUMENT_IS_MISSING;
+                myRunLambda = &Function::runLambdaArgsMissing;
             }
         }
         
         builder.lambda(parameterList.size());
         auto var = builder.context().createVariable(PMMLDocument::TYPE_LAMBDA, name);
         builder.declare(var, AstBuilder::HAS_INITIAL_VALUE);
-        builder.context().declareCustomFunction(name, var, type, nullityType, std::move(parameterList));
+        builder.context().declareCustomFunction(name, var, type, myRunLambda, std::move(parameterList));
         
         return true;
     }
@@ -1169,7 +1169,7 @@ namespace
         bool coersionOK = types ? builder.coerceToSpecificTypes(i, types) : builder.coerceToSameType(i);
         if (!coersionOK)
         {
-            fprintf(stderr, "Function: %s mismatched argument types at %i\n", name, node->GetLineNum());
+            builder.parsingError("Mismatched argument types", name, node->GetLineNum());
             return false;
         }
 
@@ -1220,7 +1220,7 @@ namespace
         const char * functionName = node->Attribute("function");
         if (functionName == nullptr)
         {
-            fprintf(stderr, "Apply needs a function at %i\n", node->GetLineNum());
+            builder.parsingError("Apply needs a function", node->GetLineNum());
             return false;
         }
 
@@ -1234,24 +1234,28 @@ namespace
         {
             if (nParameters < found->minArgs || nParameters > found->maxArgs)
             {
+                char buffer[50];
                 if (found->maxArgs == std::numeric_limits<size_t>::max())
                 {
-                    fprintf(stderr, "Built in function: %s expects >= %zu arguments, got (%zu) at %i\n", functionName, found->minArgs, nParameters, node->GetLineNum());
+                    snprintf(buffer, sizeof(buffer), "%s expects >= %zu arguments, got %zu", functionName, found->minArgs, nParameters);
                 }
                 else if (found->minArgs == found->maxArgs)
                 {
-                    fprintf(stderr, "Built in function: %s expects %zu arguments, got (%zu) at %i\n", functionName, found->minArgs, nParameters, node->GetLineNum());
+                    snprintf(buffer, sizeof(buffer), "%s expects %zu arguments, got %zu", functionName, found->minArgs, nParameters);
                 }
                 else
                 {
-                    fprintf(stderr, "Built in function: %s expects %zu-%zu arguments, got (%zu) at %i\n", functionName, found->minArgs, found->maxArgs, nParameters, node->GetLineNum());
+                    snprintf(buffer, sizeof(buffer),"%s expects %zu-%zu arguments, got %zu", functionName, found->minArgs, found->maxArgs, nParameters);
                 }
+
+                builder.parsingError("Wrong number of arguments for built in function", buffer, node->GetLineNum());
+
                 return false;
             }
 
             if (found->functionType == Function::UNSUPPORTED)
             {
-                fprintf(stderr, "Built in function: %s has not been implemented\n", functionName);
+                builder.parsingError("Function has not been implemented\n", functionName, node->GetLineNum());
                 return false;
             }
 
@@ -1287,7 +1291,7 @@ namespace
                 const PMMLDocument::FieldType types[2] = {PMMLDocument::TYPE_STRING, PMMLDocument::TYPE_NUMBER};
                 if (!builder.coerceToSpecificTypes(2, types))
                 {
-                    fprintf(stderr, "Function: %s mismatched argument types at %i\n", functionName, node->GetLineNum());
+                    builder.parsingError("Mismatched argument types", functionName, node->GetLineNum());
                     return false;
                 }
 
@@ -1306,20 +1310,34 @@ namespace
         {
             if (nParameters != customDefinition->parameters.size())
             {
-                fprintf(stderr, "User defined function: %s expects %zu arguments, got (%zu) at %i\n", functionName, customDefinition->parameters.size(), nParameters, node->GetLineNum());
+                char buffer[50];
+                snprintf(buffer, sizeof(buffer), "%s expects >= %zu arguments, got %zu", functionName, customDefinition->parameters.size(), nParameters);
+
+                builder.parsingError("Wrong number of arguments for custom function", functionName, node->GetLineNum());
             }
 
-            if (!parseFunctionExpression(builder, functionName, customDefinition, node, &customDefinition->parameters[0]))
+            int i = 0;
+            for (const tinyxml2::XMLElement * iterator = node->FirstChildElement(); iterator != nullptr; iterator = iterator->NextSiblingElement(), i++)
             {
+                if (!Transformation::parse(builder, iterator))
+                {
+                    return false;
+                }
+            }
+            bool coersionOK = builder.coerceToSpecificTypes(i, &customDefinition->parameters[0]);
+            if (!coersionOK)
+            {
+                builder.parsingError("Mismatched argument types", functionName, node->GetLineNum());
                 return false;
             }
-            
-            // Attach the definition here so the optimiser knows that it's needed.
-            builder.topNode().fieldDescription = customDefinition->definition;
+
+            builder.field(customDefinition->functionVariable);
+            builder.function(*customDefinition->lambdaDefinition, nParameters + 1);
+            builder.topNode().type = builder.topNode().coercedType = customDefinition->outputType;
         }
         else
         {
-            fprintf(stderr, "Function: %s not found at %i\n", functionName, node->GetLineNum());
+            builder.parsingError("Function not found", functionName, node->GetLineNum());
             return false;
         }
 
@@ -1391,11 +1409,11 @@ bool Transformation::parse(AstBuilder & builder, const tinyxml2::XMLElement * no
         case EXPRESSION_AGGREGATE:
         case EXPRESSION_LAG:
         case EXPRESSION_TEXT_INDEX:
-            fprintf(stderr, "Unimplemented expression type %s at %i\n", node->Name(), node->GetLineNum());
+            builder.parsingError("Unimplemented expression type", node->Name(), node->GetLineNum());
             return false;
 
         case EXPRESSION_INVALID:
-            fprintf(stderr, "Invalid expression type %s at %i\n", node->Name(), node->GetLineNum());
+            builder.parsingError("Invalid expression type", node->Name(), node->GetLineNum());
             return false;
     }
     return true;
@@ -1417,7 +1435,7 @@ bool Transformation::parseTransformationDictionary(AstBuilder & builder, const t
 
             if (name == nullptr)
             {
-                fprintf(stderr, "Derived field requires name and optype at %i\n", node->GetLineNum());
+                builder.parsingError("Derived field requires name and optype", node->GetLineNum());
                 return false;
             }
 
@@ -1526,7 +1544,7 @@ bool Transformation::parseLocalTransformations(AstBuilder & builder, const tinyx
 
         if (name == nullptr || optype == nullptr)
         {
-            fprintf(stderr, "Derived field requires name and optype at %i\n", iterator->GetLineNum());
+            builder.parsingError("Derived field requires name and optype", iterator->GetLineNum());
             return false;
         }
 

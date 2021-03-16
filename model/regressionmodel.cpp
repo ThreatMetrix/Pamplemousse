@@ -68,7 +68,7 @@ namespace
         double intercept;
         if (node->QueryDoubleAttribute("intercept", &intercept))
         {
-            fprintf(stderr, "Intercept required at %i\n", node->GetLineNum());
+            builder.parsingError("Intercept required", node->GetLineNum());
             return false;
         }
 
@@ -85,7 +85,7 @@ namespace
             double coefficient;
             if (element->QueryDoubleAttribute("coefficient", &coefficient))
             {
-                fprintf(stderr, "coefficient required at %i\n", element->GetLineNum());
+                builder.parsingError("coefficient required", element->GetLineNum());
                 return false;
             }
 
@@ -98,13 +98,13 @@ namespace
                 const char * name = element->Attribute("name");
                 if (name == nullptr)
                 {
-                    fprintf(stderr, "name required at %i\n", element->GetLineNum());
+                    builder.parsingError("name required", element->GetLineNum());
                     return false;
                 }
                 const PMMLDocument::MiningField * fieldDefinition = builder.context().getMiningField(name);
                 if (fieldDefinition == nullptr)
                 {
-                    fprintf(stderr, "Unknown field %s referenced in NumericPredictor at %i\n", name, element->GetLineNum());
+                    builder.parsingError("Unknown field referenced in NumericPredictor", name, element->GetLineNum());
                     return false;
                 }
                 
@@ -155,13 +155,13 @@ namespace
                     const char * name = fieldRef->Attribute("field");
                     if (name == nullptr)
                     {
-                        fprintf(stderr, "field required at %i\n", element->GetLineNum());
+                        builder.parsingError("field required", element->GetLineNum());
                         return false;
                     }
                     const PMMLDocument::MiningField * fieldDefinition = builder.context().getMiningField(name);
                     if (fieldDefinition == nullptr)
                     {
-                        fprintf(stderr, "Unknown field %s referenced in PredictorTerm at %i\n", name, element->GetLineNum());
+                        builder.parsingError("Unknown field referenced in PredictorTerm", name, element->GetLineNum());
                         return false;
                     }
 
@@ -280,7 +280,7 @@ namespace
             }
             else
             {
-                fprintf(stderr, "targetCategory required at %i\n", regressionTable->GetLineNum());
+                builder.parsingError("targetCategory required", regressionTable->GetLineNum());
                 return false;
             }
         }
@@ -332,7 +332,7 @@ namespace
             }
             else
             {
-                fprintf(stderr, "targetCategory required at %i\n", regressionTable->GetLineNum());
+                builder.parsingError("targetCategory required", regressionTable->GetLineNum());
                 return false;
             }
         }
@@ -364,13 +364,13 @@ bool RegressionModel::buildCatagoricalPredictor(AstBuilder & builder, const tiny
     const char * value = element->Attribute("value");
     if (name == nullptr || value == nullptr)
     {
-        fprintf(stderr, "name and value required at %i\n", element->GetLineNum());
+        builder.parsingError("name and value required", element->GetLineNum());
         return false;
     }
     const PMMLDocument::MiningField * fieldDefinition = builder.context().getMiningField(name);
     if (fieldDefinition == nullptr)
     {
-        fprintf(stderr, "Unknown field %s referenced in CategoricalPredictor at %i\n", name, element->GetLineNum());
+        builder.parsingError("Unknown field referenced in CategoricalPredictor", name, element->GetLineNum());
         return false;
     }
     
@@ -391,7 +391,7 @@ bool RegressionModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * n
         normMethod = getRegressionNormalizationMethodFromString(methodName);
         if (normMethod == METHOD_INVALID)
         {
-            fprintf(stderr, "Unknown normalizationMethod %s at %i\n", methodName, node->GetLineNum());
+            builder.parsingError("Unknown normalizationMethod", methodName, node->GetLineNum());
             return false;
         }
     }
@@ -409,7 +409,7 @@ bool RegressionModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * n
         }
         else
         {
-            fprintf(stderr, "No regression table at %i\n", node->GetLineNum());
+            builder.parsingError("No regression table", node->GetLineNum());
             return false;
         }
     }

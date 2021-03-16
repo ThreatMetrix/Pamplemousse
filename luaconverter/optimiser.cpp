@@ -396,11 +396,6 @@ public:
                 }
                 break;
                 
-            case Function::LAMBDA:
-                // Lambdas may be invoked as custom functions... don't inline them
-                clearCurrentDeclaration();
-                break;
-                
             case Function::FUNCTIONLIKE:
                 currentCost += 4;
                 break;

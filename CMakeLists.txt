@@ -76,19 +76,20 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-
-add_executable(pamplemousse_ui
-    app/pamplemousse_ui.cpp
-    app/outputtable.cpp app/outputtable.h
-    app/mainwindow.ui
-    app/testrun.cpp app/testrun.hpp
-    app/modeloutput.cpp app/modeloutput.hpp
-    app/basicexport.cpp app/basicexport.hpp
-    app/outputslist.cpp app/outputslist.h
-    app/resources.qrc)
-target_link_libraries(pamplemousse_ui Qt5::Widgets)
-target_link_libraries(pamplemousse_ui libpamplemousse)
-target_link_libraries(pamplemousse_ui ${LUA_LIBRARIES})
-target_include_directories(pamplemousse_ui PRIVATE app)
-target_compile_options(pamplemousse_ui PRIVATE -Wextra -Werror)
+find_package(Qt5 COMPONENTS Widgets)
+if (Qt5_FOUND)
+    add_executable(pamplemousse_ui
+        app/pamplemousse_ui.cpp
+        app/outputtable.cpp app/outputtable.h
+        app/mainwindow.ui
+        app/testrun.cpp app/testrun.hpp
+        app/modeloutput.cpp app/modeloutput.hpp
+        app/basicexport.cpp app/basicexport.hpp
+        app/outputslist.cpp app/outputslist.h
+        app/resources.qrc)
+    target_link_libraries(pamplemousse_ui Qt5::Widgets)
+    target_link_libraries(pamplemousse_ui libpamplemousse)
+    target_link_libraries(pamplemousse_ui ${LUA_LIBRARIES})
+    target_include_directories(pamplemousse_ui PRIVATE app)
+    target_compile_options(pamplemousse_ui PRIVATE -Wextra -Werror)
+endif()

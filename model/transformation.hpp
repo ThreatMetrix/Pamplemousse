@@ -61,7 +61,7 @@ namespace Transformation
         Closure rightClosure = NONE;
         double leftMargin;
         double rightMargin;
-        bool parse(const tinyxml2::XMLElement * interval);
+        bool parse(const AstBuilder & builder, const tinyxml2::XMLElement * interval);
         void addLeftCondition(AstBuilder & builder, const AstNode & field) const;
         void addRightCondition(AstBuilder & builder, const AstNode & field) const;
         bool isIn(double val) const;
@@ -71,10 +71,10 @@ namespace Transformation
     {
         Interval interval;
         std::string binValue;
-        bool parse(const tinyxml2::XMLElement * interval);
+        bool parse(const AstBuilder & builder, const tinyxml2::XMLElement * interval);
     };
     
-    bool parseDiscretizeBins(std::vector<DiscretizeBin> & bins, const tinyxml2::XMLElement * interval);
+    bool parseDiscretizeBins(const AstBuilder & builder, std::vector<DiscretizeBin> & bins, const tinyxml2::XMLElement * interval);
     void findHolesInDiscretizeBins(AstBuilder & builder, const std::vector<DiscretizeBin> & bins, const AstNode & field);
 
     enum NormContinuousMode

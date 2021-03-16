@@ -238,7 +238,7 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
             const char * name = iterator->Attribute("name");
             if (name == nullptr)
             {
-                fprintf(stderr, "OutputField doesn't have a name at %i", iterator->GetLineNum());
+                builder.parsingError("OutputField doesn't have a name", iterator->GetLineNum());
                 return false;
             }
             
@@ -250,7 +250,7 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
             bool gotValue = false;
             if (feature == nullptr)
             {
-                fprintf(stderr, "OutputField doesn't have a feature at %i", iterator->GetLineNum());
+                builder.parsingError("OutputField doesn't have a feature", iterator->GetLineNum());
                 return false;
             }
         
@@ -259,7 +259,7 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
                 const tinyxml2::XMLElement * child = PMMLDocument::skipExtensions(iterator->FirstChildElement());
                 if (child == nullptr)
                 {
-                    fprintf(stderr, "transformed value expects a child node at %i", iterator->GetLineNum());
+                    builder.parsingError("transformed value expects a child node", iterator->GetLineNum());
                     return false;
                 }
                 if (!Transformation::parse(builder, child))

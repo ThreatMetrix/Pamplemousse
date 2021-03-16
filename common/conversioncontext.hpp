@@ -74,7 +74,7 @@ namespace PMMLDocument
         {
             m_miningSchema.emplace(field, MiningField(variable));
         }
-        void declareCustomFunction(std::string && functionName, ConstFieldDescriptionPtr definition, FieldType type, Function::MissingValueRule nullityType, std::vector<PMMLDocument::FieldType> && parameterList);
+        void declareCustomFunction(std::string && functionName, ConstFieldDescriptionPtr definition, FieldType type, const Function::Definition * lambdaDefinition, std::vector<PMMLDocument::FieldType> && parameterList);
         const Function::CustomDefinition * findCustomFunction(const std::string & functionName) const;
 
         ConstFieldDescriptionPtr createVariable(FieldType type, const std::string & name, FieldOrigin origin = PMMLDocument::ORIGIN_TEMPORARY);
@@ -117,6 +117,7 @@ namespace PMMLDocument
         
         const DataDictionary & getInputs() { return m_inputs; }
         const DataDictionary & getOutputs() { return m_outputs; }
+        const DataDictionary & getNeurons() { return m_neurons; }
         
         const std::string & getApplication() const { return m_application; }
         void setApplication(const std::string & application) { m_application = application; }

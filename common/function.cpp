@@ -57,8 +57,8 @@ const FunctionTable functionTable = {{
     {"dateSecondsSinceMidnight","", UNSUPPORTED,   PMMLDocument::TYPE_NUMBER,LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"dateSecondsSinceYear", "",    UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"equal",       "==",           COMPARISON,    PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_EQUAL, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
-    {"erf",         "erf",          FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"exp",         "math.exp",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
+    {"erf",         "erf",          RUN_LAMBDA,    PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
+    {"exp",         "math.exp",     FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"expm1",       "",             UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
     {"floor",       "math.floor",   FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"formatDatetime","",           UNSUPPORTED,   PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
@@ -93,15 +93,15 @@ const FunctionTable functionTable = {{
     {"product",     "*",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TIMES, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
     {"replace",     "",             UNSUPPORTED,   PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
     {"round",       "math.floor",   ROUND_MACRO,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"sin",         "math.sin",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"sinh",        "math.sinh",    FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"stdNormalCDF","stdNormalCDF", FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"stdNormalIDF","stdNormalIDF", FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
+    {"sin",         "math.sin",     FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
+    {"sinh",        "math.sinh",    FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
+    {"stdNormalCDF","stdNormalCDF", RUN_LAMBDA,    PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
+    {"stdNormalIDF","stdNormalIDF", RUN_LAMBDA,    PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"stdNormalPDF","",             UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"substring",   "string.sub",   SUBSTRING_MACRO,PMMLDocument::TYPE_STRING,LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 3, 3},
     {"sum",         "+",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_PLUS,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
-    {"tan",         "math.tan",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER,  LuaOutputter::PRECEDENCE_TOP,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"tanh",        "math.tanh",    FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER,  LuaOutputter::PRECEDENCE_TOP,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
+    {"tan",         "math.tan",     FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER,  LuaOutputter::PRECEDENCE_TOP,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
+    {"tanh",        "math.tanh",    FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER,  LuaOutputter::PRECEDENCE_TOP,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"threshold",   nullptr,        THRESHOLD_MACRO,PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_OR,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
     {"trimBlanks",  nullptr,        TRIMBLANK_MACRO,PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_OR,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"uppercase",   "string.upper", FUNCTIONLIKE,      PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
@@ -127,9 +127,12 @@ const FunctionTable functionTable = {{
     const Definition makeTuple = {nullptr, MAKE_TUPLE, PMMLDocument::TYPE_INVALID, LuaOutputter::PRECEDENCE_TOP, MISSING_IF_ANY_ARGUMENT_IS_MISSING};
     
     const Definition runLambda = {nullptr, RUN_LAMBDA, PMMLDocument::TYPE_INVALID, LuaOutputter::PRECEDENCE_TOP, Function::MAYBE_MISSING};
+
+    const Definition runLambdaArgsMissing = {nullptr, RUN_LAMBDA, PMMLDocument::TYPE_INVALID, LuaOutputter::PRECEDENCE_TOP, Function::MAYBE_MISSING_IF_ANY_ARGUMENT_IS_MISSING};
+
+    const Definition runLambdaNeverMissing = {nullptr, RUN_LAMBDA, PMMLDocument::TYPE_INVALID, LuaOutputter::PRECEDENCE_TOP, Function::NEVER_MISSING};
         
     const Definition sqrtFunction = {"math.sqrt", FUNCTIONLIKE, PMMLDocument::TYPE_INVALID, LuaOutputter::PRECEDENCE_TOP, MISSING_IF_ANY_ARGUMENT_IS_MISSING};
-
 
     // These are used for "median" mode of MiningModel.
     const Definition sortTableDef = {"table.sort", FUNCTIONLIKE, PMMLDocument::TYPE_VOID, LuaOutputter::PRECEDENCE_TOP, MISSING_IF_ANY_ARGUMENT_IS_MISSING };
@@ -232,19 +235,21 @@ constexpr double magicValueForErf = 0.147;
     }
     
     typedef std::unordered_map<std::string, PMMLDocument::ConstFieldDescriptionPtr> Fixups;
-    void applyDefinedFunctionToNodes(AstNode & node, const Fixups & fixups)
+    void applyDefinedFunctionToNodes(AstBuilder & builder, AstNode & node, const Fixups & fixups)
     {
         if (const char * thisFunctionName = node.function().luaFunction)
         {
             auto found = fixups.find(thisFunctionName);
             if (found != fixups.end())
             {
-                node.fieldDescription = found->second;
+                builder.field(found->second);
+                node.children.emplace_back(builder.topNode());
+                builder.popNode();
             }
         }
         for (AstNode & child : node.children)
         {
-            applyDefinedFunctionToNodes(child, fixups);
+            applyDefinedFunctionToNodes(builder, child, fixups);
         }
     }
 }
@@ -401,7 +406,7 @@ bool Function::prologue(AstBuilder & builder)
     {
         // Put the main body on the top of the stack.
         builder.swapNodes(-1, -2);
-        applyDefinedFunctionToNodes(builder.topNode(), fixups);
+        applyDefinedFunctionToNodes(builder, builder.topNode(), fixups);
         // Put them back into the correct order.
         builder.swapNodes(-1, -2);
     }
@@ -409,9 +414,13 @@ bool Function::prologue(AstBuilder & builder)
     return added > 0;
 }
 
-Function::CustomDefinition::CustomDefinition(const PMMLDocument::ConstFieldDescriptionPtr & d, PMMLDocument::FieldType ot, MissingValueRule nt) :
-    Definition(nullptr, FUNCTIONLIKE, ot, 0, nt),
-    definition(d)
+
+Function::CustomDefinition::CustomDefinition(const PMMLDocument::ConstFieldDescriptionPtr & d, PMMLDocument::FieldType ot,
+                                             const Definition * ld,
+                                             std::vector<PMMLDocument::FieldType> && parameterList) :
+    outputType(ot),
+    lambdaDefinition(ld),
+    functionVariable(d),
+    parameters(std::move(parameterList))
 {
-    luaFunction = d->luaName.c_str();
 }

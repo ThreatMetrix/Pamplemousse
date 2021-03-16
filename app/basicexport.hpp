@@ -34,6 +34,9 @@ namespace PMMLExporter
     bool createScript(const char * sourceFile, LuaOutputter & luaOutputter,
                       std::vector<PMMLExporter::ModelOutput> & inputs, std::vector<PMMLExporter::ModelOutput> & outputs,
                       Format inputFormat = Format::AS_MULTI_ARG, Format outputFormat = Format::AS_MULTI_ARG);
+    void addFunctionHeader(LuaOutputter & output, const std::vector<PMMLExporter::ModelOutput> & inputColumns);
+    void addMultiReturnStatement(AstBuilder & builder, const std::vector<PMMLExporter::ModelOutput> & customOutputs);
+    void addTableReturnStatement(AstBuilder & builder, const std::vector<PMMLExporter::ModelOutput> & customOutputs);
 }
 
 #endif /* basicexport_hpp */

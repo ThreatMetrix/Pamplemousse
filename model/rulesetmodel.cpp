@@ -63,7 +63,7 @@ bool parseScope(std::vector<Rule> & rules, AstBuilder & builder, const tinyxml2:
             double weight = 1;
             if (rule->QueryDoubleAttribute("weight", &weight) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
             {
-                fprintf(stderr, "Invalid weight at %i\n", rule->GetLineNum());
+                builder.parsingError("Invalid weight", rule->GetLineNum());
             }
             // This will pop two nodes from the builder inside the Rule constructor.
             rules.emplace_back(builder, weight);
@@ -78,7 +78,7 @@ bool parseScope(std::vector<Rule> & rules, AstBuilder & builder, const tinyxml2:
         }
         else
         {
-            fprintf(stderr, "Unknown rule: %s %i\n", rule->Name(), rule->GetLineNum());
+            builder.parsingError("Unknown rule", rule->Name(), rule->GetLineNum());
             return false;
         }
     }
@@ -90,20 +90,20 @@ bool RulesetModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node
     const tinyxml2::XMLElement * ruleSet = node->FirstChildElement("RuleSet");
     if (ruleSet == nullptr)
     {
-        fprintf(stderr, "No RuleSet at %i\n", node->GetLineNum());
+        builder.parsingError("No RuleSet", node->GetLineNum());
         return false;
     }
     
     const tinyxml2::XMLElement * ruleSelectionMethod = ruleSet->FirstChildElement("RuleSelectionMethod");
     if (ruleSelectionMethod == nullptr)
     {
-        fprintf(stderr, "No RuleSelectionMethod at %i\n", ruleSet->GetLineNum());
+        builder.parsingError("No RuleSelectionMethod", ruleSet->GetLineNum());
         return false;
     }
     const char * criterion = ruleSelectionMethod->Attribute("criterion");
     if (criterion == nullptr)
     {
-        fprintf(stderr, "No criterion at %i\n", ruleSet->GetLineNum());
+        builder.parsingError("No criterion", ruleSet->GetLineNum());
         return false;
     }
     
@@ -130,12 +130,12 @@ bool RulesetModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node
     }
     else if (strcmp(criterion, "weightedSum") == 0)
     {
-        fprintf(stderr, "Sorry, weightedSum rule selection criterion is not supported at %i\n", ruleSelectionMethod->GetLineNum());
+        builder.parsingError("Sorry, weightedSum rule selection criterion is not supported", ruleSelectionMethod->GetLineNum());
         return false;
     }
     else
     {
-        fprintf(stderr, "Unknown rule selection criterion: %s not supported at %i\n", criterion, ruleSelectionMethod->GetLineNum());
+        builder.parsingError("Unknown rule selection criterion: %s not supported", criterion, ruleSelectionMethod->GetLineNum());
         return false;
     }
     

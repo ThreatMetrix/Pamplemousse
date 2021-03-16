@@ -299,8 +299,9 @@ void LuaConverter::Converter::process(Function::RunLambda, Analyser::AnalyserCon
         // Go to the last bit (the lambda itself)
         std::advance(iter, node.children.size() - 1);
         
+        const bool isInline =node.children.empty() ||  node.children.back().function().functionType != Function::FIELD_REF;
         // Lua doesn't like inline lambdas to not have parenthesis
-        LuaOutputter::OperatorScopeHelper parenScope(output, LuaOutputter::PRECEDENCE_PARENTHESIS);
+        LuaOutputter::OperatorScopeHelper parenScope(output, LuaOutputter::PRECEDENCE_PARENTHESIS, isInline);
         convertAstToLuaWithNullAssertions(context, *iter, DEFAULT_TO_NIL, output);
     }
     

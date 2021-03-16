@@ -107,7 +107,7 @@ namespace
     }
     
     // This function is not defined by default. It will need to be defined in the prologue.
-    const Function::Definition elliottFunction = {"elliott", Function::FUNCTIONLIKE, PMMLDocument::TYPE_INVALID, LuaOutputter::PRECEDENCE_TOP, Function::MISSING_IF_ANY_ARGUMENT_IS_MISSING};
+    const Function::Definition elliottFunction = {"elliott", Function::RUN_LAMBDA, PMMLDocument::TYPE_INVALID, LuaOutputter::PRECEDENCE_TOP, Function::MISSING_IF_ANY_ARGUMENT_IS_MISSING};
     
     void applyActivationFunction(AstBuilder & builder, ActivationFunction activationFunction, double threshold, double altitude, size_t fanIn, double width)
     {
@@ -228,14 +228,14 @@ namespace
                 const tinyxml2::XMLElement * derivedField = neuralInput->FirstChildElement("DerivedField");
                 if (derivedField == nullptr)
                 {
-                    fprintf(stderr, "No DerivedField specified at %i\n", neuralInput->GetLineNum());
+                    builder.parsingError("No DerivedField specified at %i\n", neuralInput->GetLineNum());
                     return false;
                 }
                 
                 const tinyxml2::XMLElement * expression = PMMLDocument::skipExtensions(derivedField->FirstChildElement());
                 if (expression == nullptr)
                 {
-                    fprintf(stderr, "No expression in DerivedField at %i\n", neuralInput->GetLineNum());
+                    builder.parsingError("No expression in DerivedField at %i\n", neuralInput->GetLineNum());
                     return false;
                 }
 
@@ -263,7 +263,7 @@ namespace
                 const char * idString = neuralInput->Attribute("id");
                 if (nodeIDToVariableMap.emplace(idString, thisVariable).second == false)
                 {
-                    fprintf(stderr, "Duplicate node ID: %s at %i\n", idString, neuralInput->GetLineNum());
+                    builder.parsingError("Duplicate node ID: at %i\n", idString, neuralInput->GetLineNum());
                     return false;
                 }
             }
@@ -278,7 +278,7 @@ namespace
                 activationFunction = getActivationFunctionFromString(activationFunctionName);
                 if (activationFunction == ACTIVATION_INVALID)
                 {
-                    fprintf(stderr, "Unknown activationFunction: %s at %i", activationFunctionName, neuralLayer->GetLineNum());
+                    builder.parsingError("Unknown activationFunction", activationFunctionName, neuralLayer->GetLineNum());
                     return false;
                 }
             }
@@ -289,7 +289,7 @@ namespace
                 normalizationMethod = getNormalizationMethodFromString(normalizationMethodName);
                 if (normalizationMethod == NORMALIZATION_METHOD_INVALID)
                 {
-                    fprintf(stderr, "Unknown normalizationMethodName: %s at %i", normalizationMethodName, neuralLayer->GetLineNum());
+                    builder.parsingError("Unknown normalizationMethodName", normalizationMethodName, neuralLayer->GetLineNum());
                     return false;
                 }
             }
@@ -297,19 +297,19 @@ namespace
             double threshold = defaultThreshold;
             if (neuralLayer->QueryDoubleAttribute("threshold", &threshold) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
             {
-                fprintf(stderr, "invalid threshold value at %i", neuralLayer->GetLineNum());
+                builder.parsingError("invalid threshold value", neuralLayer->GetLineNum());
             }
             
             double layerAltitude = defaultAltitude;
             if (neuralLayer->QueryDoubleAttribute("altitude", &layerAltitude) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
             {
-                fprintf(stderr, "invalid altitude value at %i", neuralLayer->GetLineNum());
+                builder.parsingError("invalid altitude value", neuralLayer->GetLineNum());
             }
             
             double layerWidth = defaultWidth;
             if (neuralLayer->QueryDoubleAttribute("width", &layerWidth) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
             {
-                fprintf(stderr, "invalid width value at %i", neuralLayer->GetLineNum());
+                builder.parsingError("invalid width value", neuralLayer->GetLineNum());
             }
             
             std::unordered_set<PMMLDocument::ConstFieldDescriptionPtr> thisLayerVars;
@@ -325,27 +325,27 @@ namespace
                 }
                 else if (retval == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
                 {
-                    fprintf(stderr, "Invalid bias at %i\n", neuron->GetLineNum());
+                    builder.parsingError("Invalid bias at %i\n", neuron->GetLineNum());
                     return false;
                 }
                 
                 double altitude = layerAltitude;
                 if (neuron->QueryDoubleAttribute("altitude", &altitude) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
                 {
-                    fprintf(stderr, "invalid altitude value at %i", neuron->GetLineNum());
+                    builder.parsingError("invalid altitude value", neuron->GetLineNum());
                     return false;
                 }
                 
                 double width = layerWidth;
                 if (neuron->QueryDoubleAttribute("width", &width) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
                 {
-                    fprintf(stderr, "invalid width value at %i", neuron->GetLineNum());
+                    builder.parsingError("invalid width value", neuron->GetLineNum());
                     return false;
                 }
                 
                 if (activationFunction == ACTIVATION_RADIAL_BASIS && width == 0)
                 {
-                    fprintf(stderr, "Width cannot be zero when using radialBasis activation, neuron at %i", neuron->GetLineNum());
+                    builder.parsingError("Width cannot be zero when using radialBasis activation, neuron", neuron->GetLineNum());
                     return false;
                 }
 
@@ -356,7 +356,7 @@ namespace
                     const char * weight = connection->Attribute("weight");
                     if (weight == nullptr)
                     {
-                        fprintf(stderr, "Connection missing weight at %i\n", connection->GetLineNum());
+                        builder.parsingError("Connection missing weight at %i\n", connection->GetLineNum());
                         return false;
                     }
                     
@@ -364,21 +364,21 @@ namespace
                     double weightAsDouble = strtod(weight, &endp);
                     if (*endp != '\0')
                     {
-                        fprintf(stderr, "Invalid weight %s at %i\n", weight, connection->GetLineNum());
+                        builder.parsingError("Invalid weight at %i\n", weight, connection->GetLineNum());
                         return false;
                     }
                     
                     const char * from = connection->Attribute("from");
                     if (from == nullptr)
                     {
-                        fprintf(stderr, "Connection missing from at %i\n", connection->GetLineNum());
+                        builder.parsingError("Connection missing from at %i\n", connection->GetLineNum());
                         return false;
                     }
                     
                     auto found = nodeIDToVariableMap.find(from);
                     if (found == nodeIDToVariableMap.end() || thisLayerVars.count(found->second) > 0)
                     {
-                        fprintf(stderr, "Connection to node: %s which was not defined in previous layer at %i\n", from, connection->GetLineNum());
+                        builder.parsingError("Connection to node which was not defined in previous layer at %i\n", from, connection->GetLineNum());
                         return false;
                     }
                     
@@ -441,7 +441,7 @@ namespace
 
                 if (nodeIDToVariableMap.emplace(idString, thisVariable).second == false)
                 {
-                    fprintf(stderr, "Duplicate node ID: %s at %i\n", idString, neuron->GetLineNum());
+                    builder.parsingError("Duplicate node ID at %i\n", idString, neuron->GetLineNum());
                     return false;
                 }
                 thisLayerVars.insert(thisVariable);
@@ -488,28 +488,28 @@ namespace
                 const char * outputNeuron = neuralOutput->Attribute("outputNeuron");
                 if (outputNeuron == nullptr)
                 {
-                    fprintf(stderr, "No outputNeuron specified at %i\n", neuralOutput->GetLineNum());
+                    builder.parsingError("No outputNeuron specified at %i\n", neuralOutput->GetLineNum());
                     return false;
                 }
                 
                 auto found = nodeIDToVariableMap.find(outputNeuron);
                 if (found == nodeIDToVariableMap.end())
                 {
-                    fprintf(stderr, "Connection to outputNeuron: %s which was not defined at %i\n", outputNeuron, neuralOutput->GetLineNum());
+                    builder.parsingError("Connection to outputNeuron which was not defined at %i\n", outputNeuron, neuralOutput->GetLineNum());
                     return false;
                 }
                 
                 const tinyxml2::XMLElement * derivedField = neuralOutput->FirstChildElement("DerivedField");
                 if (derivedField == nullptr)
                 {
-                    fprintf(stderr, "No DerivedField specified at %i\n", neuralOutput->GetLineNum());
+                    builder.parsingError("No DerivedField specified at %i\n", neuralOutput->GetLineNum());
                     return false;
                 }
                 
                 const tinyxml2::XMLElement * transform = PMMLDocument::skipExtensions(derivedField->FirstChildElement());
                 if (transform == nullptr)
                 {
-                    fprintf(stderr, "No transformation specified at %i\n", derivedField->GetLineNum());
+                    builder.parsingError("No transformation specified at %i\n", derivedField->GetLineNum());
                     return false;
                 }
                 
@@ -518,7 +518,7 @@ namespace
                 {
                     if (config.function == PMMLDocument::FUNCTION_CLASSIFICATION)
                     {
-                        fprintf(stderr, "Not sure how to denormalize NormContinuous in classification model at %i\n", transform->GetLineNum());
+                        builder.parsingError("Not sure how to denormalize NormContinuous in classification model at %i\n", transform->GetLineNum());
                         return false;
                     }
                     
@@ -537,7 +537,7 @@ namespace
                 {
                     if (config.function == PMMLDocument::FUNCTION_CLASSIFICATION)
                     {
-                        fprintf(stderr, "Not sure how to denormalize FieldRef in classification model at %i\n", transform->GetLineNum());
+                        builder.parsingError("Not sure how to denormalize FieldRef in classification model at %i\n", transform->GetLineNum());
                         return false;
                     }
                     
@@ -549,14 +549,14 @@ namespace
                 {
                     if (config.function == PMMLDocument::FUNCTION_REGRESSION)
                     {
-                        fprintf(stderr, "Not sure how to denormalize NormDiscrete in regression model at %i\n", transform->GetLineNum());
+                        builder.parsingError("Not sure how to denormalize NormDiscrete in regression model at %i\n", transform->GetLineNum());
                         return false;
                     }
                     
                     const char * value = transform->Attribute("value");
                     if (value == nullptr)
                     {
-                        fprintf(stderr, "No value specified at %i\n", transform->GetLineNum());
+                        builder.parsingError("No value specified at %i\n", transform->GetLineNum());
                         return false;
                     }
                     values.push_back(value);
@@ -568,7 +568,7 @@ namespace
                 }
                 else
                 {
-                    fprintf(stderr, "Not sure how to denormalize %s at %i\n", transform->Name(), transform->GetLineNum());
+                    builder.parsingError("Not sure how to denormalize at %i\n", transform->Name(), transform->GetLineNum());
                     return false;
                 }
             }
@@ -588,13 +588,13 @@ bool NeuralNetworkModel::parse(AstBuilder & builder, const tinyxml2::XMLElement 
     const char * activationFunctionName = node->Attribute("activationFunction");
     if (activationFunctionName == nullptr)
     {
-        fprintf(stderr, "No activationFunction specified at %i\n", node->GetLineNum());
+        builder.parsingError("No activationFunction specified at %i\n", node->GetLineNum());
         return false;
     }
     ActivationFunction defaultActivationFunction = getActivationFunctionFromString(activationFunctionName);
     if (defaultActivationFunction == ACTIVATION_INVALID)
     {
-        fprintf(stderr, "Unknown activationFunction: %s at %i\n", activationFunctionName, node->GetLineNum());
+        builder.parsingError("Unknown activationFunction: at %i\n", activationFunctionName, node->GetLineNum());
         return false;
     }
     
@@ -604,7 +604,7 @@ bool NeuralNetworkModel::parse(AstBuilder & builder, const tinyxml2::XMLElement 
         defaultNormalizationMethod = getNormalizationMethodFromString(normalizationMethodName);
         if (defaultNormalizationMethod == NORMALIZATION_METHOD_INVALID)
         {
-            fprintf(stderr, "Unknown normalizationMethodName: %s at %i\n", normalizationMethodName, node->GetLineNum());
+            builder.parsingError("Unknown normalizationMethodName: at %i\n", normalizationMethodName, node->GetLineNum());
             return false;
         }
     }
@@ -612,27 +612,27 @@ bool NeuralNetworkModel::parse(AstBuilder & builder, const tinyxml2::XMLElement 
     double defaultThreshold = 0;
     if (node->QueryDoubleAttribute("threshold", &defaultThreshold) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
     {
-        fprintf(stderr, "invalid threshold value at %i\n", node->GetLineNum());
+        builder.parsingError("invalid threshold value at %i\n", node->GetLineNum());
         return false;
     }
     
     const tinyxml2::XMLElement * neuralInputs = node->FirstChildElement("NeuralInputs");
     if (neuralInputs == nullptr)
     {
-        fprintf(stderr, "No NeuralInputs specified at %i\n", node->GetLineNum());
+        builder.parsingError("No NeuralInputs specified at %i\n", node->GetLineNum());
         return false;
     }
     
     double defaultAltitude = 0;
     if (node->QueryDoubleAttribute("altitude", &defaultAltitude) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
     {
-        fprintf(stderr, "invalid altitude value at %i", node->GetLineNum());
+        builder.parsingError("invalid altitude value", node->GetLineNum());
     }
     
     double defaultWidth = 0;
     if (node->QueryDoubleAttribute("width", &defaultWidth) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
     {
-        fprintf(stderr, "invalid width value at %i", node->GetLineNum());
+        builder.parsingError("invalid width value", node->GetLineNum());
     }
     
     NeuralNetParseState parseState(builder.context(), defaultActivationFunction, defaultNormalizationMethod, defaultThreshold, defaultAltitude, defaultWidth);
@@ -653,7 +653,7 @@ bool NeuralNetworkModel::parse(AstBuilder & builder, const tinyxml2::XMLElement 
     const tinyxml2::XMLElement * neuralOutputs = node->FirstChildElement("NeuralOutputs");
     if (neuralOutputs == nullptr)
     {
-        fprintf(stderr, "No NeuralOutputs specified at %i\n", node->GetLineNum());
+        builder.parsingError("No NeuralOutputs specified at %i\n", node->GetLineNum());
         return false;
     }
     

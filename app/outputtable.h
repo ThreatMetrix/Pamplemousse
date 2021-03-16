@@ -35,13 +35,18 @@ public:
     QMimeData *mimeData(const QModelIndexList &indexes) const override;
     QStringList mimeTypes() const override;
 
-    bool addOutput(const std::string & name);
+    bool addOutput(const std::string & name, bool isNeuron);
     void clear();
 
+    const std::vector<PMMLExporter::ModelOutput> & modelOutputs() const
+    {
+        return m_modelOutputs;
+    }
+
 private:
-    const PMMLDocument::DataDictionary & getOutputsMap() const;
-    std::vector<PMMLExporter::ModelOutput> outputs;
-    TableType tableType;
+    const PMMLDocument::DataDictionary & getOutputsMap(bool isNeuron) const;
+    std::vector<PMMLExporter::ModelOutput> m_modelOutputs;
+    TableType m_tableType;
 
 
 signals:

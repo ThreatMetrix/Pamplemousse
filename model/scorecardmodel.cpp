@@ -36,7 +36,7 @@ bool ScorecardModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * no
         }
         else if (strcmp(reasonCodeAlgorithm, "pointsBelow"))
         {
-            fprintf(stderr, "unrecognised reasonCodeAlgorithm: %s at %i\n", reasonCodeAlgorithm, node->GetLineNum());
+            builder.parsingError("unrecognised reasonCodeAlgorithm", reasonCodeAlgorithm, node->GetLineNum());
             return false;
         }
     }
@@ -48,7 +48,7 @@ bool ScorecardModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * no
     const tinyxml2::XMLElement * characteristics = node->FirstChildElement("Characteristics");
     if (characteristics == nullptr)
     {
-        fprintf(stderr, "no characteristics in scorecard at %i\n", node->GetLineNum());
+        builder.parsingError("no characteristics in scorecard", node->GetLineNum());
         return false;
     }
 
@@ -62,7 +62,7 @@ bool ScorecardModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * no
         {
             if (characteristic->QueryDoubleAttribute("baselineScore", &baseline) != tinyxml2::XML_SUCCESS && !hasDefaultBaseline)
             {
-                fprintf(stderr, "Characteristic with no baseline at %i\n", node->GetLineNum());
+                builder.parsingError("Characteristic with no baseline", node->GetLineNum());
                 return false;
             }
         }
@@ -74,7 +74,7 @@ bool ScorecardModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * no
             {
                 if (useReasonCodes && masterReasonCode == nullptr)
                 {
-                    fprintf(stderr, "Attribute with no reason code at %i\n", attribute->GetLineNum());
+                    builder.parsingError("Attribute with no reason code", attribute->GetLineNum());
                     return false;
                 }
                 reasonCode = masterReasonCode;
@@ -107,7 +107,7 @@ bool ScorecardModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * no
                 const tinyxml2::XMLElement * transform = PMMLDocument::skipExtensions(complex->FirstChildElement());
                 if (transform == nullptr)
                 {
-                    fprintf(stderr, "ComplexPartialScore with no transformation at %i\n", attribute->GetLineNum());
+                    builder.parsingError("ComplexPartialScore with no transformation", attribute->GetLineNum());
                     return false;
                 }
                 if (!Transformation::parse(builder, transform))
@@ -116,7 +116,7 @@ bool ScorecardModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * no
                 }
                 if (!builder.coerceToSpecificTypes(1, &fieldType))
                 {
-                    fprintf(stderr, "ComplexPartialScore with wrong type at %i\n", attribute->GetLineNum());
+                    builder.parsingError("ComplexPartialScore with wrong type", attribute->GetLineNum());
                     return false;
                 }
                 
@@ -169,14 +169,14 @@ bool ScorecardModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * no
             }
             else
             {
-                fprintf(stderr, "Attribute with no score at %i\n", attribute->GetLineNum());
+                builder.parsingError("Attribute with no score", attribute->GetLineNum());
                 return false;
             }
 
             const tinyxml2::XMLElement * predicate = PMMLDocument::skipExtensions(attribute->FirstChildElement());
             if (predicate == nullptr)
             {
-                fprintf(stderr, "Attribute with no predicate at %i\n", attribute->GetLineNum());
+                builder.parsingError("Attribute with no predicate", attribute->GetLineNum());
                 return false;
             }
             if (!Predicate::parse(builder, predicate))

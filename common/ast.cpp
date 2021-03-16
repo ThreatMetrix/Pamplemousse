@@ -398,6 +398,30 @@ bool AstBuilder::coerceToSpecificTypes(size_t nEntries, const PMMLDocument::Fiel
     return isOK;
 }
 
+void AstBuilder::parsingError(const char * error_message, int line_num) const
+{
+    if (m_customErrorHook)
+    {
+        m_customErrorHook->error(error_message, line_num);
+    }
+    else
+    {
+        std::fprintf(stderr, "%s at %i\n", error_message, line_num);
+    }
+}
+
+void AstBuilder::parsingError(const char * error_message, const char * error_param, int line_num) const
+{
+    if (m_customErrorHook)
+    {
+        m_customErrorHook->errorWithArg(error_message, error_param, line_num);
+    }
+    else
+    {
+        std::fprintf(stderr, "%s (%s) at %i\n", error_message, error_param, line_num);
+    }
+}
+
 // This method swaps two nodes in the builder's stack
 void AstBuilder::swapNodes(int a, int b)
 {

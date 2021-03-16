@@ -519,15 +519,19 @@ public:
             }
         }
         
+        const Function::CustomDefinition * ampmDefinition = astBuilder.context().findCustomFunction("AMPM");
+        CPPUNIT_ASSERT(ampmDefinition);
+        PMMLDocument::ConstFieldDescriptionPtr ampmFunction = ampmDefinition->functionVariable;
+        
         {
             tinyxml2::XMLDocument document;
             document.Parse("<Apply function=\"AMPM\"><FieldRef field=\"input\" /></Apply>");
             
             CPPUNIT_ASSERT(Transformation::parse(astBuilder, document.RootElement()));
-            CPPUNIT_ASSERT(TestUtils::mightBeMissingWith(astBuilder.topNode()));
+            CPPUNIT_ASSERT(TestUtils::mightBeMissingWith(astBuilder.topNode(), ampmFunction));
             parseIntoVM(astBuilder, globalStream.str(), L);
             
-            CPPUNIT_ASSERT(!TestUtils::mightBeMissingWith(astBuilder.topNode(), input));
+            CPPUNIT_ASSERT(!TestUtils::mightBeMissingWith(astBuilder.topNode(), ampmFunction, input));
             
             astBuilder.popNode();
         }
@@ -541,13 +545,18 @@ public:
         CPPUNIT_ASSERT(lua_isnil(L, -1));
         lua_pop(L, 1);
         
+        
+        const Function::CustomDefinition * contrivedDefinition = astBuilder.context().findCustomFunction("1contrived-Function");
+        CPPUNIT_ASSERT(contrivedDefinition);
+        PMMLDocument::ConstFieldDescriptionPtr contrivedFunction = contrivedDefinition->functionVariable;
+        
         {
             tinyxml2::XMLDocument document;
             document.Parse("<Apply function=\"1contrived-Function\"><FieldRef field=\"input\" /><Constant>7</Constant></Apply>");
             
             CPPUNIT_ASSERT(Transformation::parse(astBuilder, document.RootElement()));
-            CPPUNIT_ASSERT(TestUtils::mightBeMissingWith(astBuilder.topNode()));
-            CPPUNIT_ASSERT(TestUtils::mightBeMissingWith(astBuilder.topNode(), input));
+            CPPUNIT_ASSERT(TestUtils::mightBeMissingWith(astBuilder.topNode(), contrivedFunction));
+            CPPUNIT_ASSERT(TestUtils::mightBeMissingWith(astBuilder.topNode(), contrivedFunction, input));
             parseIntoVM(astBuilder, globalStream.str(), L);
             astBuilder.popNode();
         }

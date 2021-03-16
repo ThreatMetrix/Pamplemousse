@@ -11,11 +11,54 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Pamplemousse</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="2">
+    <item row="3" column="2">
+     <widget class="QComboBox" name="outputMode">
+      <item>
+       <property name="text">
+        <string>Multi Return</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Table</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QPushButton" name="addButton">
+      <property name="text">
+       <string>Add</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QTableView" name="input_list">
+      <property name="showDropIndicator" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="dragDropOverwriteMode">
+       <bool>false</bool>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::NoDragDrop</enum>
+      </property>
+      <property name="defaultDropAction">
+       <enum>Qt::MoveAction</enum>
+      </property>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>true</bool>
+      </attribute>
+     </widget>
+    </item>
+    <item row="1" column="2">
      <widget class="QTableView" name="script_outputs">
       <property name="acceptDrops">
        <bool>true</bool>
@@ -45,11 +88,11 @@
        <bool>true</bool>
       </attribute>
       <attribute name="verticalHeaderVisible">
-       <bool>true</bool>
+       <bool>false</bool>
       </attribute>
      </widget>
     </item>
-    <item row="0" column="1">
+    <item row="1" column="1">
      <widget class="OutputsList" name="model_outputs">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -71,39 +114,55 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QPushButton" name="addButton">
-      <property name="text">
-       <string>Add</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QTableView" name="input_list">
-      <property name="showDropIndicator" stdset="0">
-       <bool>false</bool>
-      </property>
-      <property name="dragEnabled">
-       <bool>false</bool>
-      </property>
-      <property name="dragDropOverwriteMode">
-       <bool>false</bool>
-      </property>
-      <property name="dragDropMode">
-       <enum>QAbstractItemView::NoDragDrop</enum>
-      </property>
-      <property name="defaultDropAction">
-       <enum>Qt::MoveAction</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
+    <item row="2" column="2">
      <widget class="QPushButton" name="removeButton">
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
       <property name="text">
        <string>Remove</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QComboBox" name="inputMode">
+      <item>
+       <property name="text">
+        <string>Multi Arg</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Table</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Inputs</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Available Outputs</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Outputs</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QComboBox" name="neurons">
+      <property name="enabled">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
@@ -141,6 +200,7 @@
    </attribute>
    <addaction name="actionOpen"/>
    <addaction name="actionExport"/>
+   <addaction name="actionCase_Insensitive"/>
   </widget>
   <action name="actionOpen">
    <property name="text">
@@ -155,6 +215,14 @@
   <action name="actionExport">
    <property name="text">
     <string>E&amp;xport</string>
+   </property>
+  </action>
+  <action name="actionCase_Insensitive">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Case Sensitive</string>
    </property>
   </action>
  </widget>

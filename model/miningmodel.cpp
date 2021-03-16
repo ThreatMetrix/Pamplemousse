@@ -215,14 +215,14 @@ namespace MiningModel
             const tinyxml2::XMLElement * predicate = PMMLDocument::skipExtensions(segment->FirstChildElement());
             if (predicate == nullptr)
             {
-                fprintf(stderr, "Empty segment at %i\n", segment->GetLineNum());
+                builder.parsingError("Empty segment", segment->GetLineNum());
                 return false;
             }
             
             const tinyxml2::XMLElement * model = PMMLDocument::skipExtensions(predicate->NextSiblingElement());
             if (model == nullptr)
             {
-                fprintf(stderr, "Segment has no model at %i\n", segment->GetLineNum());
+                builder.parsingError("Segment has no model", segment->GetLineNum());
                 return false;
             }
             
@@ -286,14 +286,14 @@ namespace MiningModel
             const tinyxml2::XMLElement * predicate = PMMLDocument::skipExtensions(segment->FirstChildElement());
             if (predicate == nullptr)
             {
-                fprintf(stderr, "Empty segment at %i\n", segment->GetLineNum());
+                builder.parsingError("Empty segment", segment->GetLineNum());
                 return false;
             }
             
             const tinyxml2::XMLElement * model = PMMLDocument::skipExtensions(predicate->NextSiblingElement());
             if (model == nullptr)
             {
-                fprintf(stderr, "Segment has no model at %i\n", segment->GetLineNum());
+                builder.parsingError("Segment has no model", segment->GetLineNum());
                 return false;
             }
             
@@ -373,14 +373,14 @@ namespace MiningModel
             const tinyxml2::XMLElement * predicate = PMMLDocument::skipExtensions(segment->FirstChildElement());
             if (predicate == nullptr)
             {
-                fprintf(stderr, "Empty segment at %i\n", segment->GetLineNum());
+                builder.parsingError("Empty segment", segment->GetLineNum());
                 return false;
             }
             
             const tinyxml2::XMLElement * model = PMMLDocument::skipExtensions(predicate->NextSiblingElement());
             if (model == nullptr)
             {
-                fprintf(stderr, "Segment has no model at %i\n", segment->GetLineNum());
+                builder.parsingError("Segment has no model", segment->GetLineNum());
                 return false;
             }
 
@@ -466,7 +466,7 @@ namespace MiningModel
         ASSERT_AST_BUILDER_ONE_NEW_NODE(builder);
         if (config.targetField == nullptr)
         {
-            fprintf(stderr, "Cannot build mining model without target field %i\n", segmentation->GetLineNum());
+            builder.parsingError("Cannot build mining model without target field %i\n", segmentation->GetLineNum());
             return false;
         }
         size_t outerBlockSize = 0;
@@ -502,14 +502,14 @@ namespace MiningModel
             const tinyxml2::XMLElement * predicate = PMMLDocument::skipExtensions(segment->FirstChildElement());
             if (predicate == nullptr)
             {
-                fprintf(stderr, "Empty segment at %i\n", segment->GetLineNum());
+                builder.parsingError("Empty segment", segment->GetLineNum());
                 return false;
             }
             
             const tinyxml2::XMLElement * model = PMMLDocument::skipExtensions(predicate->NextSiblingElement());
             if (model == nullptr)
             {
-                fprintf(stderr, "Segment has no model at %i\n", segment->GetLineNum());
+                builder.parsingError("Segment has no model", segment->GetLineNum());
                 return false;
             }
 
@@ -693,11 +693,11 @@ namespace MiningModel
         switch(modelMethod)
         {
             case INVALID:
-                fprintf(stderr, "Unknown multipleModelMethod: %s at %i\n", method, node->GetLineNum());
+                builder.parsingError("Unknown multipleModelMethod", method, node->GetLineNum());
                 return false;
             case MAJORITYVOTE:
             case WEIGHTEDMAJORITYVOTE:
-                fprintf(stderr, "Method %s is not applicable to regression models at %i\n", method, node->GetLineNum());
+                builder.parsingError("Method is not applicable to regression models", method, node->GetLineNum());
                 return false;
             case AVERAGE:
             case WEIGHTEDAVERAGE:
@@ -803,13 +803,13 @@ namespace MiningModel
         switch(modelMethod)
         {
             case INVALID:
-                fprintf(stderr, "Unknown multipleModelMethod: %s at %i\n", method, node->GetLineNum());
+                builder.parsingError("Unknown multipleModelMethod", method, node->GetLineNum());
                 return false;
             case SUM:
-                fprintf(stderr, "Method %s is not applicable to classification models at %i\n", method, node->GetLineNum());
+                builder.parsingError("Method is not applicable to classification models", method, node->GetLineNum());
                 return false;
             case MEDIAN:
-                fprintf(stderr, "Method %s is not currently not supported for classification models at %i\n", method, node->GetLineNum());
+                builder.parsingError("Method is not currently not supported for classification models", method, node->GetLineNum());
                 return false;
 
             case MAJORITYVOTE:
@@ -837,7 +837,7 @@ bool MiningModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node,
         const char * method = segmentation->Attribute("multipleModelMethod");
         if (method == nullptr)
         {
-            fprintf(stderr, "No multipleModelMethod at %i\n", node->GetLineNum());
+            builder.parsingError("No multipleModelMethod", node->GetLineNum());
             return false;
         }
 
@@ -851,6 +851,6 @@ bool MiningModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node,
         }
     }
 
-    fprintf(stderr, "No segmentation element in MiningModel at %i\n", node->GetLineNum());
+    builder.parsingError("No segmentation element in MiningModel", node->GetLineNum());
     return false;
 }

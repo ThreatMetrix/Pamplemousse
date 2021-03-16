@@ -94,7 +94,7 @@ namespace
             const tinyxml2::XMLElement * predicate = PMMLDocument::skipExtensions(childNode->FirstChildElement());
             if (predicate == nullptr)
             {
-                fprintf(stderr, "Tree node without predicate at: %i\n", childNode->GetLineNum());
+                builder.parsingError("Tree node without predicate", childNode->GetLineNum());
                 return false;
             }
             
@@ -327,7 +327,7 @@ bool TreeModel::writeScore(AstBuilder & builder, const tinyxml2::XMLElement * no
         }
         else
         {
-            fprintf(stderr, "Missing value strategies \"aggregateNodes\" and \"weightedConfidence\" both require a recordCount at %i\n", node->GetLineNum());
+            builder.parsingError("Missing value strategies \"aggregateNodes\" and \"weightedConfidence\" both require a recordCount", node->GetLineNum());
             return false;
         }
     }
@@ -350,7 +350,7 @@ bool TreeModel::writeScore(AstBuilder & builder, const tinyxml2::XMLElement * no
                 double elementRecordCount;
                 if (node->QueryDoubleAttribute("recordCount", &elementRecordCount) || value == nullptr)
                 {
-                    fprintf(stderr, "ScoreDistribution requires a recordCount and a value\n");
+                    builder.parsingError("ScoreDistribution requires a recordCount and a value", node->GetLineNum());
                     return false;
                 }
                 
@@ -399,7 +399,7 @@ bool TreeModel::writeScore(AstBuilder & builder, const tinyxml2::XMLElement * no
                 double elementRecordCount;
                 if (elementRecords->QueryDoubleValue(&elementRecordCount) || value == nullptr)
                 {
-                    fprintf(stderr, "ScoreDistribution requires a recordCount and a value\n");
+                    builder.parsingError("ScoreDistribution requires a recordCount and a value", elementRecords->GetLineNum());
                     return false;
                 }
                 
@@ -508,7 +508,7 @@ bool TreeModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node,
         treeConfig.missingValueStrategy = getMissingValueStrategyFromString(mvs->Value());
         if (treeConfig.missingValueStrategy == MVS_INVALID)
         {
-            fprintf(stderr, "Unknown missingValueStrategy: %s at %i", mvs->Value(), node->GetLineNum());
+            builder.parsingError("Unknown missingValueStrategy", mvs->Value(), node->GetLineNum());
             return false;
         }
     }
@@ -527,7 +527,7 @@ bool TreeModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node,
         }
         else
         {
-            fprintf(stderr, "Unknown noTrueChildStrategy: %s\n", ntc->Value());
+            builder.parsingError("Unknown noTrueChildStrategy", ntc->Value(), ntc->GetLineNum());
             return false;
         }
     }

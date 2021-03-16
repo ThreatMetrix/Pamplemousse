@@ -56,24 +56,24 @@ class PolynomialKernel : public SVMKernel
     double coef0;
     double degree;
 public:
-    bool read(const tinyxml2::XMLElement * kernel)
+    bool read(AstBuilder & builder, const tinyxml2::XMLElement * kernel)
     {
         gamma = 1;
         if (kernel->QueryDoubleAttribute("gamma", &gamma) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
-            fprintf(stderr, "invalid gamma value at %i\n", kernel->GetLineNum());
+            builder.parsingError("invalid gamma value", kernel->GetLineNum());
             return false;
         }
         coef0 = 1;
         if (kernel->QueryDoubleAttribute("coef0", &coef0) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
-            fprintf(stderr, "invalid coef0 value at %i\n", kernel->GetLineNum());
+            builder.parsingError("invalid coef0 value", kernel->GetLineNum());
             return false;
         }
         degree = 1;
         if (kernel->QueryDoubleAttribute("degree", &degree) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
-            fprintf(stderr, "invalid degree value at %i\n", kernel->GetLineNum());
+            builder.parsingError("invalid degree value", kernel->GetLineNum());
             return false;
         }
         return true;
@@ -114,7 +114,7 @@ class RadialBasisKernel : public SVMKernel
 {
     std::string gamma;
 public:
-    bool read(const tinyxml2::XMLElement * kernel)
+    bool read(AstBuilder &, const tinyxml2::XMLElement * kernel)
     {
         gamma = 1;
         if (const char * gammaVal = kernel->Attribute("gamma"))
@@ -166,18 +166,18 @@ class SigmoidKernel : public SVMKernel
     double gamma;
     double coef0;
 public:
-    bool read(const tinyxml2::XMLElement * kernel)
+    bool read(AstBuilder & builder, const tinyxml2::XMLElement * kernel)
     {
         gamma = 1;
         if (kernel->QueryDoubleAttribute("gamma", &gamma) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
-            fprintf(stderr, "invalid gamma value at %i\n", kernel->GetLineNum());
+            builder.parsingError("invalid gamma value", kernel->GetLineNum());
             return false;
         }
         coef0 = 1;
         if (kernel->QueryDoubleAttribute("coef0", &coef0) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
-            fprintf(stderr, "invalid coef0 value at %i\n", kernel->GetLineNum());
+            builder.parsingError("invalid coef0 value", kernel->GetLineNum());
             return false;
         }
         return true;
@@ -213,7 +213,7 @@ public:
     }
 };
 
-bool readVectorInstances(std::unordered_map<std::string, SupportVector> & vectors, const tinyxml2::XMLElement * vectorDictionary)
+bool readVectorInstances(AstBuilder & builder, std::unordered_map<std::string, SupportVector> & vectors, const tinyxml2::XMLElement * vectorDictionary)
 {
     for (const tinyxml2::XMLElement * vectorInstance = vectorDictionary->FirstChildElement("VectorInstance");
          vectorInstance; vectorInstance = vectorInstance->NextSiblingElement("VectorInstance"))
@@ -221,13 +221,13 @@ bool readVectorInstances(std::unordered_map<std::string, SupportVector> & vector
         const char * id = vectorInstance->Attribute("id");
         if (id == nullptr)
         {
-            fprintf(stderr, "No id for VectorInstance at %i\n", vectorInstance->GetLineNum());
+            builder.parsingError("No id for VectorInstance", vectorInstance->GetLineNum());
             return false;
         }
         std::pair<std::unordered_map<std::string, SupportVector>::iterator, bool> inserted = vectors.emplace(id, SupportVector());
         if (inserted.second == false)
         {
-            fprintf(stderr, "Duplicate id %s for VectorInstance at %i\n", id, vectorInstance->GetLineNum());
+            builder.parsingError("Duplicate id %s for VectorInstance", id, vectorInstance->GetLineNum());
             return false;
         }
         SupportVector & newVector = inserted.first->second;
@@ -241,7 +241,7 @@ bool readVectorInstances(std::unordered_map<std::string, SupportVector> & vector
                 double value = strtod(thisString.c_str(), &end);
                 if (*end != '\0')
                 {
-                    fprintf(stderr, "Error parsing number: %s at %i\n", thisString.c_str(), vectorInstance->GetLineNum());
+                    builder.parsingError("Error parsing number: %s", thisString.c_str(), vectorInstance->GetLineNum());
                     return false;
                 }
                 if (value != 0)
@@ -262,7 +262,7 @@ bool readVectorInstances(std::unordered_map<std::string, SupportVector> & vector
             
             if (incides == nullptr)
             {
-                fprintf(stderr, "SparseArray without Indices at %i\n", sparseArray->GetLineNum());
+                builder.parsingError("SparseArray without Indices", sparseArray->GetLineNum());
                 return false;
             }
             std::vector<size_t> indexVector;
@@ -273,12 +273,14 @@ bool readVectorInstances(std::unordered_map<std::string, SupportVector> & vector
                 if (end != iterator.stringEnd())
                 {
                     std::string thisString(iterator.stringStart(), iterator.stringEnd() - iterator.stringStart());
-                    fprintf(stderr, "Error parsing number: %s at %i\n", thisString.c_str(), vectorInstance->GetLineNum());
+                    builder.parsingError("Error parsing number: %s", thisString.c_str(), vectorInstance->GetLineNum());
                     return false;
                 }
                 if (value < 1)
                 {
-                    fprintf(stderr, "Index must be greater than 1 (value %li) at %i\n", value, vectorInstance->GetLineNum());
+                    char buffer[40];
+                    snprintf(buffer, sizeof(buffer), "%li", value);
+                    builder.parsingError("Index must be greater than 1", buffer, vectorInstance->GetLineNum());
                     return false;
                 }
                 // we use indexes starting at zero internally.
@@ -287,7 +289,7 @@ bool readVectorInstances(std::unordered_map<std::string, SupportVector> & vector
             
             if (entries == nullptr)
             {
-                fprintf(stderr, "SparseArray without REAL-Entries at %i\n", sparseArray->GetLineNum());
+                builder.parsingError("SparseArray without REAL-Entries", sparseArray->GetLineNum());
                 return false;
             }
             std::vector<size_t>::const_iterator indexIterator = indexVector.begin();
@@ -299,7 +301,7 @@ bool readVectorInstances(std::unordered_map<std::string, SupportVector> & vector
                 double value = strtod(thisString.c_str(), &end);
                 if (*end != '\0')
                 {
-                    fprintf(stderr, "Error parsing number: %s at %i\n", thisString.c_str(), vectorInstance->GetLineNum());
+                    builder.parsingError("Error parsing number: %s", thisString.c_str(), vectorInstance->GetLineNum());
                     return false;
                 }
                 if (value != 0)
@@ -310,19 +312,19 @@ bool readVectorInstances(std::unordered_map<std::string, SupportVector> & vector
             
             if (indexIterator != indexVector.end())
             {
-                fprintf(stderr, "Not enough values for space array at %i\n", sparseArray->GetLineNum());
+                builder.parsingError("Not enough values for space array", sparseArray->GetLineNum());
                 return false;
             }
             
             if (iterator.isValid())
             {
-                fprintf(stderr, "Not enough values for space array at %i\n", sparseArray->GetLineNum());
+                builder.parsingError("Not enough values for space array", sparseArray->GetLineNum());
                 return false;
             }
         }
         else
         {
-            fprintf(stderr, "No array found for VectorInstance at %i\n", vectorInstance->GetLineNum());
+            builder.parsingError("No array found for VectorInstance", vectorInstance->GetLineNum());
             return false;
         }
     }
@@ -336,14 +338,14 @@ bool convertSVM(AstBuilder & builder, const SVMKernel & kernel, const std::vecto
     const tinyxml2::XMLElement * supportVectors = supportVectorMachine->FirstChildElement("SupportVectors");
     if (supportVectors == nullptr)
     {
-        fprintf(stderr, "No SupportVectors at %i\n", supportVectorMachine->GetLineNum());
+        builder.parsingError("No SupportVectors", supportVectorMachine->GetLineNum());
         return false;
     }
     
     const tinyxml2::XMLElement * coefficients = supportVectorMachine->FirstChildElement("Coefficients");
     if (coefficients == nullptr)
     {
-        fprintf(stderr, "No Coefficients at %i\n", supportVectorMachine->GetLineNum());
+        builder.parsingError("No Coefficients", supportVectorMachine->GetLineNum());
         return false;
     }
     
@@ -354,7 +356,7 @@ bool convertSVM(AstBuilder & builder, const SVMKernel & kernel, const std::vecto
         double value = strtod(absoluteValue, &endPtr);
         if (*endPtr != '\0')
         {
-            fprintf(stderr, "invalid absoluteValue at %i\n", coefficients->GetLineNum());
+            builder.parsingError("invalid absoluteValue", coefficients->GetLineNum());
             return false;
         }
         
@@ -373,21 +375,21 @@ bool convertSVM(AstBuilder & builder, const SVMKernel & kernel, const std::vecto
         const char * vectorId = nextSupportVector->Attribute("vectorId");
         if (vectorId == nullptr)
         {
-            fprintf(stderr, "Absent vectorId at %i\n", nextSupportVector->GetLineNum());
+            builder.parsingError("Absent vectorId", nextSupportVector->GetLineNum());
             return false;
         }
         
         auto found = vectors.find(vectorId);
         if (found == vectors.end())
         {
-            fprintf(stderr, "Unknown vectorId \"%s\" at %i\n", vectorId, nextSupportVector->GetLineNum());
+            builder.parsingError("Unknown vectorId \"%s\"", vectorId, nextSupportVector->GetLineNum());
             return false;
         }
         
         const char * coefficient = nextCoefficient->Attribute("value");
         if (coefficient == nullptr)
         {
-            fprintf(stderr, "Absent value for coefficient at %i\n", nextCoefficient->GetLineNum());
+            builder.parsingError("Absent value for coefficient", nextCoefficient->GetLineNum());
             return false;
         }
         
@@ -395,7 +397,7 @@ bool convertSVM(AstBuilder & builder, const SVMKernel & kernel, const std::vecto
         double coefficientAsDouble = strtod(coefficient, &endp);
         if (*endp != '\0')
         {
-            fprintf(stderr, "Invalid value %s for coefficient at %i\n", coefficient, nextCoefficient->GetLineNum());
+            builder.parsingError("Invalid value %s for coefficient", coefficient, nextCoefficient->GetLineNum());
             return false;
         }
         
@@ -421,13 +423,13 @@ bool convertSVM(AstBuilder & builder, const SVMKernel & kernel, const std::vecto
     
     if (nextCoefficient != nullptr)
     {
-        fprintf(stderr, "Too many coefficients (or not enough support vectors) at %i\n", supportVectorMachine->GetLineNum());
+        builder.parsingError("Too many coefficients (or not enough support vectors)", supportVectorMachine->GetLineNum());
         return false;
     }
     
     if (nextSupportVector != nullptr)
     {
-        fprintf(stderr, "Too many support vectors (or not enough coefficients) at %i\n", supportVectorMachine->GetLineNum());
+        builder.parsingError("Too many support vectors (or not enough coefficients)", supportVectorMachine->GetLineNum());
         return false;
     }
     
@@ -443,7 +445,7 @@ bool convertThresholdSVM(AstBuilder & builder, const SVMKernel & kernel, const s
     double threshold = defaultThreshold;
     if (supportVectorMachine->QueryDoubleAttribute("threshold", &threshold) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
     {
-        fprintf(stderr, "invalid threshold value at %i\n", supportVectorMachine->GetLineNum());
+        builder.parsingError("invalid threshold value", supportVectorMachine->GetLineNum());
         return false;
     }
     
@@ -482,7 +484,7 @@ bool convertOneAgainstOne(AstBuilder & builder, const SVMKernel & kernel, const 
         const char * alternateTargetCategory = supportVectorMachine->Attribute("alternateTargetCategory");
         if (targetCategory == nullptr || alternateTargetCategory == nullptr)
         {
-            fprintf(stderr, "SupportVectorMachine requires targetCategory and alternateTargetCategory at %i\n", supportVectorMachine->GetLineNum());
+            builder.parsingError("SupportVectorMachine requires targetCategory and alternateTargetCategory", supportVectorMachine->GetLineNum());
             return false;
         }
         
@@ -541,7 +543,7 @@ bool convertOneAgainstAll(AstBuilder & builder, const SVMKernel & kernel, const 
         const char * targetCategory = supportVectorMachine->Attribute("targetCategory");
         if (targetCategory == nullptr)
         {
-            fprintf(stderr, "SupportVectorMachine requires targetCategory at %i\n", supportVectorMachine->GetLineNum());
+            builder.parsingError("SupportVectorMachine requires targetCategory", supportVectorMachine->GetLineNum());
             return false;
         }
         
@@ -572,21 +574,21 @@ bool parseWithKernel(AstBuilder & builder, const tinyxml2::XMLElement * node, co
     double defaultThreshold = 0;
     if (node->QueryDoubleAttribute("threshold", &defaultThreshold) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
     {
-        fprintf(stderr, "invalid threshold value at %i\n", node->GetLineNum());
+        builder.parsingError("invalid threshold value", node->GetLineNum());
         return false;
     }
     
     const tinyxml2::XMLElement * vectorDictionary = node->FirstChildElement("VectorDictionary");
     if (vectorDictionary == nullptr)
     {
-        fprintf(stderr, "No VectorDictionary at %i\n", node->GetLineNum());
+        builder.parsingError("No VectorDictionary", node->GetLineNum());
         return false;
     }
     
     const tinyxml2::XMLElement * vectorFields = vectorDictionary->FirstChildElement("VectorFields");
     if (vectorFields == nullptr)
     {
-        fprintf(stderr, "No VectorDictionary at %i\n", vectorDictionary->GetLineNum());
+        builder.parsingError("No VectorDictionary", vectorDictionary->GetLineNum());
         return false;
     }
 
@@ -606,7 +608,7 @@ bool parseWithKernel(AstBuilder & builder, const tinyxml2::XMLElement * node, co
             double coefficient;
             if (childNode->QueryDoubleAttribute("coefficient", &coefficient))
             {
-                fprintf(stderr, "coefficient required at %i\n", childNode->GetLineNum());
+                builder.parsingError("coefficient required", childNode->GetLineNum());
                 return false;
             }
             
@@ -623,7 +625,7 @@ bool parseWithKernel(AstBuilder & builder, const tinyxml2::XMLElement * node, co
     builder.popNodesIntoVector(fields, nFields);
     
     std::unordered_map<std::string, SupportVector> vectors;
-    if (!readVectorInstances(vectors, vectorDictionary))
+    if (!readVectorInstances(builder, vectors, vectorDictionary))
     {
         return false;
     }
@@ -631,7 +633,7 @@ bool parseWithKernel(AstBuilder & builder, const tinyxml2::XMLElement * node, co
     const tinyxml2::XMLElement * firstSupportVectorMachine = node->FirstChildElement("SupportVectorMachine");
     if (firstSupportVectorMachine == nullptr)
     {
-        fprintf(stderr, "No SupportVectorMachine at %i\n", node->GetLineNum());
+        builder.parsingError("No SupportVectorMachine", node->GetLineNum());
         return false;
     }
     
@@ -649,7 +651,7 @@ bool parseWithKernel(AstBuilder & builder, const tinyxml2::XMLElement * node, co
         bool maxWins = false;
         if (node->QueryBoolAttribute("maxWins", &maxWins) == tinyxml2::XML_WRONG_ATTRIBUTE_TYPE)
         {
-            fprintf(stderr, "Invalid value for maxWins at %i\n", node->GetLineNum());
+            builder.parsingError("Invalid value for maxWins", node->GetLineNum());
             return false;
         }
         
@@ -669,7 +671,7 @@ bool parseWithKernel(AstBuilder & builder, const tinyxml2::XMLElement * node, co
                 }
                 else if (strcmp(classificationMethod, "OneAgainstAll") != 0)
                 {
-                    fprintf(stderr, "Invalid value %s for classificationMethod at %i\n", classificationMethod, node->GetLineNum());
+                    builder.parsingError("Invalid value %s for classificationMethod", classificationMethod, node->GetLineNum());
                     return false;
                 }
             }
@@ -692,7 +694,7 @@ bool SupportVectorMachine::parse(AstBuilder & builder, const tinyxml2::XMLElemen
     else if (const tinyxml2::XMLElement * polynomialKernel = node->FirstChildElement("PolynomialKernelType"))
     {
         PolynomialKernel kernel;
-        if (!kernel.read(polynomialKernel))
+        if (!kernel.read(builder, polynomialKernel))
         {
             return false;
         }
@@ -701,7 +703,7 @@ bool SupportVectorMachine::parse(AstBuilder & builder, const tinyxml2::XMLElemen
     else if (const tinyxml2::XMLElement * radialBasisKernel = node->FirstChildElement("RadialBasisKernelType"))
     {
         RadialBasisKernel kernel;
-        if (!kernel.read(radialBasisKernel))
+        if (!kernel.read(builder, radialBasisKernel))
         {
             return false;
         }
@@ -710,7 +712,7 @@ bool SupportVectorMachine::parse(AstBuilder & builder, const tinyxml2::XMLElemen
     else if (const tinyxml2::XMLElement * sigmoidKernel = node->FirstChildElement("SigmoidKernelType"))
     {
         SigmoidKernel kernel;
-        if (!kernel.read(sigmoidKernel))
+        if (!kernel.read(builder, sigmoidKernel))
         {
             return false;
         }
@@ -718,7 +720,7 @@ bool SupportVectorMachine::parse(AstBuilder & builder, const tinyxml2::XMLElemen
     }
     else
     {
-        fprintf(stderr, "No recognised kernel specified at %i\n", node->GetLineNum());
+        builder.parsingError("No recognised kernel specified", node->GetLineNum());
         return false;
     }
 }

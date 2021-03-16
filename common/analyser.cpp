@@ -113,7 +113,7 @@ namespace
             // We can't figure out what this is in this context.
             if (node.children.back().function().functionType != Function::LAMBDA)
             {
-                return true;
+                return process(Function::FunctionTypeBase(), node, context);
             }
             else
             {

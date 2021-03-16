@@ -56,6 +56,17 @@ bool bindInputColumns(std::vector<PMMLExporter::ModelOutput> & inputColumns, con
     return true;
 }
 
+void populateIOWithDictionary(std::vector<PMMLExporter::ModelOutput> & io, const PMMLDocument::DataDictionary & dictionary)
+{
+    // If no special inputs/outputs are specified, try to get all inputs/outputs.
+    if (io.empty())
+    {
+        for (const auto & column : dictionary)
+        {
+            io.emplace_back(column.first, column.first);
+        }
+    }
+}
 
 static constexpr Function::Definition ReturnStatement =
 {
@@ -65,8 +76,9 @@ static constexpr Function::Definition ReturnStatement =
     LuaOutputter::PRECEDENCE_TOP, Function::NEVER_MISSING
 };
 
+}
 
-void addFunctionHeader(LuaOutputter & output, const std::vector<PMMLExporter::ModelOutput> & inputColumns)
+void PMMLExporter::addFunctionHeader(LuaOutputter & output, const std::vector<PMMLExporter::ModelOutput> & inputColumns)
 {
     output.function("func");
     bool first = true;
@@ -95,12 +107,41 @@ void addFunctionHeader(LuaOutputter & output, const std::vector<PMMLExporter::Mo
     output.finishedArguments();
 }
 
-void addMultiReturnStatement(AstBuilder & builder, std::vector<PMMLExporter::ModelOutput> & customOutputs)
+static void addOutput(AstBuilder & builder, const PMMLExporter::ModelOutput & customOutput)
+{
+    builder.field(customOutput.field);
+
+    if (customOutput.factor != 1)
+    {
+        builder.constant(customOutput.factor);
+        builder.function(Function::functionTable.names.times, 2);
+    }
+
+    if (customOutput.coefficient != 0)
+    {
+        builder.constant(customOutput.coefficient);
+        builder.function(Function::functionTable.names.sum, 2);
+    }
+
+    if (customOutput.decimalPoints >= 0)
+    {
+        // Convert it to a string with the right precision
+        char formatString[10];
+        snprintf(formatString, sizeof(formatString), "%%.%if", customOutput.decimalPoints);
+        builder.constant(formatString, PMMLDocument::TYPE_STRING);
+        builder.swapNodes(-1, -2);
+        builder.function(Function::functionTable.names.formatNumber, 2);
+        // Convert it back to a number.
+        builder.topNode().coercedType = PMMLDocument::TYPE_NUMBER;
+    }
+}
+
+void PMMLExporter::addMultiReturnStatement(AstBuilder & builder, const std::vector<PMMLExporter::ModelOutput> & customOutputs)
 {
     size_t goodOutputs = std::count_if(customOutputs.begin(), customOutputs.end(), [&builder](const PMMLExporter::ModelOutput & output){
         if (output.field)
         {
-            builder.field(output.field);
+            addOutput(builder, output);
             return true;
         }
         return false;
@@ -108,7 +149,7 @@ void addMultiReturnStatement(AstBuilder & builder, std::vector<PMMLExporter::Mod
     builder.function(ReturnStatement, goodOutputs);
 }
 
-void addTableReturnStatement(AstBuilder & builder, std::vector<PMMLExporter::ModelOutput> & customOutputs)
+void PMMLExporter::addTableReturnStatement(AstBuilder & builder, const std::vector<PMMLExporter::ModelOutput> & customOutputs)
 {
     auto var = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "output");
     builder.declare(var, AstBuilder::NO_INITIAL_VALUE);
@@ -116,7 +157,7 @@ void addTableReturnStatement(AstBuilder & builder, std::vector<PMMLExporter::Mod
     {
         if (output.field)
         {
-            builder.field(output.field);
+            addOutput(builder, output);
             builder.constant(output.variableOrAttribute, PMMLDocument::TYPE_STRING);
             builder.assignIndirect(var, 1);
         }
@@ -125,19 +166,6 @@ void addTableReturnStatement(AstBuilder & builder, std::vector<PMMLExporter::Mod
     builder.field(var);
     
     builder.function(ReturnStatement, 1);
-}
-
-void populateIOWithDictionary(std::vector<PMMLExporter::ModelOutput> & io, const PMMLDocument::DataDictionary & dictionary)
-{
-    // If no special inputs/outputs are specified, try to get all inputs/outputs.
-    if (io.empty())
-    {
-        for (const auto & column : dictionary)
-        {
-            io.emplace_back(column.first, column.first);
-        }
-    }
-}
 }
 
 bool PMMLExporter::createScript(const char * sourceFile, LuaOutputter & luaOutputter,

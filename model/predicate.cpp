@@ -67,7 +67,7 @@ namespace
         const char * operatorAttr = node->Attribute("operator");
         if (field == nullptr || operatorAttr == nullptr)
         {
-            fprintf(stderr, "Missing parameter in SimplePredicate at %i\n", node->GetLineNum());
+            builder.parsingError("Missing parameter in SimplePredicate", node->GetLineNum());
             return false;
         }
 
@@ -75,14 +75,14 @@ namespace
         // According to the standard, only a subset of functions are available here. Make sure that this one is allowed.
         if (operatorOut == nullptr || (operatorOut->functionType != Function::COMPARISON && operatorOut->functionType != Function::IS_MISSING))
         {
-            fprintf(stderr, "Unknown comparison %s in SimplePredicate at %i\n", operatorAttr, node->GetLineNum());
+            builder.parsingError("Unknown comparison in SimplePredicate", operatorAttr, node->GetLineNum());
             return false;
         }
 
         const PMMLDocument::MiningField * fieldDefinition = builder.context().getMiningField(field);
         if (fieldDefinition == nullptr)
         {
-            fprintf(stderr, "Unknown field %s referenced in SimplePredicate at %i\n", field, node->GetLineNum());
+            builder.parsingError("Unknown fieldreferenced in SimplePredicate", field, node->GetLineNum());
             return false;
         }
         
@@ -93,7 +93,7 @@ namespace
             const char * value = node->Attribute("value");
             if (value == nullptr)
             {
-                fprintf(stderr, "Missing parameter in SimplePredicate at %i\n", node->GetLineNum());
+                builder.parsingError("Missing parameter in SimplePredicate", node->GetLineNum());
                 return false;
             }
             builder.constant(value, builder.topNode().coercedType);
@@ -112,13 +112,13 @@ namespace
         const char * type = array->Attribute("type");
         if (type == nullptr)
         {
-            fprintf(stderr, "Missing type in Array at %i\n", array->GetLineNum());
+            builder.parsingError("Missing type in Array", array->GetLineNum());
             return false;
         }
         PMMLDocument::FieldType fieldType = PMMLDocument::dataTypeFromString(type);
         if (fieldType == PMMLDocument::TYPE_INVALID)
         {
-            fprintf(stderr, "Unknown data type %s in Array at %i\n", type, array->GetLineNum());
+            builder.parsingError("Unknown data type in Array", type, array->GetLineNum());
             return false;
         }
         
@@ -132,7 +132,7 @@ namespace
         }
         if (iterator.hasUnterminatedQuote())
         {
-            fprintf(stderr, "Unterminated quote in array at %i\n", array->GetLineNum());
+            builder.parsingError("Unterminated quote in array", array->GetLineNum());
             return false;
         }
         return true;
@@ -145,14 +145,14 @@ namespace
         const tinyxml2::XMLElement * array = node->FirstChildElement("Array");
         if (field == nullptr || booleanOperator == nullptr)
         {
-            fprintf(stderr, "Missing parameter in SimpleSetPredicate at %i\n", node->GetLineNum());
+            builder.parsingError("Missing parameter in SimpleSetPredicate", node->GetLineNum());
             return false;
         }
         
         const PMMLDocument::MiningField * fieldDefinition = builder.context().getMiningField(field);
         if (fieldDefinition == nullptr)
         {
-            fprintf(stderr, "Unknown field %s referenced in SimpleSetPredicate at %i\n", field, node->GetLineNum());
+            builder.parsingError("Unknown field referenced in SimpleSetPredicate", field, node->GetLineNum());
             return false;
         }
         
@@ -161,13 +161,13 @@ namespace
         const Function::Definition * operatorOut = Function::findBuiltInFunctionDefinition(booleanOperator);
         if (operatorOut == nullptr || operatorOut->functionType != Function::IS_IN)
         {
-            fprintf(stderr, "Unknown booleanOperator: %s at %i\n", booleanOperator, node->GetLineNum());
+            builder.parsingError("Unknown booleanOperator", booleanOperator, node->GetLineNum());
             return false;
         }
 
         if (array == nullptr)
         {
-            fprintf(stderr, "Missing array in SimpleSetPredicate at %i\n", node->GetLineNum());
+            builder.parsingError("Missing array in SimpleSetPredicate", node->GetLineNum());
             return false;
         }
 
@@ -186,7 +186,7 @@ namespace
         const char * booleanOperator = node->Attribute("booleanOperator");
         if (booleanOperator == nullptr)
         {
-            fprintf(stderr, "CompoundPredicate without booleanOperator at %i\n", node->GetLineNum());
+            builder.parsingError("CompoundPredicate without booleanOperator", node->GetLineNum());
             return false;
         }
         const Function::Definition * operatorOut = Function::findBuiltInFunctionDefinition(booleanOperator);
@@ -203,7 +203,7 @@ namespace
             }
             else
             {
-                fprintf(stderr, "Unknown booleanOperator: %s at %i\n", booleanOperator, node->GetLineNum());
+                builder.parsingError("Unknown booleanOperator", booleanOperator, node->GetLineNum());
                 return false;
             }
         }
@@ -220,7 +220,7 @@ namespace
         }
         if (count == 0)
         {
-            fprintf(stderr, "Empty CompoundPredicate at %i\n", node->GetLineNum());
+            builder.parsingError("Empty CompoundPredicate", node->GetLineNum());
             return false;
         }
         
@@ -250,7 +250,7 @@ bool Predicate::parse(AstBuilder & builder, const tinyxml2::XMLElement * node)
             builder.constant("false", PMMLDocument::TYPE_BOOL);
             return true;
         case PREDICATE_INVALID:
-            fprintf(stderr, "Unknown predicate %s at %i\n", name, node->GetLineNum());
+            builder.parsingError("Unknown predicate", name, node->GetLineNum());
     }
 
     return false;

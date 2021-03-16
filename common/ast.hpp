@@ -163,6 +163,9 @@ public:
     bool coerceToSameType(size_t nEntries);
     bool coerceToSpecificTypes(size_t nEntries, const PMMLDocument::FieldType * types);
     size_t stackSize() const { return m_stack.size(); }
+
+    void parsingError(const char * error_message, int line_num) const;
+    void parsingError(const char * error_message, const char * error_param, int line_num) const;
     
     static const Function::Definition CONSTANT_DEF;
     static const Function::Definition FIELD_DEF;
@@ -174,6 +177,15 @@ public:
     static const Function::Definition LAMBDA_DEF;
     static const Function::Definition NIL_DEF;
 
+    class CustomErrorHook
+    {
+        public:
+        virtual ~CustomErrorHook() = default;
+        virtual void error(const char * msg, int lineNo) const = 0;
+        virtual void errorWithArg(const char * msg, const char * arg, int lineNo) const = 0;
+    };
+
+    std::shared_ptr<const CustomErrorHook> m_customErrorHook;
 private:
     PMMLDocument::ConversionContext m_context;
     std::vector<AstNode> m_stack;
