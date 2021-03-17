@@ -44,15 +44,6 @@ add_library(libpamplemousse STATIC
 target_link_libraries(libpamplemousse PUBLIC tinyxml2)
 target_compile_options(libpamplemousse PRIVATE -Wextra -Werror)
 
-add_executable(pamplemousse
-    app/pamplemousse.cpp
-    app/testrun.cpp app/testrun.hpp
-    app/modeloutput.cpp app/modeloutput.hpp
-    app/basicexport.cpp app/basicexport.hpp)
-target_link_libraries(pamplemousse libpamplemousse)
-target_link_libraries(pamplemousse ${LUA_LIBRARIES})
-target_compile_options(pamplemousse PRIVATE -Wextra -Werror)
-
 cuti_creates_test_target(libpamplemousse_test libpamplemousse
     unit_tests/testutils.cpp
     unit_tests/testutils.hpp
@@ -67,18 +58,17 @@ cuti_creates_test_target(libpamplemousse_test libpamplemousse
     unit_tests/test_tree.cpp)
 target_link_libraries(libpamplemousse_test PRIVATE ${LUA_LIBRARIES})
 
-
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
 if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
 find_package(Qt5 COMPONENTS Widgets)
 if (Qt5_FOUND)
-    add_executable(pamplemousse_ui
+    set(CMAKE_AUTOMOC ON)
+    set(CMAKE_AUTORCC ON)
+    set(CMAKE_AUTOUIC ON)
+
+    add_executable(pamplemousse
         app/pamplemousse.cpp
         app/pamplemousse_ui.cpp app/pamplemousse_ui.h
         app/outputtable.cpp app/outputtable.h
@@ -88,10 +78,17 @@ if (Qt5_FOUND)
         app/basicexport.cpp app/basicexport.hpp
         app/outputslist.cpp app/outputslist.h
         app/resources.qrc)
-    target_link_libraries(pamplemousse_ui Qt5::Widgets)
-    target_link_libraries(pamplemousse_ui libpamplemousse)
-    target_link_libraries(pamplemousse_ui ${LUA_LIBRARIES})
-    target_include_directories(pamplemousse_ui PRIVATE app)
-    target_compile_options(pamplemousse_ui PRIVATE -Wextra -Werror)
-    target_compile_definitions(pamplemousse_ui PRIVATE INCLUDE_UI)
+    target_link_libraries(pamplemousse Qt5::Widgets)
+    target_include_directories(pamplemousse PRIVATE app)
+    target_compile_definitions(pamplemousse PRIVATE INCLUDE_UI)
+else()
+    add_executable(pamplemousse
+        app/pamplemousse.cpp
+        app/testrun.cpp app/testrun.hpp
+        app/modeloutput.cpp app/modeloutput.hpp
+        app/basicexport.cpp app/basicexport.hpp)
 endif()
+        
+target_link_libraries(pamplemousse libpamplemousse)
+target_link_libraries(pamplemousse ${LUA_LIBRARIES})
+target_compile_options(pamplemousse PRIVATE -Wextra -Werror)

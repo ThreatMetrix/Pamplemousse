@@ -149,30 +149,49 @@ void PamplemousseUI::on_actionOpen_triggered()
 
     newBuilder.m_customErrorHook.reset();
 
-    clear();
+    importLoadedModel(std::move(newBuilder));
+}
 
-    builder = newBuilder;
+void PamplemousseUI::importLoadedModel(AstBuilder && newBuilder)
+{
+    clear();
+    builder = std::move(newBuilder);
     somethingLoaded = true;
 
-    for (const auto & column : newBuilder.context().getInputs())
+    for (const auto & column : builder.context().getInputs())
     {
         inputs.addOutput(column.first, false);
     }
 
-    for (const auto & column : newBuilder.context().getOutputs())
+    for (const auto & column : builder.context().getOutputs())
     {
         model_outputs->addItem(QString::fromStdString(column.first));
     }
 
-    if (!newBuilder.context().getNeurons().empty())
+    if (!builder.context().getNeurons().empty())
     {
         neurons->setDisabled(false);
     }
 
-    for (const auto & column : newBuilder.context().getNeurons())
+    for (const auto & column : builder.context().getNeurons())
     {
         neurons->addItem(QString::fromStdString(column.first));
     }
+}
+
+void PamplemousseUI::setInsensitive()
+{
+    actionCase_Insensitive->toggled(true);
+}
+
+void PamplemousseUI::setTableIn()
+{
+    inputMode->setCurrentIndex(1);
+}
+
+void PamplemousseUI::setTableOut()
+{
+    outputMode->setCurrentIndex(1);
 }
 
 void PamplemousseUI::on_model_outputs_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
@@ -305,3 +324,5 @@ void PamplemousseUI::on_neurons_currentIndexChanged(int index)
         outputs.addOutput(neurons->itemText(index).toStdString(), true);
     }
 }
+
+#include "moc_pamplemousse_ui.cpp"

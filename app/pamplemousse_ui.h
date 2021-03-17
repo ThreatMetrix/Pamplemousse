@@ -15,6 +15,14 @@ class PamplemousseUI : public QMainWindow, private Ui_PamplemousseUI
 public:
     explicit PamplemousseUI(QWidget *parent = nullptr);
     void clear();
+    void importLoadedModel(AstBuilder && newBuilder);
+    void importOutputs(std::vector<PMMLExporter::ModelOutput> && outputList)
+    {
+        outputs.importOutputs(std::move(outputList));
+    }
+    void setInsensitive();
+    void setTableIn();
+    void setTableOut();
 private slots:
     void on_addButton_clicked();
     void on_removeButton_clicked();
@@ -26,7 +34,5 @@ private slots:
     void on_neurons_currentIndexChanged(int index);
 };
 
-
-#include "pamplemousse_ui.moc"
 
 #endif // PAMPLEMOUSSE_UI_H

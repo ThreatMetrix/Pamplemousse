@@ -155,6 +155,50 @@ int main(int argc, char *argv[])
     {
         QApplication app(argc, argv);
         PamplemousseUI mainWindow;
+
+        if (optind < argc)
+        {
+            const char * sourceFile = argv[optind];
+            tinyxml2::XMLDocument doc(sourceFile);
+            if (doc.LoadFile(sourceFile) != tinyxml2::XML_SUCCESS)
+            {
+                fprintf(stderr, "Failed to load file \"%s\": %s\n", sourceFile, doc.ErrorStr());
+                return -1;
+            }
+
+            AstBuilder builder;
+            if (!PMMLDocument::convertPMML( builder, doc.RootElement() ))
+            {
+                return -1;
+            }
+
+            for (auto & output : outputs)
+            {
+                if (!output.bindToModel(builder.context()))
+                {
+                    return -1;
+                }
+            }
+
+            mainWindow.importLoadedModel(std::move(builder));
+            mainWindow.importOutputs(std::move(outputs));
+        }
+
+        if (insensitive)
+        {
+            mainWindow.setInsensitive();
+        }
+
+        if (inputFormat == int(PMMLExporter::Format::AS_TABLE))
+        {
+            mainWindow.setTableIn();
+        }
+
+        if (outputFormat == int(PMMLExporter::Format::AS_TABLE))
+        {
+            mainWindow.setTableOut();
+        }
+
         mainWindow.show();
 
         return app.exec();

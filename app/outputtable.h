@@ -37,6 +37,10 @@ public:
 
     bool addOutput(const std::string & name, bool isNeuron);
     void clear();
+    void importOutputs(std::vector<PMMLExporter::ModelOutput> && outputs)
+    {
+        m_modelOutputs = std::move(outputs);
+    }
 
     const std::vector<PMMLExporter::ModelOutput> & modelOutputs() const
     {
