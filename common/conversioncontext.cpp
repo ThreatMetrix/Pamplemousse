@@ -65,9 +65,9 @@ namespace PMMLDocument
     void ConversionContext::declareCustomFunction(std::string && pmmlFunction, ConstFieldDescriptionPtr definition, FieldType type, const Function::Definition * ld, std::vector<PMMLDocument::FieldType> && parameterList)
     {
         // constructor to CustomDefinition requires a c string and a type (more than one argument), so we need to use the piecewise_construct to implace it here.
-        auto inserted = m_customFunctionDefinitions.emplace(std::piecewise_construct,
-                                                            std::forward_as_tuple(pmmlFunction),
-                                                            std::forward_as_tuple(definition, type, ld, std::move(parameterList)));
+        m_customFunctionDefinitions.emplace(std::piecewise_construct,
+                                            std::forward_as_tuple(pmmlFunction),
+                                            std::forward_as_tuple(definition, type, ld, std::move(parameterList)));
     }
 
     const Function::CustomDefinition * ConversionContext::findCustomFunction(const std::string & pmmlFunction) const

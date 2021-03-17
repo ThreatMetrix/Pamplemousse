@@ -7,8 +7,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
 
 find_package( Lua REQUIRED )
-if (NOT DEFINED TinyXML2_DIR)
-  find_package( TinyXML2 REQUIRED )
+if (NOT DEFINED tinyxml2_DIR)
+  find_package( tinyxml2 REQUIRED )
 endif()
 
 include_directories(${LUA_INCLUDE_DIR} /usr/local/include/ . common)
@@ -42,7 +42,13 @@ add_library(libpamplemousse STATIC
     luaconverter/optimiser.cpp luaconverter/optimiser.hpp)
 
 target_link_libraries(libpamplemousse PUBLIC tinyxml2)
-target_compile_options(libpamplemousse PRIVATE -Wextra -Werror)
+
+if(MSVC)
+  target_compile_options(libpamplemousse PRIVATE /W4 /WX)
+else()
+  target_compile_options(libpamplemousse PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
+
 
 cuti_creates_test_target(libpamplemousse_test libpamplemousse
     unit_tests/testutils.cpp
@@ -91,4 +97,11 @@ endif()
         
 target_link_libraries(pamplemousse libpamplemousse)
 target_link_libraries(pamplemousse ${LUA_LIBRARIES})
-target_compile_options(pamplemousse PRIVATE -Wextra -Werror)
+
+if(MSVC)
+  target_compile_options(libpamplemousse PRIVATE /W4 /WX)
+  target_compile_options(pamplemousse PRIVATE /W4 /WX)
+else()
+  target_compile_options(libpamplemousse PRIVATE -Wall -Wextra -pedantic -Werror)
+  target_compile_options(pamplemousse PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
