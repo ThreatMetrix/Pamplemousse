@@ -51,4 +51,4 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
-	  
+
