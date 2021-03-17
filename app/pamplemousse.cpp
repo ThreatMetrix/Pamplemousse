@@ -59,6 +59,8 @@ static void printUsage(const char * programName)
     std::cout << "E.g. \"--prediction probability=predicted_value*100+3\" is acceptable, but \"--prediction probability=100*predicted_value+3\" is not" << std::endl;
 }
 
+static int runUI(int argc, char *argv[], bool insensitive, std::vector<PMMLExporter::ModelOutput> && outputs, int inputFormat, int outputFormat);
+
 int main(int argc, char *argv[])
 {
     int isTest = 0;
@@ -153,55 +155,7 @@ int main(int argc, char *argv[])
 #ifdef INCLUDE_UI
     if (isTest == 0 && isConvert == 0)
     {
-        QApplication app(argc, argv);
-        PamplemousseUI mainWindow;
-
-        if (optind < argc)
-        {
-            const char * sourceFile = argv[optind];
-            tinyxml2::XMLDocument doc(sourceFile);
-            if (doc.LoadFile(sourceFile) != tinyxml2::XML_SUCCESS)
-            {
-                fprintf(stderr, "Failed to load file \"%s\": %s\n", sourceFile, doc.ErrorStr());
-                return -1;
-            }
-
-            AstBuilder builder;
-            if (!PMMLDocument::convertPMML( builder, doc.RootElement() ))
-            {
-                return -1;
-            }
-
-            for (auto & output : outputs)
-            {
-                if (!output.bindToModel(builder.context()))
-                {
-                    return -1;
-                }
-            }
-
-            mainWindow.importLoadedModel(std::move(builder));
-            mainWindow.importOutputs(std::move(outputs));
-        }
-
-        if (insensitive)
-        {
-            mainWindow.setInsensitive();
-        }
-
-        if (inputFormat == int(PMMLExporter::Format::AS_TABLE))
-        {
-            mainWindow.setTableIn();
-        }
-
-        if (outputFormat == int(PMMLExporter::Format::AS_TABLE))
-        {
-            mainWindow.setTableOut();
-        }
-
-        mainWindow.show();
-
-        return app.exec();
+        return runUI(argc, argv, insensitive, std::move(outputs), inputFormat, outputFormat);
     }
 #endif
 
@@ -260,3 +214,59 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+
+#ifdef INCLUDE_UI
+static int runUI(int argc, char *argv[], bool insensitive, std::vector<PMMLExporter::ModelOutput> && outputs, int inputFormat, int outputFormat)
+{
+    QApplication app(argc, argv);
+    PamplemousseUI mainWindow;
+
+    if (optind < argc)
+    {
+        const char * sourceFile = argv[optind];
+        tinyxml2::XMLDocument doc(sourceFile);
+        if (doc.LoadFile(sourceFile) != tinyxml2::XML_SUCCESS)
+        {
+            fprintf(stderr, "Failed to load file \"%s\": %s\n", sourceFile, doc.ErrorStr());
+            return -1;
+        }
+
+        AstBuilder builder;
+        if (!PMMLDocument::convertPMML( builder, doc.RootElement() ))
+        {
+            return -1;
+        }
+
+        for (auto & output : outputs)
+        {
+            if (!output.bindToModel(builder.context()))
+            {
+                return -1;
+            }
+        }
+
+        mainWindow.importLoadedModel(std::move(builder));
+        mainWindow.importOutputs(std::move(outputs));
+    }
+
+    if (insensitive)
+    {
+        mainWindow.setInsensitive();
+    }
+
+    if (inputFormat == int(PMMLExporter::Format::AS_TABLE))
+    {
+        mainWindow.setTableIn();
+    }
+
+    if (outputFormat == int(PMMLExporter::Format::AS_TABLE))
+    {
+        mainWindow.setTableOut();
+    }
+
+    mainWindow.show();
+
+    return app.exec();
+}
+#endif
