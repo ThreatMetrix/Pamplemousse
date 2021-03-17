@@ -12,6 +12,8 @@ jobs:
     env:
       buildDir: '${{ github.workspace }}/build'
     steps:
+      - uses: actions/checkout@v2
+      
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
