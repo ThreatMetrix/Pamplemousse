@@ -157,8 +157,9 @@ namespace Function
                 return dispatcher.process(ReturnStatement(), args...);
                 
             case UNSUPPORTED:
-                return ReturnType();
+                break;
         }
+        return ReturnType();
     }
 }
 

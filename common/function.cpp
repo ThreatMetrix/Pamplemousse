@@ -21,7 +21,7 @@
 #include "model/transformation.hpp"
 #include <algorithm>
 #include <cstring>
-#include <cmath>
+#include <math.h>
 
 namespace Function
 {
