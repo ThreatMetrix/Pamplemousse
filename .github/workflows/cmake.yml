@@ -48,8 +48,8 @@ jobs:
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
       - name: Install CPPUnit (Mac)
         if: startsWith(matrix.os, 'macos')
-        run: brew install cppunit 
-      - name: Install CPPUnit
+        run: brew install cppunit
+      - name: Install CPPUnit (Other)
         if: !startsWith(matrix.os, 'macos')
         run: '${{ github.workspace }}/vcpkg/vcpkg install cppunit' 
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
