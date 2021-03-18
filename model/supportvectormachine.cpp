@@ -686,7 +686,7 @@ bool parseWithKernel(AstBuilder & builder, const tinyxml2::XMLElement * node, co
 bool SupportVectorMachine::parse(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ModelConfig & config)
 {
     ASSERT_AST_BUILDER_ONE_NEW_NODE(builder);
-    if (const tinyxml2::XMLElement * linearKernel = node->FirstChildElement("LinearKernelType"))
+    if (node->FirstChildElement("LinearKernelType"))
     {
         LinearKernel kernel;
         return parseWithKernel(builder, node, kernel, config);
