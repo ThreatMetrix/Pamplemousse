@@ -255,10 +255,14 @@ void PamplemousseUI::on_actionExport_triggered()
         return;
     }
 
-    std::ofstream out;
-
-    out.__open(file.handle(), std::ios_base::out);
-
+#ifdef _WIN32
+    auto sixteenBit = fileName.toStdWString();
+    std::ofstream out(sixteenBit, std::ios_base::out);
+#else
+    auto eightbit = fileName.toLocal8Bit();
+    std::ofstream out(eightbit.data(), std::ios_base::out);
+#endif
+    
     AstBuilder myBuilder = builder;
 
     LuaOutputter luaOutputter(out, actionCase_Insensitive->isChecked() ? LuaOutputter::OPTION_LOWERCASE : 0);

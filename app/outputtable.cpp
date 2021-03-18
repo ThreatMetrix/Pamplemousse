@@ -218,9 +218,9 @@ bool OutputTable::setData(const QModelIndex &index, const QVariant &value, int r
                 if (newName == row.modelOutput || newName == row.variableOrAttribute)
                     return true;
 
-                if (std::any_of(m_modelOutputs.begin(), m_modelOutputs.end(), [&newName](const PMMLExporter::ModelOutput & row)
+                if (std::any_of(m_modelOutputs.begin(), m_modelOutputs.end(), [&newName](const PMMLExporter::ModelOutput & r)
                                 {
-                                    return row.variableOrAttribute == newName;
+                                    return r.variableOrAttribute == newName;
                                 }))
                 {
                     return false;
