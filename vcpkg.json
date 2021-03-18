@@ -6,7 +6,11 @@
     "description": "Utility to deploy PMML models as Lua scripts",
     "dependencies": [
 	"tinyxml2",
-	"lua"],
+	"lua",
+        {
+	    "name": "cppunit",
+	    "platform": "!osx"
+	}],
     "features": [
 	{
 	    "name": "ui",

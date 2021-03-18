@@ -49,9 +49,6 @@ jobs:
       - name: Install CPPUnit (Mac)
         if: startsWith(matrix.os, 'macos')
         run: brew install cppunit
-      - name: Install CPPUnit (Other)
-        if: startsWith(matrix.os, 'macos') != true
-        run: '${{ github.workspace }}/vcpkg/vcpkg install cppunit' 
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
         uses: lukka/run-cmake@v3
         with:

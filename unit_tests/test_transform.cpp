@@ -750,7 +750,7 @@ public:
             
             CPPUNIT_ASSERT(TestUtils::mightBeMissingWith(astBuilder.topNode()));
             // We've filled in the hole in the left margin, cannot be missing.
-            CPPUNIT_ASSERT(not TestUtils::mightBeMissingWith(astBuilder.topNode(), fieldFornumber));
+            CPPUNIT_ASSERT(!TestUtils::mightBeMissingWith(astBuilder.topNode(), fieldFornumber));
             parseIntoVM(astBuilder, L);
         }
         executeSimpleQuery(L, "number", -100.0);
@@ -1253,7 +1253,7 @@ public:
             Transformation::importTransformationDictionary(astBuilder, scope, block_size);
 
             CPPUNIT_ASSERT_EQUAL(size_t(1), block_size);
-            CPPUNIT_ASSERT_EQUAL(static_cast<const PMMLDocument::MiningField *>(nullptr), astBuilder.context().getMiningField("derived2"));
+            CPPUNIT_ASSERT(astBuilder.context().getMiningField("derived2") == nullptr);
 
             astBuilder.field(astBuilder.context().getMiningField("derived1"));
         }
@@ -1282,7 +1282,7 @@ public:
             Transformation::importTransformationDictionary(astBuilder, scope, block_size);
 
             CPPUNIT_ASSERT_EQUAL(size_t(1), block_size);
-            CPPUNIT_ASSERT_EQUAL(static_cast<const PMMLDocument::MiningField *>(nullptr), astBuilder.context().getMiningField("derived2"));
+            CPPUNIT_ASSERT(astBuilder.context().getMiningField("derived2") == nullptr);
 
 
             astBuilder.field(astBuilder.context().getMiningField("derived1"));
@@ -1299,7 +1299,7 @@ public:
             PMMLDocument::MiningSchemaStackGuard schema(astBuilder.context(), newminingSchema.RootElement());
             Transformation::importTransformationDictionary(astBuilder, scope, block_size);
 
-            CPPUNIT_ASSERT_EQUAL(static_cast<const PMMLDocument::MiningField *>(nullptr), astBuilder.context().getMiningField("derived2"));
+            CPPUNIT_ASSERT(astBuilder.context().getMiningField("derived2") == nullptr);
 
             astBuilder.field(astBuilder.context().getMiningField("derived1"));
             astBuilder.field(accum);
