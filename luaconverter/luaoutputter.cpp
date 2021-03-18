@@ -367,7 +367,7 @@ LuaOutputter & LuaOutputter::nullReplacement(const char * literal, PMMLDocument:
 {
     if (type == PMMLDocument::TYPE_BOOL)
     {
-        if (strcasecmp(literal, "true") == 0)
+        if (PMMLDocument::strcasecmp(literal, "true") == 0)
         {
             return keyword("~= false");
         }

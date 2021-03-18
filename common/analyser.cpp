@@ -399,7 +399,7 @@ namespace
         
         static TrivialValue process(Function::Constant, const AstNode & node, AnalyserContext &)
         {
-            return (node.type == PMMLDocument::TYPE_BOOL && strcasecmp(node.content.c_str(), "false") == 0) ? ALWAYS_FALSE : ALWAYS_TRUE;
+            return (node.type == PMMLDocument::TYPE_BOOL && PMMLDocument::strcasecmp(node.content.c_str(), "false") == 0) ? ALWAYS_FALSE : ALWAYS_TRUE;
         }
         
         static TrivialValue process(Function::BooleanAndOr, const AstNode & node, AnalyserContext & context)

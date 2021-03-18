@@ -86,7 +86,7 @@ namespace
     // Push a bool to the lua stack
     void pushBool(lua_State *L, const char * start, const char * end)
     {
-        int result = end ? strncasecmp(start, "true", end-start) : strcasecmp(start, "true");
+        int result = end ? PMMLDocument::strncasecmp(start, "true", end-start) : PMMLDocument::strcasecmp(start, "true");
         lua_pushboolean(L, result == 0);
     }
 
@@ -321,7 +321,7 @@ namespace
                         return false;
                     }
                     
-                    bool target = (nextToken ? strncasecmp(token, "true", nextToken-token) : strcasecmp(token, "true")) != 0;
+                    bool target = (nextToken ? PMMLDocument::strncasecmp(token, "true", nextToken-token) : PMMLDocument::strcasecmp(token, "true")) != 0;
                     bool actual = lua_toboolean(L, outTableIndex);
                     if (target != actual)
                     {

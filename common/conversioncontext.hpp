@@ -201,6 +201,35 @@ namespace PMMLDocument
             return m_isValid;
         }
     };
+
+
+    // Hiding strcasecmp here because it is included in most places. Think of a better place to put this!
+    #ifdef _WIN32
+    #include <windows.h>
+    static inline int strcasecmp(const char *s1, const char *s2)
+    {
+        return lstrcmpiA(s1, s2);
+    }
+
+    static inline int strncasecmp(const char *s1, const char *s2, size_t n))
+    {
+        return CompareStringA(LOCALE_NAME_INVARIANT, NORM_IGNORECASE, s1, n, s2, n);
+    }
+
+    #else
+    #include <strings.h>
+    static inline int strcasecmp(const char *s1, const char *s2)
+    {
+        return ::strcasecmp(s1, s2);
+    }
+
+    static inline int strncasecmp(const char *s1, const char *s2, size_t n)
+    {
+        return ::strncasecmp(s1, s2, n);
+    }
+
+    #endif
 }
+
 
 #endif /* conversioncontext_hpp */

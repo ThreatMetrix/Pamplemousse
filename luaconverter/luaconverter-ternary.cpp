@@ -78,7 +78,7 @@ void LuaConverter::convertTernaryExpressionBackwards(Analyser::AnalyserContext &
     // If it defaults to false, we need to make an inverse fake ternary, "(not(a) or b) and c"
     
     PMMLDocument::FieldType trueClauseType = node.children[1].type;
-    const bool replacementEvaluatesToPositive = trueClauseType != PMMLDocument::TYPE_BOOL || strcasecmp(falseValue.c_str(), "false") != 0;
+    const bool replacementEvaluatesToPositive = trueClauseType != PMMLDocument::TYPE_BOOL || PMMLDocument::strcasecmp(falseValue.c_str(), "false") != 0;
     
     Analyser::ChildAssertionIterator iter(context, node);
     if (replacementEvaluatesToPositive)
