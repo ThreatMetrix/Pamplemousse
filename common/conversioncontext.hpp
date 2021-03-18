@@ -213,12 +213,12 @@ namespace PMMLDocument
     #ifdef _WIN32
     static inline int strcasecmp(const char *s1, const char *s2)
     {
-        return lstrcmpiA(s1, s2);
+        return lstrcmpiA(s1, s2);
     }
 
     static inline int strncasecmp(const char *s1, const char *s2, size_t n)
     {
-        return CompareStringA(LOCALE_NAME_INVARIANT, NORM_IGNORECASE, s1, n, s2, n);
+        return CompareStringA(LOCALE_INVARIANT, NORM_IGNORECASE, s1, n, s2, n);
     }
     #else
     static inline int strcasecmp(const char *s1, const char *s2)
