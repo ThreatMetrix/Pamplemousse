@@ -9,7 +9,7 @@ add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
 find_package( Lua REQUIRED )
 if (DEFINED tinyxml2_DIR)
   set ( TinyXML_LIBRARY -ltinyxml2 )
-else()
+else()
   find_package( tinyxml2 REQUIRED )
 endif()
 
