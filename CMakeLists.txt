@@ -6,12 +6,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package( Lua REQUIRED )
 
-if (NOT DEFINED tinyxml2_DIR)
-  set(TinyXML_INCLUDE_DIRS, /usr/local/include)
-  set(TinyXML_LIBRARIES, -ltinyxml2)
-else()
-  find_package( tinyxml2 REQUIRED )
-endif()
+find_package( tinyxml2 REQUIRED )
 
 include_directories(${LUA_INCLUDE_DIR} . common tinyxml2::tinyxml2)
 
