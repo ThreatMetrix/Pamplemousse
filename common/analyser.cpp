@@ -21,7 +21,16 @@
 #include "conversioncontext.hpp"
 #include <algorithm>
 #include <assert.h>
+
+#ifdef _WIN32
+#include <windows.h>
+static inline int strcasecmp(const char *s1, const char *s2)
+{
+    return lstrcmpiA(s1, s2);
+}
+#else
 #include <strings.h>
+#endif
 
 namespace Analyser
 {

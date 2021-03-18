@@ -31,6 +31,7 @@
 
 #ifdef INCLUDE_UI
 #include "pamplemousse_ui.h"
+static int runUI(int argc, char *argv[], bool insensitive, std::vector<PMMLExporter::ModelOutput> && outputs, int inputFormat, int outputFormat);
 #endif
 
 static void printUsage(const char * programName)
@@ -58,8 +59,6 @@ static void printUsage(const char * programName)
     std::cout << "You may also put expression using +, -, * and / after an model output, but not before." << std::endl;
     std::cout << "E.g. \"--prediction probability=predicted_value*100+3\" is acceptable, but \"--prediction probability=100*predicted_value+3\" is not" << std::endl;
 }
-
-static int runUI(int argc, char *argv[], bool insensitive, std::vector<PMMLExporter::ModelOutput> && outputs, int inputFormat, int outputFormat);
 
 int main(int argc, char *argv[])
 {
