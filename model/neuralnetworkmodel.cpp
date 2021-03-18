@@ -423,7 +423,7 @@ namespace
                     // Correct number of items on stack already.
                 }
                 
-                applyActivationFunction(builder, activationFunction, threshold, terms, altitude, width);
+                applyActivationFunction(builder, activationFunction, threshold, altitude, terms, width);
                 
                 // Softmax is based on e^x[i], so take the exponent here.
                 if (normalizationMethod == NORMALIZATION_METHOD_SOFTMAX)

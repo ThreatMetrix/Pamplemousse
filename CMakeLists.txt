@@ -7,7 +7,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
 
 find_package( Lua REQUIRED )
-if (NOT DEFINED tinyxml2_DIR)
+if (DEFINED tinyxml2_DIR)
+  set ( TinyXML_LIBRARY -ltinyxml2 )
+else
   find_package( tinyxml2 REQUIRED )
 endif()
 
@@ -41,7 +43,7 @@ add_library(libpamplemousse STATIC
     luaconverter/luaoutputter.cpp luaconverter/luaoutputter.hpp
     luaconverter/optimiser.cpp luaconverter/optimiser.hpp)
 
-target_link_libraries(libpamplemousse PUBLIC tinyxml2)
+target_link_libraries(libpamplemousse PUBLIC ${TinyXML_LIBRARY})
 
 if(MSVC)
   target_compile_options(libpamplemousse PRIVATE /W4 /WX)
