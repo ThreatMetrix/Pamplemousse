@@ -7,6 +7,13 @@
     "dependencies": [
 	"tinyxml2",
 	"lua",
-        "cppunit",
-	"qt5"]
+        "cppunit"],
+    "features": [
+	{
+	    "name": "ui",
+	    "description": "A graphical interface to run the tool interactively",
+	    "dependencies": [
+		"qt5"]
+	}
+    ]
 }

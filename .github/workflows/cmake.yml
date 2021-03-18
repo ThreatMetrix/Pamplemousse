@@ -24,10 +24,14 @@ jobs:
             triplet: x64-osx
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           submodules: true
-      - uses: lukka/get-cmake@latest
+      - name: Get CMake
+          uses: lukka/get-cmake@latest
+      - name: Install Qt
+          uses: jurplel/install-qt-action@v2
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
