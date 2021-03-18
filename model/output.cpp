@@ -344,10 +344,10 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
                         else
                         {
                             // Try to just use a probability
-                            auto found = modelConfig.probabilityValueName.find(value);
-                            if (found != modelConfig.probabilityValueName.end())
+                            auto probabilityFound = modelConfig.probabilityValueName.find(value);
+                            if (probabilityFound != modelConfig.probabilityValueName.end())
                             {
-                                builder.field(found->second);
+                                builder.field(probabilityFound->second);
                                 builder.defaultValue("0");
                                 gotValue = true;
                             }

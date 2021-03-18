@@ -4,17 +4,10 @@ project(pamplemousse)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
-
-find_package( Lua REQUIRED )
-if (DEFINED tinyxml2_DIR)
-  set ( TinyXML_LIBRARY -ltinyxml2 )
-else()
-  find_package( tinyxml2 REQUIRED )
-endif()
-
 include_directories(${LUA_INCLUDE_DIR} /usr/local/include/ . common)
 link_directories(/usr/local/lib/ )
+
+find_package( Lua REQUIRED )
 
 add_library(libpamplemousse STATIC
     common/ast.cpp common/ast.hpp
@@ -43,28 +36,31 @@ add_library(libpamplemousse STATIC
     luaconverter/luaoutputter.cpp luaconverter/luaoutputter.hpp
     luaconverter/optimiser.cpp luaconverter/optimiser.hpp)
 
-target_link_libraries(libpamplemousse PUBLIC ${TinyXML_LIBRARY})
 
-if(MSVC)
-  target_compile_options(libpamplemousse PRIVATE /W4 /WX)
+if (DEFINED tinyxml2_DIR)
+  target_link_libraries(libpamplemousse PUBLIC -ltinyxml2)
 else()
-  target_compile_options(libpamplemousse PRIVATE -Wall -Wextra -pedantic -Werror)
+  find_package( tinyxml2 REQUIRED )
+  target_link_libraries(libpamplemousse PUBLIC tinyxml2)
 endif()
 
+if (NOT DEFINED skip_tests)
+    add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
 
-cuti_creates_test_target(libpamplemousse_test libpamplemousse
-    unit_tests/testutils.cpp
-    unit_tests/testutils.hpp
-    unit_tests/test_function.cpp
-    unit_tests/test_miningmodel.cpp
-    unit_tests/test_naivebayes.cpp
-    unit_tests/test_predicate.cpp
-    unit_tests/test_ruleset.cpp
-    unit_tests/test_scorecard.cpp
-    unit_tests/test_supportvectormachine.cpp
-    unit_tests/test_transform.cpp
-    unit_tests/test_tree.cpp)
-target_link_libraries(libpamplemousse_test PRIVATE ${LUA_LIBRARIES})
+    cuti_creates_test_target(libpamplemousse_test libpamplemousse
+        unit_tests/testutils.cpp
+        unit_tests/testutils.hpp
+        unit_tests/test_function.cpp
+        unit_tests/test_miningmodel.cpp
+        unit_tests/test_naivebayes.cpp
+        unit_tests/test_predicate.cpp
+        unit_tests/test_ruleset.cpp
+        unit_tests/test_scorecard.cpp
+        unit_tests/test_supportvectormachine.cpp
+        unit_tests/test_transform.cpp
+        unit_tests/test_tree.cpp)
+    target_link_libraries(libpamplemousse_test PRIVATE ${LUA_LIBRARIES})
+endif()
 
 if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -101,6 +97,7 @@ target_link_libraries(pamplemousse libpamplemousse)
 target_link_libraries(pamplemousse ${LUA_LIBRARIES})
 
 if(MSVC)
+  target_compile_options(libpamplemousse PRIVATE /W4 /WX)
 else()
   target_compile_options(libpamplemousse PRIVATE -Wall -Wextra -pedantic -Werror)
   target_compile_options(pamplemousse PRIVATE -Wall -Wextra -pedantic -Werror)
