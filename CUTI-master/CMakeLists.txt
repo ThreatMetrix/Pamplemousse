@@ -182,7 +182,10 @@ if(NOT ${USE_CUTI_BACK_END})
 	if(NOT CUTI_RUNNER_INCLUDE_GUARD)
 		add_executable(Cuti ${CMAKE_CURRENT_SOURCE_DIR}/src/CutiMain.cpp)
 		target_link_libraries(Cuti ${CPPUNIT_LIB})
-
+		if (UNIX)
+		   target_link_libraries(Cuti -ldl)
+		endif (UNIX)
+		
 		target_include_directories(Cuti PRIVATE ${CPPUNIT_INCLUDE_DIR})
 		set(CUTI_RUNNER_INCLUDE_GUARD ON)
 	endif()
