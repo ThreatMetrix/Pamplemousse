@@ -15,9 +15,6 @@
 //  Created by Caleb Moore on 9/3/20.
 //
 
-// For microsoft, this must be first.
-#define _USE_MATH_DEFINES
-
 #include <math.h>
 #include "naivebayesmodel.hpp"
 #include "conversioncontext.hpp"
