@@ -21,7 +21,10 @@
 #include "model/transformation.hpp"
 #include <algorithm>
 #include <cstring>
-#include <math.h>
+
+// for microsoft
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 namespace Function
 {
