@@ -92,7 +92,6 @@ target_link_libraries(pamplemousse libpamplemousse)
 target_link_libraries(pamplemousse ${LUA_LIBRARIES})
 
 if(MSVC)
-  target_compile_options(libpamplemousse PRIVATE /W4 /WX)
   target_compile_definitions(libpamplemousse PRIVATE NOMINMAX _USE_MATH_DEFINES)
   target_compile_definitions(pamplemousse PRIVATE NOMINMAX _USE_MATH_DEFINES)
 else()
