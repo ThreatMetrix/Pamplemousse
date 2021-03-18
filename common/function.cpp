@@ -15,8 +15,6 @@
 //  Created by Caleb Moore on 11/9/18.
 //
 
-// For microsoft, this must be first.
-#define _USE_MATH_DEFINES
 
 #include "function.hpp"
 #include "ast.hpp"
@@ -49,12 +47,12 @@ const FunctionTable functionTable = {{
     {"/",           "/",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TIMES, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
     {"abs",         "math.abs",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"acos",        "math.acos",    FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"and",         "and",          BOOLEAN_AND,   PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_AND,   MAYBE_MISSING_IF_ANY_ARGUMENT_IS_MISSING,                  1, (std::numeric_limits<size_t>::max)()},
+    {"and",         "and",          BOOLEAN_AND,   PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_AND,   MAYBE_MISSING_IF_ANY_ARGUMENT_IS_MISSING,                  1, std::numeric_limits<size_t>::max()},
     {"asin",        "math.asin",    FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"atan",        "math.atan",    FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"avg",         "+",            MEAN_MACRO,    PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TIMES, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, (std::numeric_limits<size_t>::max)()},
+    {"avg",         "+",            MEAN_MACRO,    PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TIMES, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
     {"ceil",        "math.ceil",    FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TIMES, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
-    {"concat",      "..",           OPERATOR,      PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_CONCAT,MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, (std::numeric_limits<size_t>::max)()},
+    {"concat",      "..",           OPERATOR,      PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_CONCAT,MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
     {"cos",         "math.cos",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP, MISSING_IF_ANY_ARGUMENT_IS_MISSING,   1, 1},
     {"cosh",        "math.cosh",    FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP, MISSING_IF_ANY_ARGUMENT_IS_MISSING,   1, 1},
     {"dateDaysSinceYear", "",       UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
@@ -70,9 +68,9 @@ const FunctionTable functionTable = {{
     {"greaterOrEqual", ">=",        COMPARISON,    PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_EQUAL, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
     {"greaterThan", ">",            COMPARISON,    PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_EQUAL, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
     {"if",          nullptr,        TERNARY_MACRO, PMMLDocument::TYPE_INVALID,LuaOutputter::PRECEDENCE_TOP,   MAYBE_MISSING_IF_ANY_ARGUMENT_IS_MISSING,              2, 3},
-    {"isIn",        "==",           IS_IN,         PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_OR,    MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, (std::numeric_limits<size_t>::max)()},
+    {"isIn",        "==",           IS_IN,         PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_OR,    MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, std::numeric_limits<size_t>::max()},
     {"isMissing",   "==",           IS_MISSING,    PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_EQUAL, NEVER_MISSING,                      1, 1},
-    {"isNotIn",     "~=",           IS_IN,         PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_AND,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, (std::numeric_limits<size_t>::max)()},
+    {"isNotIn",     "~=",           IS_IN,         PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_AND,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, std::numeric_limits<size_t>::max()},
     {"isNotMissing","not",          IS_NOT_MISSING,PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_UNARY, NEVER_MISSING,                      1, 1},
     // These aren't actually correct as we treat missing and invalid the same way, but will give the right result mostly.
     {"isNotValid",  "==",           IS_MISSING,    PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_EQUAL, NEVER_MISSING,                      1, 1},
@@ -83,19 +81,19 @@ const FunctionTable functionTable = {{
     {"ln",          "math.log",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"lowercase",   "string.lower", FUNCTIONLIKE,      PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"matches",     "",             UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
-    {"max",         "math.max",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, (std::numeric_limits<size_t>::max)()},
-    {"median",      "",             UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, (std::numeric_limits<size_t>::max)()},
-    {"min",         "math.min",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, (std::numeric_limits<size_t>::max)()},
+    {"max",         "math.max",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
+    {"median",      "",             UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
+    {"min",         "math.min",     FUNCTIONLIKE,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
     {"modulo",      "%",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TIMES, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
     {"normalCDF",   "normalCDF",    UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 3, 3},
     {"normalIDF",   "normalIDF",    UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 3, 3},
     {"normalPDF",   "normalPDF",    UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 3, 3},
     {"not",         "not",          NOT_OPERATOR,  PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_UNARY, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"notEqual",    "~=",           COMPARISON,    PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_EQUAL, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
-    {"or",          "or",           BOOLEAN_OR,    PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_OR,    MAYBE_MISSING_IF_ANY_ARGUMENT_IS_MISSING,                   1, (std::numeric_limits<size_t>::max)()},
+    {"or",          "or",           BOOLEAN_OR,    PMMLDocument::TYPE_BOOL,   LuaOutputter::PRECEDENCE_OR,    MAYBE_MISSING_IF_ANY_ARGUMENT_IS_MISSING,                   1, std::numeric_limits<size_t>::max()},
     {"pow",         "^",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_POWER, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},
-    {"product",     "*",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TIMES, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, (std::numeric_limits<size_t>::max)()},
-    {"replace",     "",             UNSUPPORTED,   PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, (std::numeric_limits<size_t>::max)()},
+    {"product",     "*",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TIMES, MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
+    {"replace",     "",             UNSUPPORTED,   PMMLDocument::TYPE_STRING, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
     {"round",       "math.floor",   ROUND_MACRO,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"sin",         "math.sin",     FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"sinh",        "math.sinh",    FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
@@ -103,7 +101,7 @@ const FunctionTable functionTable = {{
     {"stdNormalIDF","stdNormalIDF", RUN_LAMBDA,    PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"stdNormalPDF","",             UNSUPPORTED,   PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"substring",   "string.sub",   SUBSTRING_MACRO,PMMLDocument::TYPE_STRING,LuaOutputter::PRECEDENCE_TOP,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 3, 3},
-    {"sum",         "+",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_PLUS,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, (std::numeric_limits<size_t>::max)()},
+    {"sum",         "+",            OPERATOR,      PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_PLUS,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, std::numeric_limits<size_t>::max()},
     {"tan",         "math.tan",     FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER,  LuaOutputter::PRECEDENCE_TOP,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"tanh",        "math.tanh",    FUNCTIONLIKE,  PMMLDocument::TYPE_NUMBER,  LuaOutputter::PRECEDENCE_TOP,  MISSING_IF_ANY_ARGUMENT_IS_MISSING, 1, 1},
     {"threshold",   nullptr,        THRESHOLD_MACRO,PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_OR,   MISSING_IF_ANY_ARGUMENT_IS_MISSING, 2, 2},

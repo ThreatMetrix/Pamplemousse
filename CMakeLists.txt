@@ -39,7 +39,6 @@ add_library(libpamplemousse STATIC
 
 target_link_libraries(libpamplemousse PUBLIC tinyxml2::tinyxml2)
 
-
 if (NOT DEFINED skip_tests)
     add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
 
@@ -94,7 +93,10 @@ target_link_libraries(pamplemousse ${LUA_LIBRARIES})
 
 if(MSVC)
   target_compile_options(libpamplemousse PRIVATE /W4 /WX)
+  target_compile_definitions(libpamplemousse PRIVATE NOMINMAX _USE_MATH_DEFINES)
+  target_compile_definitions(pamplemousse PRIVATE NOMINMAX _USE_MATH_DEFINES)
 else()
   target_compile_options(libpamplemousse PRIVATE -Wshadow -Wall -Wextra -pedantic -Werror)
   target_compile_options(pamplemousse PRIVATE -Wshadow -Wall -Wextra -pedantic -Werror)
 endif()
+
