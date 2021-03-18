@@ -466,21 +466,6 @@ static const EXPORT_METHOD::Microsoft::VisualStudio::CppUnitTestFramework::Membe
 
 #define IMPL_CUTI_END_TESTS_REGISTRATION() /**/
 
-/****************************************************************
-* Fix VisualStudio::CppUnitTestFramework missing specializations*
-*****************************************************************/
-#define INTERNAL_CUTI_SPECIALIZED_TO_STRING(type)                                                                               \
-    template <>                                                                                                                 \
-    inline std::wstring Microsoft::VisualStudio::CppUnitTestFramework::ToString<type>(const type &t) { RETURN_WIDE_STRING(t); } \
-    \
-template<> inline std::wstring                                                                                                  \
-    Microsoft::VisualStudio::CppUnitTestFramework::ToString<type>(const type *t) { RETURN_WIDE_STRING(t); }                     \
-    \
-template<> inline std::wstring Microsoft::VisualStudio::CppUnitTestFramework::ToString<type>(type * t) { RETURN_WIDE_STRING(t); }
-
-INTERNAL_CUTI_SPECIALIZED_TO_STRING(int64_t);
-INTERNAL_CUTI_SPECIALIZED_TO_STRING(uint16_t);
-
 /*****************
 * CUTI internals*
 *****************/

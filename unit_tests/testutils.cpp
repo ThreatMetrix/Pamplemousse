@@ -17,7 +17,6 @@
 
 #include "testutils.hpp"
 #include "document.hpp"
-#include <libgen.h>
 #include "luaconverter/luaconverter.hpp"
 #include "luaconverter/luaoutputter.hpp"
 #include "luaconverter/optimiser.hpp"
@@ -25,9 +24,20 @@
 
 std::string TestUtils::getPathToFile(const char * name)
 {
-    char thisFileName[] = __FILE__;
-    const char * pathName = dirname(thisFileName);
-    return std::string(pathName) + "/" + name;
+#if _WIN32
+    const char allowed_sep[] = "/\\";
+    const char preferred_sep[] = "\\";
+#else
+    const char allowed_sep[] = "/";
+    const char preferred_sep[] = "/";
+#endif
+
+    std::string thisFileName(__FILE__);
+    // Hack off the filename
+    const size_t last_of = thisFileName.find_last_of(allowed_sep);
+    if (last_of < std::string::npos)
+        thisFileName.resize(last_of + 1);
+    return thisFileName + preferred_sep + name;
 }
 
 const Function::Definition ReturnStatement =
