@@ -159,7 +159,7 @@ public:
         return out;
     }
     void popNodesIntoVector(std::vector<AstNode> & nodes, size_t nInstructions);
-    void swapNodes(int a, int b);
+    void swapNodes(long a, long b);
     bool coerceToSameType(size_t nEntries);
     bool coerceToSpecificTypes(size_t nEntries, const PMMLDocument::FieldType * types);
     size_t stackSize() const { return m_stack.size(); }

@@ -225,11 +225,13 @@ AstNode & AstBuilder::topNode()
     return m_stack.back();
 }
 
+typedef std::iterator_traits<std::vector<AstNode>::iterator>::difference_type node_iterator_difference;
+
 void AstBuilder::popNodesIntoVector(std::vector<AstNode> & nodes, size_t nInstructions)
 {
     assert(m_stack.size() >= nInstructions);
     std::vector<AstNode>::iterator endIterator = m_stack.end();
-    std::advance(endIterator, -nInstructions);
+    std::advance(endIterator, -node_iterator_difference(nInstructions));
     
     nodes.reserve(nInstructions);
     std::move(endIterator, m_stack.end(), std::back_inserter(nodes));
@@ -353,7 +355,7 @@ bool AstBuilder::coerceToSameType(size_t nEntries)
         return true;
     }
     std::vector<AstNode>::iterator startIterator = m_stack.end();
-    std::advance(startIterator, -nEntries);
+    std::advance(startIterator, -node_iterator_difference(nEntries));
     // Pick the most permissive of all arguments
     PMMLDocument::FieldType type = std::min_element(startIterator, m_stack.end(), [](const AstNode & a, const AstNode & b)
     {
@@ -381,7 +383,7 @@ bool AstBuilder::coerceToSameType(size_t nEntries)
 bool AstBuilder::coerceToSpecificTypes(size_t nEntries, const PMMLDocument::FieldType * types)
 {
     std::vector<AstNode>::iterator iter = m_stack.end();
-    std::advance(iter, -nEntries);
+    std::advance(iter, -node_iterator_difference(nEntries));
     bool isOK = true;
     for (size_t i = 0; i < nEntries; ++i, ++iter)
     {
@@ -423,15 +425,15 @@ void AstBuilder::parsingError(const char * error_message, const char * error_par
 }
 
 // This method swaps two nodes in the builder's stack
-void AstBuilder::swapNodes(int a, int b)
+void AstBuilder::swapNodes(long a, long b)
 {
     if (a < 0)
     {
-        a = m_stack.size() + a;
+        a = long(m_stack.size()) + a;
     }
     if (b < 0)
     {
-        b = m_stack.size() + b;
+        b = long(m_stack.size()) + b;
     }
 
     std::swap(m_stack[a], m_stack[b]);

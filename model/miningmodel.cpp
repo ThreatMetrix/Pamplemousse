@@ -827,8 +827,8 @@ namespace MiningModel
             case MODELCHAIN:
                 return doNonCombiningSegments(builder, config, segmentation, modelMethod);
         }
+        return false;
     }
-return false;
 }
 
 bool MiningModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ModelConfig & config)

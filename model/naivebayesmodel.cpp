@@ -33,7 +33,7 @@ static bool buildFromPairs(AstBuilder & builder, const PMMLDocument::MiningField
     {
         if (const tinyxml2::XMLElement * discretize = derivedField->FirstChildElement("Discretize"))
         {
-            if (not Transformation::parseDiscretizeBins(builder, bins, discretize))
+            if (!Transformation::parseDiscretizeBins(builder, bins, discretize))
             {
                 return false;
             }
@@ -269,14 +269,14 @@ static bool loadInputMappings(AstBuilder & builder, const tinyxml2::XMLElement *
         // A field may be defined by pairs or by stats (i.e. a normal distribution)
         if (const tinyxml2::XMLElement * pairCounts = countElement->FirstChildElement("PairCounts"))
         {
-            if (not buildFromPairs(builder, fieldDefinition, pairCounts, outputs, threshold))
+            if (!buildFromPairs(builder, fieldDefinition, pairCounts, outputs, threshold))
             {
                 return false;
             }
         }
         else if (const tinyxml2::XMLElement * targetValueStats = countElement->FirstChildElement("TargetValueStats"))
         {
-            if (not buildFromStats(builder, fieldDefinition, targetValueStats, outputs, threshold))
+            if (!buildFromStats(builder, fieldDefinition, targetValueStats, outputs, threshold))
             {
                 return false;
             }

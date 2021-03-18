@@ -15,6 +15,9 @@
 //  Created by Caleb Moore on 11/9/18.
 //
 
+// For microsoft, this must be first.
+#define _USE_MATH_DEFINES
+
 #include "function.hpp"
 #include "ast.hpp"
 #include "luaconverter/luaoutputter.hpp"
@@ -22,8 +25,6 @@
 #include <algorithm>
 #include <cstring>
 
-// for microsoft
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 namespace Function
