@@ -4,10 +4,16 @@ project(pamplemousse)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-include_directories(${LUA_INCLUDE_DIR} /usr/local/include/ . common)
-link_directories(/usr/local/lib/ )
-
 find_package( Lua REQUIRED )
+
+if (NOT DEFINED tinyxml2_DIR)
+  set(TinyXML_INCLUDE_DIRS, /usr/local/include)
+  set(TinyXML_LIBRARIES, -ltinyxml2)
+else()
+  find_package( tinyxml2 REQUIRED )
+endif()
+
+include_directories(${LUA_INCLUDE_DIR} . common tinyxml2::tinyxml2)
 
 add_library(libpamplemousse STATIC
     common/ast.cpp common/ast.hpp
@@ -36,13 +42,8 @@ add_library(libpamplemousse STATIC
     luaconverter/luaoutputter.cpp luaconverter/luaoutputter.hpp
     luaconverter/optimiser.cpp luaconverter/optimiser.hpp)
 
+target_link_libraries(libpamplemousse PUBLIC tinyxml2::tinyxml2)
 
-if (DEFINED tinyxml2_DIR)
-  target_link_libraries(libpamplemousse PUBLIC -ltinyxml2)
-else()
-  find_package( tinyxml2 REQUIRED )
-  target_link_libraries(libpamplemousse PUBLIC tinyxml2)
-endif()
 
 if (NOT DEFINED skip_tests)
     add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)

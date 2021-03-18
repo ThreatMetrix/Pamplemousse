@@ -16,7 +16,7 @@
 //
 
 #include "pmmldocumentdefs.hpp"
-#include "tinyxml2.h"
+#include <tinyxml2.h>
 #include <algorithm>
 
 PMMLDocument::MiningFieldUsage PMMLDocument::getMiningFieldUsage(const tinyxml2::XMLElement * field)
