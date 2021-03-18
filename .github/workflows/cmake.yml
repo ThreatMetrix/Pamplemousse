@@ -31,7 +31,7 @@ jobs:
       - name: Get CMake
         uses: lukka/get-cmake@latest
       - name: Install Qt
-          uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v2
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
