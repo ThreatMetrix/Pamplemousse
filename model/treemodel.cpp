@@ -547,8 +547,9 @@ bool TreeModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node,
         blockSize++;
     }
     
-    if ((treeConfig.missingValuePenalty = node->Attribute("missingValuePenalty")))
+    if (const char * missingValuePenalty = node->Attribute("missingValuePenalty"))
     {
+        treeConfig.missingValuePenalty = missingValuePenalty;
         treeConfig.totalMissingValuePenalty = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "missingValuePenalty");
         builder.constant("1", PMMLDocument::TYPE_NUMBER);
         builder.declare(treeConfig.totalMissingValuePenalty, AstBuilder::HAS_INITIAL_VALUE);
