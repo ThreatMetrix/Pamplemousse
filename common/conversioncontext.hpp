@@ -218,7 +218,7 @@ namespace PMMLDocument
 
     static inline int strncasecmp(const char *s1, const char *s2, size_t n)
     {
-        return CompareStringA(LOCALE_INVARIANT, NORM_IGNORECASE, s1, n, s2, n);
+        return CompareStringA(LOCALE_INVARIANT, NORM_IGNORECASE, s1, int(n), s2, int(n));
     }
     #else
     static inline int strcasecmp(const char *s1, const char *s2)
