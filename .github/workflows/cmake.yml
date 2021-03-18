@@ -8,12 +8,6 @@ env:
 
 
 jobs:
-  mac-prepare:
-    runs-on: macos-latest
-    steps:
-      - run: brew install autoconf 
-      - run: brew install autoconf
-
   job:
     name: ${{ matrix.os }}-hosted-basic
     runs-on: ${{ matrix.os }}
