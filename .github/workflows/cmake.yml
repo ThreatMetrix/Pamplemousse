@@ -33,13 +33,13 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
       - name: Install CPPUnit (Linux)
-        if: ${{ matrix.triplet }} == "x64-linux"
+        if: startsWith(matrix.os,'ubuntu')
         run: sudo apt-get install libcppunit-dev
       - name: Install CPPUnit (Windows)
-        if: ${{ matrix.triplet }} == "x64-windows"
+        if: startsWith(matrix.os,'windows')
         run: choco install cppunit
       - name: Install CPPUnit (Mac)
-        if: ${{ matrix.triplet }} == "x64-osx"
+        if: startsWith(matrix.os, 'macos')
         run: brew install cppunit 
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
