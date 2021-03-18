@@ -317,7 +317,7 @@ namespace
             else
             {
                 // Clamp values for OUTLIER_TREATMENT_AS_IS
-                i = std::max(1lu, std::min(i, origins.size() - 1));
+                i = std::max(std::vector<double>::size_type(1lu), std::min(i, origins.size() - 1));
                 // Work out the mapped value for this default ahead of time
                 double gradient = (normals[i] - normals[i - 1]) / (origins[i] - origins[i - 1]);
                 missingReplacementFromField = (asValue - origins[i - 1]) * gradient + normals[i - 1];
