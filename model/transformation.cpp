@@ -1235,7 +1235,7 @@ namespace
             if (nParameters < found->minArgs || nParameters > found->maxArgs)
             {
                 char buffer[50];
-                if (found->maxArgs == std::numeric_limits<size_t>::max())
+                if (found->maxArgs == (std::numeric_limits<size_t>::max)())
                 {
                     snprintf(buffer, sizeof(buffer), "%s expects >= %zu arguments, got %zu", functionName, found->minArgs, nParameters);
                 }
