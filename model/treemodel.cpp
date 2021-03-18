@@ -154,9 +154,9 @@ namespace
                 if (isDefaultChild)
                 {
                     // Something before this could have been missing
-                    for (const AstNode & node : savedPredicatesForNotFound)
+                    for (const AstNode & savedPredicateNode : savedPredicatesForNotFound)
                     {
-                        builder.pushNode(node);
+                        builder.pushNode(savedPredicateNode);
                         builder.function(Function::functionTable.names.isMissing, 1);
                     }
                     
@@ -199,9 +199,9 @@ namespace
                     builder.defaultValue("true");
 
                     // Or if any previous conditions are missing
-                    for (const AstNode & node : savedPredicatesForNotFound)
+                    for (const AstNode & savedPredicateNode : savedPredicatesForNotFound)
                     {
-                        builder.pushNode(node);
+                        builder.pushNode(savedPredicateNode);
                         builder.function(Function::functionTable.names.isMissing, 1);
                     }
                     
@@ -244,9 +244,9 @@ namespace
                     // Before the default child, we need to make sure we don't automatically drop into any other conditions
                     if (!savedPredicatesForNotFound.empty())
                     {
-                        for (const AstNode & node : savedPredicatesForNotFound)
+                        for (const AstNode & savedPredicateNode : savedPredicatesForNotFound)
                         {
-                            builder.pushNode(node);
+                            builder.pushNode(savedPredicateNode);
                             builder.function(Function::functionTable.names.isNotMissing, 1);
                         }
                         builder.function(Function::functionTable.names.fnAnd, savedPredicatesForNotFound.size() + 1);
@@ -270,9 +270,9 @@ namespace
             if (config.missingValueStrategy == MVS_AGGREGATENODES ||
                 config.missingValueStrategy == MVS_WEIGHTEDCONFIDENCE)
             {
-                for (const AstNode & node : savedPredicatesForNotFound)
+                for (const AstNode & savedPredicateNode : savedPredicatesForNotFound)
                 {
-                    builder.pushNode(node);
+                    builder.pushNode(savedPredicateNode);
                 }
                 builder.function(Function::functionTable.names.fnOr, savedPredicatesForNotFound.size());
                 builder.function(Function::functionTable.names.fnNot, 1);
@@ -449,8 +449,8 @@ bool TreeModel::writeScore(AstBuilder & builder, const tinyxml2::XMLElement * no
                         builder.constant(confidence->Value(), PMMLDocument::TYPE_NUMBER);
                     }
                     
-                    PMMLDocument::ConstFieldDescriptionPtr outputField = PMMLDocument::getOrAddCategoryInOutputMap(builder.context(), config.confidenceValues, "confidence", PMMLDocument::TYPE_NUMBER, value);
-                    assignOrIncrement(builder, outputField, recordNumberAccumulator != nullptr);
+                    PMMLDocument::ConstFieldDescriptionPtr confidenceOutputField = PMMLDocument::getOrAddCategoryInOutputMap(builder.context(), config.confidenceValues, "confidence", PMMLDocument::TYPE_NUMBER, value);
+                    assignOrIncrement(builder, confidenceOutputField, recordNumberAccumulator != nullptr);
                     blockSize++;
                 }
             }

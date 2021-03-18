@@ -419,7 +419,7 @@ void LuaConverter::Converter::process(Function::ThresholdMacro, Analyser::Analys
     {
         LuaOutputter::OperatorScopeHelper timesScope(output, LuaOutputter::PRECEDENCE_AND);
         {
-            LuaOutputter::OperatorScopeHelper plusScope(output, LuaOutputter::PRECEDENCE_EQUAL);
+            LuaOutputter::OperatorScopeHelper innerPlusScope(output, LuaOutputter::PRECEDENCE_EQUAL);
             convertAstToLuaWithNullAssertions(context, *iter++, DEFAULT_TO_NIL, output);
             output.keyword(">");
             convertAstToLuaWithNullAssertions(context, *iter++, DEFAULT_TO_NIL, output);
@@ -434,7 +434,7 @@ void LuaConverter::convertBruteForceMissingClause(Analyser::AnalyserContext & co
 {
     if (node.type == PMMLDocument::TYPE_BOOL && invert)
     {
-        LuaOutputter::OperatorScopeHelper equalScope(output, LuaOutputter::PRECEDENCE_OR);
+        LuaOutputter::OperatorScopeHelper orScope(output, LuaOutputter::PRECEDENCE_OR);
         {
             LuaOutputter::OperatorScopeHelper equalScope(output, LuaOutputter::PRECEDENCE_EQUAL);
             convertAstToLuaWithNullAssertions(context, node, DEFAULT_TO_NIL, output);
