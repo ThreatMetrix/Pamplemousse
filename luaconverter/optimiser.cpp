@@ -489,7 +489,7 @@ public:
         if (triv != Analyser::RUNTIME_EVALUATION_NEEDED)
         {
             m_killedAnything = true;
-            if (not m_stack.empty())
+            if (!m_stack.empty())
             {
                 const Function::FunctionType type = m_stack.back().type;
                 // And/or clauses can remove single values or can recursively remove themselves.

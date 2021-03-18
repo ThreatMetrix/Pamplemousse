@@ -542,7 +542,7 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
     std::vector<PMMLExporter::ModelOutput> inputColumns;
     {
         std::vector<std::string> inputColumnNames;
-        if (not readColumnNames(inputColumnNames, inputData, lowercase))
+        if (!readColumnNames(inputColumnNames, inputData, lowercase))
         {
             return false;
         }

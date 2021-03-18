@@ -557,7 +557,7 @@ namespace
         for (const tinyxml2::XMLElement * child = node->FirstChildElement("DiscretizeBin"); child; child = child->NextSiblingElement("DiscretizeBin"))
         {
             bins.emplace_back();
-            if (not bins.back().parse(builder, child))
+            if (!bins.back().parse(builder, child))
             {
                 return false;
             }
@@ -646,7 +646,7 @@ namespace
     bool parseDiscretize(AstBuilder & builder, const tinyxml2::XMLElement * node)
     {
         std::vector<DiscretizeBin> bins;
-        if (not parseDiscretizeBins(builder, bins, node))
+        if (!parseDiscretizeBins(builder, bins, node))
         {
             return false;
         }

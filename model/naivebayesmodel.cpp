@@ -15,6 +15,9 @@
 //  Created by Caleb Moore on 9/3/20.
 //
 
+// For microsoft, this must be first.
+#define _USE_MATH_DEFINES
+
 #include <math.h>
 #include "naivebayesmodel.hpp"
 #include "conversioncontext.hpp"
@@ -336,7 +339,7 @@ bool NaiveBayesModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * n
         inserted.first->second.push_back(builder.popNode());
     }
     
-    if (not loadInputMappings(builder, inputs, outputs, node->Attribute("threshold")))
+    if (!loadInputMappings(builder, inputs, outputs, node->Attribute("threshold")))
     {
         return false;
     }

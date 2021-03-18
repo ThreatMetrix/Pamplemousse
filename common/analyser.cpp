@@ -21,6 +21,7 @@
 #include "conversioncontext.hpp"
 #include <algorithm>
 #include <assert.h>
+#include <strings.h>
 
 namespace Analyser
 {
@@ -592,7 +593,7 @@ TrivialValue AnalyserContext::checkIfTrivial(const AstNode & node)
 void ChildAssertionIterator::fixAssertions()
 {
     blockAssertions.clear();
-    if (maintainAssertions == false || not valid())
+    if (maintainAssertions == false || !valid())
     {
         return;
     }
