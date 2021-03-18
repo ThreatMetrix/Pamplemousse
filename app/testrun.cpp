@@ -27,6 +27,7 @@
 #include <vector>
 #include <math.h>
 #include <algorithm>
+#include <chrono>
 
 extern "C"
 {
@@ -143,7 +144,7 @@ namespace
     }
 
     // Create a new Lua environment with the given source code already loaded.
-    lua_State * buildEnv(const char * sourceFile, std::string & sourceCode, bool lowercase, std::vector<PMMLExporter::ModelOutput> & inputColumns, std::vector<PMMLExporter::ModelOutput> & customOutputs, size_t & nOverflowedVariables)
+    lua_State * buildEnv(const char * sourceFile, std::string & sourceCode, bool lowercase, std::vector<PMMLExporter::ModelOutput> & inputColumns, std::vector<PMMLExporter::ModelOutput> & customOutputs, int & nOverflowedVariables)
     {
         std::stringstream mystream;
         LuaOutputter output(mystream, lowercase ? LuaOutputter::OPTION_LOWERCASE : 0);
@@ -153,7 +154,7 @@ namespace
             return nullptr;
         }
     
-        nOverflowedVariables = output.nOverflowedVariables();
+        nOverflowedVariables = int(output.nOverflowedVariables());
         
         lua_State * L = luaL_newstate();
         sourceCode = mystream.str();
@@ -368,16 +369,16 @@ namespace
     }
     
     // Runs the model for a single line of input
-    bool executeThisLine(lua_State * L, const std::string & lineBuffer, const std::vector<PMMLExporter::ModelOutput> & inputColumns, bool insensitive, size_t hasOverflow, int nOutputs)
+    bool executeThisLine(lua_State * L, const std::string & lineBuffer, const std::vector<PMMLExporter::ModelOutput> & inputColumns, bool insensitive, int nOverflow, int nOutputs)
     {
         lua_getglobal(L, "func");
         const char * token = lineBuffer.c_str();
-        lua_checkstack(L, std::min(size_t(200), inputColumns.size() + 2));
+        lua_checkstack(L, std::min(200, int(inputColumns.size()) + 2));
         size_t cols = 0;
-        if (hasOverflow)
+        if (nOverflow > 0)
         {
             cols++;
-            lua_createtable(L, hasOverflow, 0);
+            lua_createtable(L, nOverflow, 0);
         }
         int overflowPos = lua_gettop(L);
         for (const auto & column : inputColumns)
@@ -433,7 +434,7 @@ namespace
     
     // When something didn't work (verification failed, or exception thrown), we try to give a hint why.
     // Like executeThisLine, but with tracing. Will print out annotated source code when it is done.
-    bool debugThisLine(lua_State * L, const std::string & lineBuffer, const std::vector<PMMLExporter::ModelOutput> & inputColumns, const std::string & sourceCode, bool insensitive, bool hasOverflow, size_t nOutputs)
+    bool debugThisLine(lua_State * L, const std::string & lineBuffer, const std::vector<PMMLExporter::ModelOutput> & inputColumns, const std::string & sourceCode, bool insensitive, int nOverflow, size_t nOutputs)
     {
         static std::vector<bool> linesExecuted;
         linesExecuted.clear();
@@ -449,7 +450,7 @@ namespace
                         linesExecuted[line] = true;
                     }, LUA_MASKLINE, 0);
         
-        executeThisLine(L, lineBuffer, inputColumns, insensitive, hasOverflow, nOutputs);
+        executeThisLine(L, lineBuffer, inputColumns, insensitive, nOverflow, nOutputs);
         
         lua_sethook(L, nullptr, 0, 0);
         
@@ -565,8 +566,8 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
         }
     }
 
-    size_t hasOverflow = 0;
-    lua_State * L = buildEnv(sourceFile, sourceCode, lowercase, inputColumns, outputs, hasOverflow);
+    int nOverflow = 0;
+    lua_State * L = buildEnv(sourceFile, sourceCode, lowercase, inputColumns, outputs, nOverflow);
     if (L == nullptr)
     {
         return false;
@@ -594,10 +595,10 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
         lineNumber++;
         stripNewlines(lineBuffer);
         
-        if (!executeThisLine(L, lineBuffer, inputColumns, lowercase, hasOverflow, nOutputs))
+        if (!executeThisLine(L, lineBuffer, inputColumns, lowercase, nOverflow, nOutputs))
         {
             std::cerr << lua_tostring( L , -1 ) << " at input line: " << lineNumber << std::endl;
-            debugThisLine(L, lineBuffer, inputColumns, sourceCode, lowercase, hasOverflow, nOutputs);
+            debugThisLine(L, lineBuffer, inputColumns, sourceCode, lowercase, nOverflow, nOutputs);
             ok = false;
             break;
         }
@@ -606,7 +607,7 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
         {
             if (!verifyOutputs(L, outputs, verificationData, verificationEpsilon, lineNumber, nOutputs))
             {
-                debugThisLine(L, lineBuffer, inputColumns, sourceCode, lowercase, hasOverflow, nOutputs);
+                debugThisLine(L, lineBuffer, inputColumns, sourceCode, lowercase, nOverflow, nOutputs);
                 printColumnHeaders(output, outputs);
                 printOutputs(output, L, outputs, nOutputs);
                 ok = false;
@@ -622,9 +623,9 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
 
     lua_close(L);
     
-    int count = lineNumber - 1;
+    size_t count = lineNumber - 1;
     auto endTime = std::chrono::steady_clock::now();
     long nanoseconds = std::chrono::nanoseconds(endTime - startTime).count();
-    fprintf(stderr, "%i runs in %li ns, %lins each run\n", count, nanoseconds, count == 0 ? 0 : (nanoseconds / count));
+    fprintf(stderr, "%zu runs in %li ns, %lins each run\n", count, nanoseconds, count == 0 ? 0 : (nanoseconds / count));
     return ok;
 }
