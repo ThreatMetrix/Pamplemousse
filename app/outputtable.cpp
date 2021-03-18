@@ -14,7 +14,7 @@ OutputTable::OutputTable(OutputTable::TableType type, QObject *parent) : QAbstra
 
 void OutputTable::clear()
 {
-    removeRows(0, m_modelOutputs.size());
+    removeRows(0, int(m_modelOutputs.size()));
 }
 
 QStringList OutputTable::mimeTypes() const
@@ -34,7 +34,7 @@ const PMMLDocument::DataDictionary & OutputTable::getOutputsMap(bool isNeuron) c
 
 bool OutputTable::addOutput(const std::string & name, bool isNeuron)
 {
-    int newIndex = m_modelOutputs.size();
+    int newIndex = int(m_modelOutputs.size());
     const auto & outputsMap = getOutputsMap(isNeuron);
     const auto found = outputsMap.find(name);
     if (found != outputsMap.end())
@@ -52,7 +52,7 @@ bool OutputTable::addOutput(const std::string & name, bool isNeuron)
 
 int OutputTable::rowCount(const QModelIndex & /*parent*/) const
 {
-   return m_modelOutputs.size();
+   return int(m_modelOutputs.size());
 }
 
 int OutputTable::columnCount(const QModelIndex & /*parent*/) const
@@ -339,7 +339,7 @@ bool OutputTable::dropMimeData(const QMimeData *data, Qt::DropAction, int row, i
 
     if (!newOutputs.empty())
     {
-        beginInsertRows(QModelIndex(), beginRow, beginRow + newOutputs.size() - 1);
+        beginInsertRows(QModelIndex(), beginRow, beginRow + int(newOutputs.size()) - 1);
         m_modelOutputs.insert(m_modelOutputs.begin() + beginRow, newOutputs.begin(), newOutputs.end());
         endInsertRows();
         return true;

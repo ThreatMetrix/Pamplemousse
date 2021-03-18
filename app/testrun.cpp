@@ -204,7 +204,7 @@ namespace
     }
 
     // Print the outputs from executing a model once, in the same order as the outputDictionary
-    static void printOutputs(std::ostream & output, lua_State * L, const std::vector<PMMLExporter::ModelOutput> & outputs, size_t nOutputs)
+    static void printOutputs(std::ostream & output, lua_State * L, const std::vector<PMMLExporter::ModelOutput> & outputs, int nOutputs)
     {
         // Figure out the first offset (number of expected returns)
         int outTableIndex = lua_gettop(L) - nOutputs;
@@ -260,7 +260,7 @@ namespace
     }
     
     // Reads a line from the verification file and compares it with outputs.
-    bool verifyOutputs(lua_State * L, const std::vector<PMMLExporter::ModelOutput> & verificationColumns, std::ifstream & verificationData, double epsilon, size_t line, size_t nOutputs)
+    bool verifyOutputs(lua_State * L, const std::vector<PMMLExporter::ModelOutput> & verificationColumns, std::ifstream & verificationData, double epsilon, size_t line, int nOutputs)
     {
         std::string lineBuffer;
         if (!std::getline(verificationData, lineBuffer))
@@ -368,7 +368,7 @@ namespace
     }
     
     // Runs the model for a single line of input
-    bool executeThisLine(lua_State * L, const std::string & lineBuffer, const std::vector<PMMLExporter::ModelOutput> & inputColumns, bool insensitive, size_t hasOverflow, size_t nOutputs)
+    bool executeThisLine(lua_State * L, const std::string & lineBuffer, const std::vector<PMMLExporter::ModelOutput> & inputColumns, bool insensitive, size_t hasOverflow, int nOutputs)
     {
         lua_getglobal(L, "func");
         const char * token = lineBuffer.c_str();
@@ -379,7 +379,7 @@ namespace
             cols++;
             lua_createtable(L, hasOverflow, 0);
         }
-        size_t overflowPos = lua_gettop(L);
+        int overflowPos = lua_gettop(L);
         for (const auto & column : inputColumns)
         {
             bool quoted = false;
@@ -577,7 +577,7 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
         printColumnHeaders(output, outputs);
     }
     
-    size_t nOutputs = 0;
+    int nOutputs = 0;
     for (const auto & o : outputs)
     {
         if (o.field)
@@ -585,8 +585,7 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
             nOutputs++;
         }
     }
-    timespec startTime;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &startTime);
+    auto startTime = std::chrono::steady_clock::now();
     size_t lineNumber = 1; // First line is the header.
     std::string lineBuffer;
     bool ok = true;
@@ -624,9 +623,8 @@ bool PMMLExporter::doTestRun(const char * sourceFile, const std::vector<ModelOut
     lua_close(L);
     
     int count = lineNumber - 1;
-    timespec endTime;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &endTime);
-    long nanoseconds = (endTime.tv_sec - startTime.tv_sec) * 1000000000 + (endTime.tv_nsec - startTime.tv_nsec);
+    auto endTime = std::chrono::steady_clock::now();
+    long nanoseconds = std::chrono::nanoseconds(endTime - startTime).count();
     fprintf(stderr, "%i runs in %li ns, %lins each run\n", count, nanoseconds, count == 0 ? 0 : (nanoseconds / count));
     return ok;
 }

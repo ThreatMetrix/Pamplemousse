@@ -27,7 +27,47 @@
 #include <vector>
 
 #include <stdlib.h>
+
+#ifdef _WIN32
+
+// Copyright 2016 Microsoft
+// Licensed under the Apache License, Version 2.0
+// https://github.com/iotivity/iotivity/blob/master/resource/c_common/windows/src/getopt.c
+
+static char* optarg = NULL;
+static int optind = 1;
+
+static int getopt(int argc, char *const argv[], const char *optstring)
+{
+    if ((optind >= argc) || (argv[optind][0] != '-') || (argv[optind][0] == 0))
+    {
+        return -1;
+    }
+
+    int opt = argv[optind][1];
+    const char *p = strchr(optstring, opt);
+
+    if (p == NULL)
+    {
+        return '?';
+    }
+    if (p[1] == ':')
+    {
+        optind++;
+        if (optind >= argc)
+        {
+            return '?';
+        }
+        optarg = argv[optind];
+        optind++;
+    }
+    return opt;
+}
+// End Copyright Microsoft
+
+#else
 #include <getopt.h>
+#endif
 
 #ifdef INCLUDE_UI
 #include "pamplemousse_ui.h"
@@ -64,12 +104,13 @@ int main(int argc, char *argv[])
 {
     int isTest = 0;
     int isConvert = 0;
+    
     int inputFormat = int(PMMLExporter::Format::AS_MULTI_ARG);
     int outputFormat = int(PMMLExporter::Format::AS_MULTI_ARG);
-    
+#ifndef _WIN32
     struct option longopts[] = {
-        { "test",      no_argument,     &isTest,       1 },
-        { "convert",   no_argument,     &isConvert,    1 },
+        { "test",      no_argument,      NULL,         'T' },
+        { "convert",   no_argument,      NULL,         'C' },
         { "insensitive", no_argument,    NULL,         'i' },
         { "data",      required_argument,NULL,         'd' },
         { "verify",    required_argument,NULL,         'v' },
@@ -84,6 +125,9 @@ int main(int argc, char *argv[])
         { "output_table",no_argument,    &outputFormat,int(PMMLExporter::Format::AS_TABLE) },
         { NULL,        0,                NULL,          0 }
     };
+#endif
+    
+    static constexpr char OPTSTRING[] = "id:v:o:f:p:he:TC";
 
     const char * dataFile   = nullptr;
     const char * verifyFile = nullptr;
@@ -93,9 +137,22 @@ int main(int argc, char *argv[])
     std::vector<PMMLExporter::ModelOutput> inputs;
     std::vector<PMMLExporter::ModelOutput> outputs;
     char c;
-    while ((c = getopt_long(argc, argv, "id:v:o:f:p:he:", longopts, NULL)) != -1)
+    
+#ifndef _WIN32
+    while ((c = getopt_long(argc, argv, OPTSTRING, longopts, NULL)) != -1)
+#else
+    while ((c = getopt(argc, argv, OPTSTRING)) != -1)
+#endif
     {
-        if (c == 'i')
+        if (c == 'T')
+        {
+            isTest = 1;
+        }
+        else if (c == 'C')
+        {
+            isConvert = 1;
+        }
+        else if (c == 'i')
         {
             insensitive = true;
         }
