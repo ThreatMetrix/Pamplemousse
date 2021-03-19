@@ -41,7 +41,7 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode_12.app/Contents/Developer; xcrun --show-sdk-version
       - name: Install Deps (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get install libx11-dev libgl1-mesa-dev libglu1-mesa-dev libxi-dev libxext-dev libxkbcommon-x11-dev gperf autopoint
+        run: sudo apt-get install libx11-dev libgl1-mesa-dev libglu1-mesa-dev libxi-dev libxext-dev libxkbcommon-x11-dev libx11-xcb-dev gperf autopoint
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
@@ -65,26 +65,6 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
-      - if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: error-${{ matrix.triplet }}
-          path: '${{ github.workspace }}\\vcpkg\\buildtrees\\qt5-declarative\\package-build-x64-windows-dbg-out.log'
-      - if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: error-${{ matrix.triplet }}
-          path: '${{ github.workspace }}\\vcpkg\\buildtrees\\qt5-declarative\\package-build-x64-windows-dbg-err.log'
-      - if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: error-${{ matrix.triplet }}
-          path: '${{ github.workspace }}/vcpkg/buildtrees/qt5-base/config-${{ matrix.triplet }}-dbg-err.log'
-      - if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: error-${{ matrix.triplet }}
-          path: '${{ github.workspace }}/vcpkg/buildtrees/qt5-base/config-${{ matrix.triplet }}-dbg-out.log'
       - uses: actions/upload-artifact@v2
         with:
           name: pamplemousse-${{ matrix.triplet }}
