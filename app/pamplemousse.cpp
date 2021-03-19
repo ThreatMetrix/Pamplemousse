@@ -38,6 +38,9 @@ struct option
     int val;
 };
 
+#define no_argument        0
+#define required_argument  1
+
 // Copyright 2016 Microsoft
 // Licensed under the Apache License, Version 2.0
 // https://github.com/iotivity/iotivity/blob/master/resource/c_common/windows/src/getopt.c
