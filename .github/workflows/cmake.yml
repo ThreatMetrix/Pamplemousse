@@ -36,9 +36,18 @@ jobs:
       - name: Install Gperf (Mac)
         if: startsWith(matrix.os, 'macos')
         run: brew install gperf
+      - name: Install Automake (Mac)
+        if: startsWith(matrix.os, 'macos')
+        run: brew install automake
       - name: Install Gperf (Linux)
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install gperf
+      - name: Install Autopoint (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get install autopoint
+      - name: Install Autopoint (Mac)
+        if: startsWith(matrix.os, 'macos')
+        run: brew install gettext; sudo ln -s `brew ls gettext | grep bin/autopoint` /usr/local/bin
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
