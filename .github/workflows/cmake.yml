@@ -58,7 +58,7 @@ jobs:
         run: brew install cppunit
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
         uses: lukka/run-cmake@v3
-	continue-on-error: true
+        continue-on-error: true
         with:
           cmakeGenerator: 'Ninja'  
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
