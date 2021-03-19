@@ -38,7 +38,7 @@ jobs:
         run: brew install automake gperf
       - name: Select SDK (Mac)
         if: startsWith(matrix.os, 'macos')
-	run: sudo xcode-select -s /Applications/Xcode_12.app/Contents/Developer; xcrun --show-sdk-version
+        run: sudo xcode-select -s /Applications/Xcode_12.app/Contents/Developer; xcrun --show-sdk-version
       - name: Install Deps (Linux)
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install libx11-dev libgl1-mesa-dev libglu1-mesa-dev libxi-dev libxext-dev libxkbcommon-x11-dev gperf autopoint
