@@ -123,7 +123,7 @@ bool PMMLExporter::ModelOutput::bindToModel(PMMLDocument::ConversionContext & co
                 break;
                 
             case ',':
-                decimalPoints = newTerm;
+                decimalPoints = int(newTerm);
                 break;
                 
             default:

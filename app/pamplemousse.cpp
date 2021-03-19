@@ -30,6 +30,14 @@
 
 #ifdef _WIN32
 
+struct option
+{
+    const char *name;
+    int has_arg;
+    int *flag;
+    int val;
+};
+
 // Copyright 2016 Microsoft
 // Licensed under the Apache License, Version 2.0
 // https://github.com/iotivity/iotivity/blob/master/resource/c_common/windows/src/getopt.c
@@ -74,30 +82,76 @@ static int getopt(int argc, char *const argv[], const char *optstring)
 static int runUI(int argc, char *argv[], bool insensitive, std::vector<PMMLExporter::ModelOutput> && outputs, int inputFormat, int outputFormat);
 #endif
 
-static void printUsage(const char * programName)
+
+
+static void printUsage(const char * programName, option* longopts)
 {
-    std::cout << "OVERVIEW:\tconverts PMML document to Lua" << std::endl;
-    std::cout << std::endl;
-    std::cout << "USAGE:\t\t" << programName << " (--test/--convert) [options] <input>" << std::endl;
-    std::cout << std::endl;
-    std::cout << "OPTIONS:\t--test\t\t\t\t\t\tCheck model output given a CSV input" << std::endl;
-    std::cout << "\t\t\t--convert\t\t\t\t\tConvert model to LUA" << std::endl;
-    std::cout << "\t\t-h\t--help\t\t\t\t\t\tDisplay this message." << std::endl;
-    std::cout << "\t\t-i\t--insenstive\t\t\t\tConvert all strings to lower case\t\t\t\t\t(--test/--convert, optional)" << std::endl;
-    std::cout << "\t\t-o\t--output <file>\t\t\t\tWrite to a file (defaults to stdout)\t\t\t\t(--test/--convert, optional)" << std::endl;
-    std::cout << "\t\t-f\t--feature featurename\t\tDefine input\t\t\t\t\t\t\t\t\t\t(--convert, optional)" << std::endl;
-    std::cout << "\t\t-p\t--prediction <name>=<name>\tOutput to a custom attribute.\t\t\t\t\t\t(--test/--convert, optional)" << std::endl;
-    std::cout << "\t\t-d\t--data <file>\t\t\t\tCSV input file\t\t\t\t\t\t\t\t\t\t(--test, mandatory)" << std::endl;
-    std::cout << "\t\t-v\t--verify <file>\t\t\t\tCSV input file\t\t\t\t\t\t\t\t\t\t(--test, optional)" << std::endl;
-    std::cout << "\t\t-e\t--epsilon <epsilon>\t\t\tPrecision to verify output.\t\t\t\t\t\t\t(--test, optional)" << std::endl;
-    std::cout << "\t\t\t--input_multi\t\t\t\tUse multiple parameters for inputs (default)\t\t(--convert, optional)" << std::endl;
-    std::cout << "\t\t\t--input_table\t\t\t\tUse table for inputs\t\t\t\t\t\t\t\t(--convert, optional)" << std::endl;
-    std::cout << "\t\t\t--output_multi\t\t\t\tUse multiple parameters for outputs (default)\t\t(--convert, optional)" << std::endl;
-    std::cout << "\t\t\t--output_table\t\t\t\tUse table for outputs\t\t\t\t\t\t\t\t(--convert, optional)" << std::endl;
-    std::cout << std::endl;
-    std::cout << "For any output, you may reference any target/predicted or output value from the model. Furthermore, you may access any neuron's activation value through \"neuron:<id>\"" << std::endl;
-    std::cout << "You may also put expression using +, -, * and / after an model output, but not before." << std::endl;
-    std::cout << "E.g. \"--prediction probability=predicted_value*100+3\" is acceptable, but \"--prediction probability=100*predicted_value+3\" is not" << std::endl;
+    static constexpr size_t NUMBER_OF_MODES = 3;
+    static constexpr const char * DESCRIPTIONS[] = {
+        "Check model output given a CSV input",
+        "Convert model to LUA",
+        "Display this message.",
+        "Convert all strings to lower case",
+        "Write to a file (defaults to stdout)",
+        "Define input",
+        "Output to a custom attribute.",
+        "CSV input file",
+        "CSV input file",
+        "Precision to verify output",
+        "Use multiple parameters for inputs (default)",
+        "Use table for inputs",
+        "Use multiple parameters for outputs",
+        "Use table for outputs",
+        nullptr
+    };
+    
+    printf("OVERVIEW:\tconverts PMML document to Lua\n");
+    printf("Usage: %s <mode> <option> <option>... <filename.pmml>\n\nModes:\n", programName);
+    
+    for (size_t i = 0; longopts[i].name != nullptr; ++i)
+    {
+        if (i == NUMBER_OF_MODES)
+        {
+            printf("\nOptions:\n");
+        }
+        
+        const option & opt = longopts[i];
+        char singleOption[3] = "  ";
+        if (opt.flag == nullptr)
+        {
+            singleOption[0] = '-';
+            singleOption[1] = opt.val;
+        }
+#ifdef _WIN32
+        else
+        {
+            // Windows currently only supports short options for now
+            continue;
+        }
+#endif
+        const char * argstring = opt.has_arg == no_argument ? "     " : "<arg>";
+        
+        assert(DESCRIPTIONS[i]);
+        printf("  %s %s    ", singleOption, argstring);
+#ifndef _WIN32
+        // Do not show long names for windows, because they are not supported
+        const char * name = opt.name;
+        constexpr char columnBlank[] = "                   ";
+        constexpr size_t columnBlankWidth = sizeof(columnBlank) - 1;
+        const size_t namelen = strlen(name);
+        assert(namelen <= columnBlankWidth);
+        printf("--%s %s%.*s", name, argstring, (int)(columnBlankWidth - namelen), columnBlank);
+#endif
+        printf("%s\n",  DESCRIPTIONS[i]);
+    }
+    
+#ifdef INCLUDE_UI
+    printf("\nStarting without a mode specified will open the interactive GUI\n");
+#endif
+    
+    printf("\nFor any output, you may reference any target/predicted or output value from the model. Furthermore, you may access any neuron's activation value through \"neuron:<id>\"\n");
+    printf("You may also put expression using +, -, * and / after an model output, but not before.\n");
+    printf("E.g. \"--prediction probability=predicted_value*100+3\" is acceptable, but \"--prediction probability=100*predicted_value+3\" is not\n");
 }
 
 int main(int argc, char *argv[])
@@ -107,7 +161,7 @@ int main(int argc, char *argv[])
     
     int inputFormat = int(PMMLExporter::Format::AS_MULTI_ARG);
     int outputFormat = int(PMMLExporter::Format::AS_MULTI_ARG);
-#ifndef _WIN32
+    
     struct option longopts[] = {
         { "test",      no_argument,      NULL,         'T' },
         { "convert",   no_argument,      NULL,         'C' },
@@ -125,7 +179,6 @@ int main(int argc, char *argv[])
         { "output_table",no_argument,    &outputFormat,int(PMMLExporter::Format::AS_TABLE) },
         { NULL,        0,                NULL,          0 }
     };
-#endif
     
     static constexpr char OPTSTRING[] = "id:v:o:f:p:he:TC";
 
@@ -187,7 +240,7 @@ int main(int argc, char *argv[])
         }
         else if (c == 'h')
         {
-            printUsage(argv[0]);
+            printUsage(argv[0], longopts);
             return 0;
         }
         else if (c == 'e')
@@ -203,7 +256,7 @@ int main(int argc, char *argv[])
         else if (c != 0)
         {
             fprintf( stderr, "%s: Unrecognised option: %s\n", argv[0], argv[optind]);
-            printUsage(argv[0]);
+            printUsage(argv[0], longopts);
             return -1;
         }
     }
@@ -217,8 +270,8 @@ int main(int argc, char *argv[])
 
     if (isTest + isConvert != 1)
     {
-        fprintf( stderr, "%s: Requires exactly one of the following arguments: --%s, --%s\n", argv[0], longopts[0].name, longopts[1].name );
-        printUsage(argv[0]);
+        fprintf( stderr, "%s: Requires exactly one of the following arguments: -T/--test, -C/--convert\n", argv[0]);
+        printUsage(argv[0], longopts);
         return -1;
     }
 

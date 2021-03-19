@@ -58,4 +58,7 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
-
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pamplemousse-${{ env.name }}
+          path: '${{github.workspace}}/build/pamplemousse'

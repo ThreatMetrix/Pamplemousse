@@ -286,7 +286,7 @@ public:
                         std::string message = lua_tostring( L , -1 );
                         CPPUNIT_ASSERT_MESSAGE( message, false );
                     }
-                    CPPUNIT_ASSERT_EQUAL_MESSAGE(message, valueToTry == 4, bool(lua_toboolean(L, -1) != 0));
+                    CPPUNIT_ASSERT_EQUAL_MESSAGE(message, bool(valueToTry == 4), bool(lua_toboolean(L, -1)));
                     lua_pop(L, 1);
                 }
 

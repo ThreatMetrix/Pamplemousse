@@ -374,7 +374,7 @@ namespace
         lua_getglobal(L, "func");
         const char * token = lineBuffer.c_str();
         lua_checkstack(L, std::min(200, int(inputColumns.size()) + 2));
-        size_t cols = 0;
+        int cols = 0;
         if (nOverflow > 0)
         {
             cols++;
