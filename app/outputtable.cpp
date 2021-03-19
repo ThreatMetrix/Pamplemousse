@@ -352,6 +352,11 @@ bool OutputTable::dropMimeData(const QMimeData *data, Qt::DropAction, int row, i
 
 bool OutputTable::removeRows(int row, int count, const QModelIndex &)
 {
+    if (count == 0)
+    {
+        return true;
+    }
+
     beginRemoveRows(QModelIndex(), row, row + count - 1);
 
     m_modelOutputs.erase(m_modelOutputs.begin() + row, m_modelOutputs.begin() + row + count);

@@ -41,7 +41,7 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode_12.app/Contents/Developer; xcrun --show-sdk-version
       - name: Install Deps (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get install libx11-dev libgl1-mesa-dev libglu1-mesa-dev libxi-dev libxext-dev libxkbcommon-x11-dev libx11-xcb-dev gperf autopoint
+        run: sudo apt-get install libx11-dev libgl1-mesa-dev libglu1-mesa-dev libxi-dev libxext-dev libxkbcommon-x11-dev libx11-xcb-dev libxcb-sync-dev libxcb-xinerama0-dev gperf autopoint
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
