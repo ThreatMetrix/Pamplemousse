@@ -11,6 +11,6 @@
         {
 	    "name": "cppunit",
 	    "platform": "!osx"
-	}]
+	}
     ]
 }
