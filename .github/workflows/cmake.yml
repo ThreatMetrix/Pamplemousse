@@ -69,7 +69,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: error-${{ matrix.triplet }}
-          path: '{{ github.workspace }}/vcpkg/buildtrees/fontconfig/autoconf-${{ matrix.triplet }}-err.log'
+          path: '${{ github.workspace }}/vcpkg/buildtrees/fontconfig/autoconf-${{ matrix.triplet }}-err.log'
       - uses: actions/upload-artifact@v2
         with:
           name: pamplemousse-${{ matrix.triplet }}
