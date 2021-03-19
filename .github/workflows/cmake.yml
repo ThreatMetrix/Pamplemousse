@@ -38,7 +38,7 @@ jobs:
         run: brew install automake gperf
       - name: Install Deps (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get install libx11-dev libmesa-dev libxi-dev libxext-dev gperf autopoint
+        run: sudo apt-get install libx11-dev libgl1-mesa-dev libxi-dev libxext-dev gperf autopoint
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
