@@ -33,9 +33,12 @@ jobs:
           submodules: true
       - name: Get CMake
         uses: lukka/get-cmake@latest
-      - name: Install Fontconfig (Mac)
+      - name: Install Gperf (Mac)
         if: startsWith(matrix.os, 'macos')
-        run: brew install fontconfig
+        run: brew install gperf
+      - name: Install Gperf (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: apt-get install gperf
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
@@ -55,6 +58,7 @@ jobs:
         run: brew install cppunit
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
         uses: lukka/run-cmake@v3
+	continue-on-error: true
         with:
           cmakeGenerator: 'Ninja'  
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
@@ -62,6 +66,11 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
+      - if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: error-${{ matrix.triplet }}
+          path: '{{ github.workspace }}/vcpkg/buildtrees/fontconfig/autoconf-${{ matrix.triplet }}-err.log'
       - uses: actions/upload-artifact@v2
         with:
           name: pamplemousse-${{ matrix.triplet }}
