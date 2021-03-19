@@ -65,6 +65,16 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
+      - if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: error-${{ matrix.triplet }}
+          path: '${{ github.workspace }}/vcpkg/buildtrees/qt5-base/config-${{ matrix.triplet }}-dbg-err.log'
+      - if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: error-${{ matrix.triplet }}
+          path: '${{ github.workspace }}/vcpkg/buildtrees/qt5-base/config-${{ matrix.triplet }}-dbg-out.log'
       - uses: actions/upload-artifact@v2
         with:
           name: pamplemousse-${{ matrix.triplet }}
