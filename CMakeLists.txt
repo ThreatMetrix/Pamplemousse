@@ -4,6 +4,13 @@ project(pamplemousse)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+vcpkg_configure_cmake(
+    SOURCE_PATH ${SOURCE_PATH}
+    PREFER_NINJA
+    OPTIONS
+        -DVCPKG_OSX_DEPLOYMENT_TARGET=11.15
+)
+
 find_package( Lua REQUIRED )
 
 find_package( tinyxml2 REQUIRED )
