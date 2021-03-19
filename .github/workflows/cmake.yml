@@ -33,18 +33,12 @@ jobs:
           submodules: true
       - name: Get CMake
         uses: lukka/get-cmake@latest
-      - name: Install Gperf (Mac)
+      - name: Install Deps (Mac)
         if: startsWith(matrix.os, 'macos')
-        run: brew install gperf
-      - name: Install Automake (Mac)
-        if: startsWith(matrix.os, 'macos')
-        run: brew install automake
-      - name: Install Gperf (Linux)
+        run: brew install automake gperf
+      - name: Install Deps (Linux)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get install gperf
-      - name: Install Autopoint (Linux)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get install autopoint
+        run: sudo apt-get install libx11-dev libmesa-dev libxi-dev libxext-dev gperf autopoint
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
