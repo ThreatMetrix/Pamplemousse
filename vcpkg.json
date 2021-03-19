@@ -7,16 +7,10 @@
     "dependencies": [
 	"tinyxml2",
 	"lua",
+	"qt5",
         {
 	    "name": "cppunit",
 	    "platform": "!osx"
-	}],
-    "features": [
-	{
-	    "name": "ui",
-	    "description": "A graphical interface to run the tool interactively",
-	    "dependencies": [
-		"qt5"]
-	}
+	}]
     ]
 }

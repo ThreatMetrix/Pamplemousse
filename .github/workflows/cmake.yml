@@ -18,10 +18,13 @@ jobs:
         include:
           - os: windows-latest
             triplet: x64-windows
+            artifact: pamplemousse.exe
           - os: ubuntu-latest
             triplet: x64-linux
+            artifact: pamplemousse
           - os: macos-latest
             triplet: x64-osx
+            artifact: pamplemousse
 
     steps:
       - name: Checkout
@@ -30,8 +33,9 @@ jobs:
           submodules: true
       - name: Get CMake
         uses: lukka/get-cmake@latest
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+      - name: Install Fontconfig (Mac)
+        if: startsWith(matrix.os, 'macos')
+        run: brew install fontconfig
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
         uses: lukka/run-vcpkg@v6
@@ -61,4 +65,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: pamplemousse-${{ matrix.triplet }}
-          path: '${{github.workspace}}/build/pamplemousse'
+          path: '${{github.workspace}}/build/${{matrix.artifact}}'
