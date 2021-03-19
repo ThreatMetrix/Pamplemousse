@@ -8,6 +8,6 @@
 	"tinyxml2",
 	"lua",
 	"cppunit",
-	"qt5-core"
+	"qt5-base"
     ]
 }
