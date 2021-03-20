@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set(VCPKG_BUILD_TYPE release)
+set(VCPKG_OVERLAY_TRIPLETS custom_triplets)
 
 project(pamplemousse)
 
