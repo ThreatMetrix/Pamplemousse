@@ -8,6 +8,9 @@
 	"tinyxml2",
 	"lua",
 	"cppunit",
-	"qt5-base"
+        {
+	    "name": "qt5",
+	    "platform": "!linux"
+	}
     ]
 }
