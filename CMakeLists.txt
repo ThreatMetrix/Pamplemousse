@@ -20,6 +20,7 @@ add_library(libpamplemousse STATIC
     common/pmmldocumentdefs.cpp common/pmmldocumentdefs.hpp
     common/analyser.cpp common/analyser.hpp
     common/functiondispatch.hpp
+    model/generalregressionmodel.cpp model/generalregressionmodel.hpp
     model/miningmodel.cpp model/miningmodel.hpp
     model/naivebayesmodel.cpp model/naivebayesmodel.hpp
     model/neuralnetworkmodel.cpp model/neuralnetworkmodel.hpp

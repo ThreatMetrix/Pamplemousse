@@ -23,46 +23,6 @@
 
 namespace
 {
-    enum RegressionNormalizationMethod
-    {
-        METHOD_CAUCHIT,
-        METHOD_CLOGLOG,
-        METHOD_EXP,
-        METHOD_LOGIT,
-        METHOD_LOGLOG,
-        METHOD_NONE,
-        METHOD_PROBIT,
-        METHOD_SIMPLEMAX,
-        METHOD_SOFTMAX,
-        METHOD_INVALID
-    };
-    
-    const char * const REGRESSIONNORMALIZATIONMETHOD[9] =
-    {
-        "cauchit",
-        "cloglog",
-        "exp",
-        "logit",
-        "loglog",
-        "none",
-        "probit",
-        "simplemax",
-        "softmax"
-    };
-
-    RegressionNormalizationMethod getRegressionNormalizationMethodFromString(const char * name)
-    {
-        auto found = std::equal_range(REGRESSIONNORMALIZATIONMETHOD, REGRESSIONNORMALIZATIONMETHOD + static_cast<int>(METHOD_INVALID), name, PMMLDocument::stringIsBefore);
-        if (found.first != found.second)
-        {
-            return static_cast<RegressionNormalizationMethod>(found.first - REGRESSIONNORMALIZATIONMETHOD);
-        }
-        else
-        {
-            return METHOD_INVALID;
-        }
-    }
-
     bool parseRegressionTable(AstBuilder & builder, const tinyxml2::XMLElement * node)
     {
         double intercept;
@@ -193,75 +153,8 @@ namespace
         return true;
     }
     
-    // Add the normalization function to a regression table.
-    void normalizeTable(AstBuilder & builder, RegressionNormalizationMethod normMethod, bool clamp)
-    {
-        if (clamp)
-        {
-            builder.constant(1);
-            builder.function(Function::functionTable.names.min, 2);
-            builder.constant(0);
-            builder.function(Function::functionTable.names.max, 2);
-        }
-        
-        switch (normMethod)
-        {
-            case METHOD_CAUCHIT:
-                // predictedValue = 0.5 + (1/π) arctan(y1)
-                builder.function(Function::functionTable.names.atan, 1);
-                // HACK: this will need to be done properly if this ever outputs anything but Lua.
-                builder.constant("(1 / math.pi)", PMMLDocument::TYPE_NUMBER);
-                builder.function(Function::functionTable.names.times, 2);
-                builder.constant(0.5);
-                builder.function(Function::functionTable.names.plus, 2);
-                break;
-            case METHOD_CLOGLOG:
-                // predictedValue = 1 - exp( -exp( y1))
-                builder.function(Function::functionTable.names.exp, 1);
-                builder.function(Function::unaryMinus, 1);
-                builder.function(Function::functionTable.names.exp, 1);
-                builder.constant(1);
-                builder.swapNodes(-1, -2);
-                builder.function(Function::functionTable.names.minus, 2);
-                break;
-            case METHOD_EXP:
-                // predictedValue = exp(y1)
-                builder.function(Function::functionTable.names.exp, 1);
-                break;
-                // Softmax is treated like logit in regression models.
-                // in classification models, its treated as "METHOD_EXP"
-            case METHOD_SOFTMAX:
-            case METHOD_LOGIT:
-                // predictedValue = 1/(1+exp(-y1))
-                builder.function(Function::unaryMinus, 1);
-                builder.function(Function::functionTable.names.exp, 1);
-                builder.constant(1);
-                builder.function(Function::functionTable.names.plus, 2);
-                builder.constant(1);
-                builder.swapNodes(-1, -2);
-                builder.function(Function::functionTable.names.divide, 2);
-                break;
-            case METHOD_LOGLOG:
-                // predictedValue = exp( -exp( -y1))
-                builder.function(Function::unaryMinus, 1);
-                builder.function(Function::functionTable.names.exp, 1);
-                builder.function(Function::unaryMinus, 1);
-                builder.function(Function::functionTable.names.exp, 1);
-                break;
-            case METHOD_PROBIT:
-                builder.function(Function::functionTable.names.stdNormalCDF, 1);
-                break;
-                // These are all no-ops or unsupported.
-            case METHOD_NONE:
-            case METHOD_SIMPLEMAX:
-            case METHOD_INVALID:
-                // predictedValue = y1
-                break;
-        }
-    }
-
     bool doRegressionClassificationMax(AstBuilder & builder, const tinyxml2::XMLElement * node,
-                                       PMMLDocument::ModelConfig & config, RegressionNormalizationMethod normMethod, size_t & blockSize)
+                                       PMMLDocument::ModelConfig & config, RegressionModel::RegressionNormalizationMethod normMethod, size_t & blockSize)
     {
         std::vector<std::string> categoryNames;
         for (const tinyxml2::XMLElement * regressionTable = node->FirstChildElement("RegressionTable");
@@ -273,7 +166,7 @@ namespace
                 {
                     return false;
                 }
-                normalizeTable(builder, normMethod == METHOD_SOFTMAX ? METHOD_EXP : METHOD_NONE, false);
+                normalizeTable(builder, normMethod == RegressionModel::METHOD_SOFTMAX ? RegressionModel::METHOD_EXP : RegressionModel::METHOD_NONE, false);
                 builder.declare(PMMLDocument::getOrAddCategoryInOutputMap(builder.context(), config.probabilityValueName, "probabilities", PMMLDocument::TYPE_NUMBER, targetCategory), AstBuilder::HAS_INITIAL_VALUE);
                 blockSize++;
                 categoryNames.push_back(targetCategory);
@@ -291,7 +184,7 @@ namespace
     }
 
     bool doRegressionClassificationNonmax(AstBuilder & builder, const tinyxml2::XMLElement * node,
-                                          PMMLDocument::ModelConfig & config, RegressionNormalizationMethod normMethod, bool binaryField, size_t & blockSize)
+                                          PMMLDocument::ModelConfig & config, RegressionModel::RegressionNormalizationMethod normMethod, bool binaryField, size_t & blockSize)
     {
         std::vector<std::string> categoryNames;
         for (const tinyxml2::XMLElement * regressionTable = node->FirstChildElement("RegressionTable");
@@ -343,9 +236,9 @@ namespace
     }
 
     bool doRegressionClassification(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ProbabilitiesOutputMap &,
-                                    PMMLDocument::ModelConfig & config, RegressionNormalizationMethod normMethod, size_t & blockSize)
+                                    PMMLDocument::ModelConfig & config, RegressionModel::RegressionNormalizationMethod normMethod, size_t & blockSize)
     {
-        if (normMethod != METHOD_SIMPLEMAX && normMethod != METHOD_SOFTMAX)
+        if (normMethod != RegressionModel::METHOD_SIMPLEMAX && normMethod != RegressionModel::METHOD_SOFTMAX)
         {
             // PMML specified special treatment for "binary fields", i.e. catagorical fields with two values.
             bool binaryField = config.targetField != nullptr && config.targetField->field.opType == PMMLDocument::OPTYPE_CATEGORICAL && config.targetField->field.values.size() == 2;
@@ -356,7 +249,122 @@ namespace
             return doRegressionClassificationMax(builder, node, config, normMethod, blockSize);
         }
     }
+
+
+    const char * const REGRESSIONNORMALIZATIONMETHOD[static_cast<int>(RegressionModel::METHOD_INVALID)] =
+    {
+        "cauchit",
+        "cloglog",
+        "exp",
+        "identity",
+        "log",
+        "logc",
+        "logit",
+        "loglog",
+        "none",
+        "probit",
+        "simplemax",
+        "softmax"
+    };
+
 }
+
+RegressionModel::RegressionNormalizationMethod RegressionModel::getRegressionNormalizationMethodFromString(const char * name)
+{
+    auto found = std::equal_range(REGRESSIONNORMALIZATIONMETHOD, REGRESSIONNORMALIZATIONMETHOD + static_cast<int>(METHOD_INVALID), name, PMMLDocument::stringIsBefore);
+    if (found.first != found.second)
+    {
+        return static_cast<RegressionNormalizationMethod>(found.first - REGRESSIONNORMALIZATIONMETHOD);
+    }
+    else
+    {
+        return METHOD_INVALID;
+    }
+}
+
+// Add the normalization function to a regression table.
+void RegressionModel::normalizeTable(AstBuilder & builder, RegressionModel::RegressionNormalizationMethod normMethod, bool clamp)
+{
+    switch (normMethod)
+    {
+        case METHOD_CAUCHIT:
+            // predictedValue = 0.5 + (1/π) arctan(y1)
+            builder.function(Function::functionTable.names.atan, 1);
+            // HACK: this will need to be done properly if this ever outputs anything but Lua.
+            builder.constant("(1 / math.pi)", PMMLDocument::TYPE_NUMBER);
+            builder.function(Function::functionTable.names.times, 2);
+            builder.constant(0.5);
+            builder.function(Function::functionTable.names.plus, 2);
+            break;
+            
+        case METHOD_CLOGLOG:
+            // predictedValue = 1 - exp( -exp( y1))
+            builder.function(Function::functionTable.names.exp, 1);
+            builder.function(Function::unaryMinus, 1);
+            builder.function(Function::functionTable.names.exp, 1);
+            builder.constant(1);
+            builder.swapNodes(-1, -2);
+            builder.function(Function::functionTable.names.minus, 2);
+            break;
+            
+        case METHOD_LOGC:
+            // predictedValue = 1 - exp(y1)
+            builder.function(Function::functionTable.names.exp, 1);
+            builder.constant(1);
+            builder.swapNodes(-1, -2);
+            builder.function(Function::functionTable.names.minus, 2);
+            break;
+            
+        case METHOD_EXP:
+        case METHOD_LOG:
+            // predictedValue = exp(y1)
+            builder.function(Function::functionTable.names.exp, 1);
+            break;
+            
+            // Softmax is treated like logit in regression models.
+            // in classification models, its treated as "METHOD_EXP"
+        case METHOD_SOFTMAX:
+        case METHOD_LOGIT:
+            // predictedValue = 1/(1+exp(-y1))
+            builder.function(Function::unaryMinus, 1);
+            builder.function(Function::functionTable.names.exp, 1);
+            builder.constant(1);
+            builder.function(Function::functionTable.names.plus, 2);
+            builder.constant(1);
+            builder.swapNodes(-1, -2);
+            builder.function(Function::functionTable.names.divide, 2);
+            break;
+            
+        case METHOD_LOGLOG:
+            // predictedValue = exp( -exp( -y1))
+            builder.function(Function::unaryMinus, 1);
+            builder.function(Function::functionTable.names.exp, 1);
+            builder.function(Function::unaryMinus, 1);
+            builder.function(Function::functionTable.names.exp, 1);
+            break;
+            
+        case METHOD_PROBIT:
+            builder.function(Function::functionTable.names.stdNormalCDF, 1);
+            break;
+            
+            // These are all no-ops or unsupported.
+        case METHOD_NONE:
+        case METHOD_IDENTITY:
+        case METHOD_SIMPLEMAX:
+        case METHOD_INVALID:
+            // predictedValue = y1
+            break;
+    }
+    
+    if (clamp)
+    {
+        builder.constant(1);
+        builder.function(Function::functionTable.names.min, 2);
+        builder.constant(0);
+        builder.function(Function::functionTable.names.max, 2);
+    }
+}
+
 
 bool RegressionModel::buildCatagoricalPredictor(AstBuilder & builder, const tinyxml2::XMLElement * element, double coefficient)
 {

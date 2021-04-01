@@ -40,7 +40,7 @@ static bool buildFromPairs(AstBuilder & builder, const PMMLDocument::MiningField
         }
         else
         {
-            builder.parsingError("DerivedField only supports Discretize at %i\n", derivedField->GetLineNum());
+            builder.parsingError("DerivedField only supports Discretize", derivedField->GetLineNum());
             return false;
         }
     }
@@ -51,14 +51,14 @@ static bool buildFromPairs(AstBuilder & builder, const PMMLDocument::MiningField
         const char * value = pair->Attribute("value");
         if (value == nullptr)
         {
-            builder.parsingError("No value specified at %i\n", pair->GetLineNum());
+            builder.parsingError("No value specified", pair->GetLineNum());
             return false;
         }
         
         const tinyxml2::XMLElement * targetValueCounts = pair->FirstChildElement("TargetValueCounts");
         if (targetValueCounts == nullptr)
         {
-            builder.parsingError("No TargetValueCounts specified at %i\n", pair->GetLineNum());
+            builder.parsingError("No TargetValueCounts specified", pair->GetLineNum());
             return false;
         }
         
@@ -69,12 +69,12 @@ static bool buildFromPairs(AstBuilder & builder, const PMMLDocument::MiningField
             double count;
             if (targetValue == nullptr)
             {
-                builder.parsingError("No value at %i\n", targetValueCount->GetLineNum());
+                builder.parsingError("No value", targetValueCount->GetLineNum());
                 return false;
             }
             if (targetValueCount->QueryAttribute("count", &count) != tinyxml2::XML_SUCCESS)
             {
-                builder.parsingError("No valid count at %i\n", targetValueCount->GetLineNum());
+                builder.parsingError("No valid count", targetValueCount->GetLineNum());
                 return false;
             }
             
@@ -190,14 +190,14 @@ static bool buildFromStats(AstBuilder & builder, const PMMLDocument::MiningField
         const char * value = targetValueStat->Attribute("value");
         if (value == nullptr)
         {
-            builder.parsingError("No value specified at %i\n", targetValueStat->GetLineNum());
+            builder.parsingError("No value specified", targetValueStat->GetLineNum());
             return false;
         }
         
         auto found = outputs.find(value);
         if (found == outputs.end())
         {
-            builder.parsingError("Value is not a Baysean output at %i\n", value, targetValueStat->GetLineNum());
+            builder.parsingError("Value is not a Baysean output", value, targetValueStat->GetLineNum());
             return false;
         }
         
@@ -207,14 +207,14 @@ static bool buildFromStats(AstBuilder & builder, const PMMLDocument::MiningField
             double meanAsDouble;
             if (mean == nullptr || mean->QueryDoubleValue(&meanAsDouble) != tinyxml2::XML_SUCCESS)
             {
-                builder.parsingError("No mean found at %i\n", gaussianDistribution->GetLineNum());
+                builder.parsingError("No mean found", gaussianDistribution->GetLineNum());
                 return false;
             }
             
             double variance;
             if (gaussianDistribution->QueryAttribute("variance", &variance) != tinyxml2::XML_SUCCESS)
             {
-                builder.parsingError("No variance specified at %i\n", gaussianDistribution->GetLineNum());
+                builder.parsingError("No variance specified", gaussianDistribution->GetLineNum());
                 return false;
             }
             
@@ -239,7 +239,7 @@ static bool buildFromStats(AstBuilder & builder, const PMMLDocument::MiningField
         }
         else
         {
-            builder.parsingError("Sorry, we currently only support GaussianDistribution at %i\n", targetValueStat->GetLineNum());
+            builder.parsingError("Sorry, we currently only support GaussianDistribution", targetValueStat->GetLineNum());
             return false;
         }
     }
@@ -255,14 +255,14 @@ static bool loadInputMappings(AstBuilder & builder, const tinyxml2::XMLElement *
         const char * fieldName = countElement->Attribute("fieldName");
         if (fieldName == nullptr)
         {
-            builder.parsingError("No fieldName specified at %i\n", countElement->GetLineNum());
+            builder.parsingError("No fieldName specified", countElement->GetLineNum());
             return false;
         }
         
         const PMMLDocument::MiningField * fieldDefinition = builder.context().getMiningField(fieldName);
         if (fieldDefinition == nullptr)
         {
-            builder.parsingError("Unknown field specified at %i\n", fieldName, countElement->GetLineNum());
+            builder.parsingError("Unknown field specified", fieldName, countElement->GetLineNum());
             return false;
         }
 
@@ -283,7 +283,7 @@ static bool loadInputMappings(AstBuilder & builder, const tinyxml2::XMLElement *
         }
         else
         {
-            builder.parsingError("Cannot get PairCounts or TargetValueStats at %i\n", countElement->GetLineNum());
+            builder.parsingError("Cannot get PairCounts or TargetValueStats", countElement->GetLineNum());
         }
     }
     return true;
@@ -295,21 +295,21 @@ bool NaiveBayesModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * n
     const tinyxml2::XMLElement * inputs = node->FirstChildElement("BayesInputs");
     if (inputs == nullptr)
     {
-        builder.parsingError("No BayesInputs specified at %i\n", node->GetLineNum());
+        builder.parsingError("No BayesInputs specified", node->GetLineNum());
         return false;
     }
     
     const tinyxml2::XMLElement * outputElement = node->FirstChildElement("BayesOutput");
     if (outputElement == nullptr)
     {
-        builder.parsingError("No BayesOutput specified at %i\n", node->GetLineNum());
+        builder.parsingError("No BayesOutput specified", node->GetLineNum());
         return false;
     }
     
     const tinyxml2::XMLElement * targetValueCounts = outputElement->FirstChildElement("TargetValueCounts");
     if (targetValueCounts == nullptr)
     {
-        builder.parsingError("No TargetValueCounts specified at %i\n", node->GetLineNum());
+        builder.parsingError("No TargetValueCounts specified", node->GetLineNum());
         return false;
     }
     

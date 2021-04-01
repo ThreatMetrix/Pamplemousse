@@ -23,8 +23,27 @@
 
 namespace RegressionModel
 {
+    enum RegressionNormalizationMethod
+    {
+        METHOD_CAUCHIT,
+        METHOD_CLOGLOG,
+        METHOD_EXP,
+        METHOD_IDENTITY,
+        METHOD_LOG,
+        METHOD_LOGC,
+        METHOD_LOGIT,
+        METHOD_LOGLOG,
+        METHOD_NONE,
+        METHOD_PROBIT,
+        METHOD_SIMPLEMAX,
+        METHOD_SOFTMAX,
+        METHOD_INVALID
+    };
+
     bool parse(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ModelConfig & config);
     bool buildCatagoricalPredictor(AstBuilder & builder, const tinyxml2::XMLElement * node, double coefficient);
+    RegressionNormalizationMethod getRegressionNormalizationMethodFromString(const char * name);
+    void normalizeTable(AstBuilder & builder, RegressionNormalizationMethod normMethod, bool clamp);
 }
 
 #endif /* regression_hpp */

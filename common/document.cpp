@@ -18,6 +18,7 @@
 #include "document.hpp"
 #include "ast.hpp"
 #include "conversioncontext.hpp"
+#include "model/generalregressionmodel.hpp"
 #include "model/miningmodel.hpp"
 #include "model/naivebayesmodel.hpp"
 #include "model/neuralnetworkmodel.hpp"
@@ -278,6 +279,13 @@ bool parseModelInternal(AstBuilder & builder, const tinyxml2::XMLElement * node,
     else if (strcmp(name, "NaiveBayesModel") == 0)
     {
         if (!NaiveBayesModel::parse(builder, node, modelConfig))
+        {
+            return false;
+        }
+    }
+    else if (strcmp(name, "GeneralRegressionModel") == 0)
+    {
+        if (!GeneralRegressionModel::parse(builder, node, modelConfig))
         {
             return false;
         }
