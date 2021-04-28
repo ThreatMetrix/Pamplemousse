@@ -88,12 +88,17 @@ const char * Output::findOutputForFeature(const tinyxml2::XMLElement * element, 
             {
                 continue;
             }
-            const char * name = iterator->Attribute("name");
-            const char * feature = iterator->Attribute("feature");
-            if (name != nullptr && feature != nullptr &&
-                strcmp(featureName, feature) == 0)
+            if (const char * name = iterator->Attribute("name"))
             {
-                return name;
+                if (iterator->Attribute("feature", featureName))
+                {
+                    return name;
+                }
+                else if (strcmp("predictedValue", featureName) == 0)
+                {
+                    // predictedValue is the default.
+                    return name;
+                }
             }
         }
     }
@@ -248,13 +253,15 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
             
             const char * feature = iterator->Attribute("feature");
             bool gotValue = false;
-            if (feature == nullptr)
+            if (feature == nullptr || strcmp("predictedValue", feature) == 0)
             {
-                builder.parsingError("OutputField doesn't have a feature", iterator->GetLineNum());
-                return false;
+                if (modelConfig.outputValueName != nullptr && modelConfig.outputValueName != description)
+                {
+                    builder.field(modelConfig.outputValueName);
+                    gotValue = true;
+                }
             }
-        
-            if (strcmp("transformedValue", feature) == 0)
+            else if (strcmp("transformedValue", feature) == 0)
             {
                 const tinyxml2::XMLElement * child = PMMLDocument::skipExtensions(iterator->FirstChildElement());
                 if (child == nullptr)
@@ -267,14 +274,6 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
                     return false;
                 }
                 gotValue = true;
-            }
-            else if (strcmp("predictedValue", feature) == 0)
-            {
-                if (modelConfig.outputValueName != nullptr && modelConfig.outputValueName != description)
-                {
-                    builder.field(modelConfig.outputValueName);
-                    gotValue = true;
-                }
             }
             else if (strcmp("predictedDisplayValue", feature) == 0)
             {

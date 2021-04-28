@@ -23,6 +23,12 @@
 // This generates Lua based on a scorecard, the simplest model (and possibly least useful) type.
 bool ScorecardModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ModelConfig & config)
 {
+    if (config.function != PMMLDocument::FUNCTION_REGRESSION)
+    {
+        builder.parsingError("Scorecard model must be a regression function", node->GetLineNum());
+        return false;
+    }
+
     const double initialScore = node->DoubleAttribute("initialScore", 0);
     double defaultBaseline = 0;
     const bool hasDefaultBaseline = node->QueryDoubleAttribute("baselineScore", &defaultBaseline) == tinyxml2::XML_SUCCESS;

@@ -38,7 +38,7 @@ namespace PMMLDocument
 {
 namespace
 {
-bool parseDataDictionary(const tinyxml2::XMLElement * dataDictionary, DataFieldVector & dataDictionaryOut)
+bool parseDataDictionary(const AstBuilder & builder, const tinyxml2::XMLElement * dataDictionary, DataFieldVector & dataDictionaryOut)
 {
      for (const tinyxml2::XMLElement * element = dataDictionary->FirstChildElement("DataField");
              element; element = element->NextSiblingElement("DataField"))
@@ -50,21 +50,21 @@ bool parseDataDictionary(const tinyxml2::XMLElement * dataDictionary, DataFieldV
             name == nullptr||
             optype == nullptr)
         {
-            fprintf(stderr, "DataField missing name or dataType at %i\n", element->GetLineNum());
+            builder.parsingError("DataField missing name or dataType", element->GetLineNum());
             return false;
         }
 
         FieldType fieldType = dataTypeFromString(type);
         if (fieldType == TYPE_INVALID)
         {
-            fprintf(stderr, "DataField has unknown data type %s at %i\n", type, element->GetLineNum());
+            builder.parsingError("DataField has unknown data type", type, element->GetLineNum());
             return false;
         }
 
         PMMLDocument::OpType opType = PMMLDocument::optypeFromString(optype);
         if (opType == OPTYPE_INVALID)
         {
-            fprintf(stderr, "DataField has unknown optype %s at %i\n", optype, element->GetLineNum());
+            builder.parsingError("DataField has unknown optype", optype, element->GetLineNum());
             return false;
         }
         PMMLDocument::DataField dataField(fieldType, opType);
@@ -119,12 +119,12 @@ bool PMMLDocument::convertPMML(AstBuilder & builder, const tinyxml2::XMLElement 
     const tinyxml2::XMLElement * header = documentRoot->FirstChildElement();
     if (header == nullptr)
     {
-        printf("Header is not present\n");
+        builder.parsingError("Header is not present", documentRoot->GetLineNum());
         return false;
     }
     if (strcmp(header->Name(), "Header"))
     {
-        printf("Instead of header, found %s", header->Name());
+        builder.parsingError("Instead of header, found", header->Name(), documentRoot->GetLineNum());
         return false;
     }
     if (const tinyxml2::XMLElement * applicationField = header->FirstChildElement("Application"))
@@ -148,7 +148,7 @@ bool PMMLDocument::convertPMML(AstBuilder & builder, const tinyxml2::XMLElement 
     if (dataDictionary)
     {
         DataFieldVector dataDictionaryOut;
-        if (!parseDataDictionary(dataDictionary, dataDictionaryOut))
+        if (!parseDataDictionary(builder, dataDictionary, dataDictionaryOut))
         {
             return false;
         }
@@ -159,7 +159,7 @@ bool PMMLDocument::convertPMML(AstBuilder & builder, const tinyxml2::XMLElement 
     }
     else
     {
-        printf("Data dictionary is not present\n");
+        builder.parsingError("Data dictionary is not present", documentRoot->GetLineNum());
         return false;
     }
     
@@ -185,7 +185,7 @@ bool PMMLDocument::convertPMML(AstBuilder & builder, const tinyxml2::XMLElement 
 
     if (model == nullptr)
     {
-        printf("Model is not present\n");
+        builder.parsingError("Model is not present\n", documentRoot->GetLineNum());
         return false;
     }
     
@@ -292,7 +292,7 @@ bool parseModelInternal(AstBuilder & builder, const tinyxml2::XMLElement * node,
     }
     else
     {
-        printf("Unknown or unsupported model type: \"%s\" at %i\n", name, node->GetLineNum());
+        builder.parsingError("Unknown or unsupported model type", name, node->GetLineNum());
         return false;
     }
     return true;
@@ -303,6 +303,29 @@ bool PMMLDocument::parseModel(AstBuilder & builder, const tinyxml2::XMLElement *
 {
     ASSERT_AST_BUILDER_ONE_NEW_NODE(builder);
 
+    const char * functionName = node->Attribute("functionName");
+    if (functionName == nullptr)
+    {
+        builder.parsingError("No function name specified", node->GetLineNum());
+        return false;
+    }
+
+    // Work out what function this model is
+    MiningFunction function;
+    if (strcmp("regression", functionName) == 0)
+    {
+        function = FUNCTION_REGRESSION;
+    }
+    else if (strcmp("classification", functionName) == 0)
+    {
+        function = FUNCTION_CLASSIFICATION;
+    }
+    else
+    {
+        builder.parsingError("Unknown or unsupported model function", functionName, node->GetLineNum());
+        return false;
+    }
+
     // Note that model is passed by value and modified heavily by this function.
     // This is the variable name where the model being passed will be output
     if (modelConfig.outputValueName == nullptr)
@@ -310,6 +333,14 @@ bool PMMLDocument::parseModel(AstBuilder & builder, const tinyxml2::XMLElement *
         if (const char * predictedValue = Output::findOutputForFeature(node, "predictedValue", false))
         {
             modelConfig.outputValueName = builder.context().getFieldDescription(predictedValue);
+        }
+
+        if (modelConfig.outputValueName == nullptr &&
+            function == FUNCTION_REGRESSION)
+        {
+            // There is no guarentee that this will do anything useful. But regression models assume this to be populated.
+            modelConfig.outputValueName = builder.context().createVariable(TYPE_NUMBER, "output", ORIGIN_OUTPUT);
+            return false;
         }
     }
 
@@ -331,29 +362,6 @@ bool PMMLDocument::parseModel(AstBuilder & builder, const tinyxml2::XMLElement *
         }
     }
 
-    const char * functionName = node->Attribute("functionName");
-    if (functionName == nullptr)
-    {
-        printf("No function name specified at %i\n", node->GetLineNum());
-        return false;
-    }
-    
-    // Work out what function this model is
-    MiningFunction function;
-    if (strcmp("regression", functionName) == 0)
-    {
-        function = FUNCTION_REGRESSION;
-    }
-    else if (strcmp("classification", functionName) == 0)
-    {
-        function = FUNCTION_CLASSIFICATION;
-    }
-    else
-    {
-        printf("Unknown or unsupported model function: \"%s\" at %i\n", functionName, node->GetLineNum());
-        return false;
-    }
-
     // Has the caller constrained this model?
     if (modelConfig.function == FUNCTION_ANY)
     {
@@ -361,7 +369,7 @@ bool PMMLDocument::parseModel(AstBuilder & builder, const tinyxml2::XMLElement *
     }
     else if (modelConfig.function != function)
     {
-        printf("Unexpected functionName %s at %i\n", functionName, node->GetLineNum());
+        builder.parsingError("Unexpected functionName", functionName, node->GetLineNum());
         return false;
     }
 

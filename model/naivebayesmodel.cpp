@@ -292,6 +292,12 @@ static bool loadInputMappings(AstBuilder & builder, const tinyxml2::XMLElement *
 
 bool NaiveBayesModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ModelConfig & config)
 {
+    if (config.function != PMMLDocument::FUNCTION_REGRESSION)
+    {
+        builder.parsingError("Scorecard model must be a regression function", node->GetLineNum());
+        return false;
+    }
+
     const tinyxml2::XMLElement * inputs = node->FirstChildElement("BayesInputs");
     if (inputs == nullptr)
     {
