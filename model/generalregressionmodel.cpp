@@ -16,6 +16,7 @@
 //
 
 #include <math.h>
+#include <algorithm>
 #include "generalregressionmodel.hpp"
 #include "conversioncontext.hpp"
 #include "ast.hpp"
