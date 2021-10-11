@@ -24,6 +24,12 @@
 #include <iostream>
 #include <algorithm>
 
+namespace PMMLDocument
+{
+    extern const char* PMML_INFINITY;
+    extern bool hasInfinityValue;
+}
+
 namespace
 {
 // Take a CSV input and a dataDictionary from a model and work out which columns can be inputted/verified
@@ -87,6 +93,16 @@ void PMMLExporter::addFunctionHeader(LuaOutputter & output, const std::vector<PM
         // Overflow variables are passed in as an array because they may contain input parameters.
         output.keyword("overflow");
         first = false;
+    }
+
+    if (PMMLDocument::hasInfinityValue)
+    {
+        if (!first)
+        {
+            output.comma();
+        }
+        first = false;
+        output.keyword(PMMLDocument::PMML_INFINITY);
     }
 
     for (const auto & input : inputColumns)

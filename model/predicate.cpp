@@ -24,6 +24,12 @@
 #include <algorithm>
 #include <assert.h>
 
+namespace PMMLDocument
+{
+    extern const char* PMML_INFINITY;
+    extern bool hasInfinityValue;
+}
+
 namespace
 {
     // These two lists must be kept in sync and ordered
@@ -96,6 +102,12 @@ namespace
                 builder.parsingError("Missing parameter in SimplePredicate", node->GetLineNum());
                 return false;
             }
+            
+            if (strcmp(value, PMMLDocument::PMML_INFINITY) == 0)
+            {
+                PMMLDocument::hasInfinityValue = true;
+            }
+
             builder.constant(value, builder.topNode().coercedType);
             builder.function(*operatorOut, 2);
         }

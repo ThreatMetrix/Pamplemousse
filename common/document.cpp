@@ -32,10 +32,11 @@
 #include "luaconverter/luaconverter.hpp"
 #include "luaconverter/optimiser.hpp"
 
-#include <iostream>
-
 namespace PMMLDocument
 {
+    const char* PMML_INFINITY = "Infinity";
+    bool hasInfinityValue = false;
+
 namespace
 {
 bool parseDataDictionary(const AstBuilder & builder, const tinyxml2::XMLElement * dataDictionary, DataFieldVector & dataDictionaryOut)
