@@ -10,7 +10,7 @@ find_package( Lua REQUIRED )
 
 find_package( tinyxml2 REQUIRED )
 
-include_directories(${LUA_INCLUDE_DIR} . common tinyxml2::tinyxml2)
+include_directories(${LUA_INCLUDE_DIR} . common)
 
 add_library(libpamplemousse STATIC
     common/ast.cpp common/ast.hpp
@@ -40,7 +40,7 @@ add_library(libpamplemousse STATIC
     luaconverter/luaoutputter.cpp luaconverter/luaoutputter.hpp
     luaconverter/optimiser.cpp luaconverter/optimiser.hpp)
 
-target_link_libraries(libpamplemousse PUBLIC tinyxml2::tinyxml2)
+target_link_libraries(libpamplemousse PUBLIC)
 
 if (NOT DEFINED skip_tests)
     add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
