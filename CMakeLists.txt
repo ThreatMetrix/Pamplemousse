@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.5)
-set(VCPKG_OVERLAY_TRIPLETS ../custom_triplets)
-
 project(pamplemousse)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-find_package( Lua REQUIRED )
+add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
 
+find_package( Lua REQUIRED )
 if (NOT DEFINED TinyXML2_DIR)
   find_package( TinyXML2 REQUIRED )
 endif()
 
-include_directories(${LUA_INCLUDE_DIR} . common tinyxml2::tinyxml2)
+include_directories(${LUA_INCLUDE_DIR} /usr/local/include/ . common)
+link_directories(/usr/local/lib/ )
 
 add_library(libpamplemousse STATIC
     common/ast.cpp common/ast.hpp
@@ -22,7 +22,6 @@ add_library(libpamplemousse STATIC
     common/pmmldocumentdefs.cpp common/pmmldocumentdefs.hpp
     common/analyser.cpp common/analyser.hpp
     common/functiondispatch.hpp
-    model/generalregressionmodel.cpp model/generalregressionmodel.hpp
     model/miningmodel.cpp model/miningmodel.hpp
     model/naivebayesmodel.cpp model/naivebayesmodel.hpp
     model/neuralnetworkmodel.cpp model/neuralnetworkmodel.hpp
@@ -42,66 +41,28 @@ add_library(libpamplemousse STATIC
     luaconverter/luaoutputter.cpp luaconverter/luaoutputter.hpp
     luaconverter/optimiser.cpp luaconverter/optimiser.hpp)
 
-target_link_libraries(libpamplemousse PUBLIC tinyxml2::tinyxml2)
+target_link_libraries(libpamplemousse PUBLIC tinyxml2)
+target_compile_options(libpamplemousse PRIVATE -Wextra -Werror)
 
-if (NOT DEFINED skip_tests)
-    add_subdirectory(CUTI-master ${CMAKE_BINARY_DIR}/cuti)
-
-    cuti_creates_test_target(libpamplemousse_test libpamplemousse
-        unit_tests/testutils.cpp
-        unit_tests/testutils.hpp
-        unit_tests/test_function.cpp
-        unit_tests/test_miningmodel.cpp
-        unit_tests/test_naivebayes.cpp
-        unit_tests/test_predicate.cpp
-        unit_tests/test_ruleset.cpp
-        unit_tests/test_scorecard.cpp
-        unit_tests/test_supportvectormachine.cpp
-        unit_tests/test_transform.cpp
-        unit_tests/test_tree.cpp)
-    target_link_libraries(libpamplemousse_test PRIVATE ${LUA_LIBRARIES})
-endif()
-
-if(CMAKE_VERSION VERSION_LESS "3.7.0")
-    set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endif()
-
-find_package(Qt5 COMPONENTS Widgets)
-if (Qt5_FOUND)
-    set(CMAKE_AUTOMOC ON)
-    set(CMAKE_AUTORCC ON)
-    set(CMAKE_AUTOUIC ON)
-
-    add_executable(pamplemousse
-        app/pamplemousse.cpp
-        app/pamplemousse_ui.cpp app/pamplemousse_ui.h
-        app/outputtable.cpp app/outputtable.h
-        app/mainwindow.ui
-        app/testrun.cpp app/testrun.hpp
-        app/modeloutput.cpp app/modeloutput.hpp
-        app/basicexport.cpp app/basicexport.hpp
-        app/outputslist.cpp app/outputslist.h
-        app/resources.qrc)
-    target_link_libraries(pamplemousse Qt5::Widgets)
-    target_include_directories(pamplemousse PRIVATE app)
-    target_compile_definitions(pamplemousse PRIVATE INCLUDE_UI)
-else()
-    add_executable(pamplemousse
-        app/pamplemousse.cpp
-        app/testrun.cpp app/testrun.hpp
-        app/modeloutput.cpp app/modeloutput.hpp
-        app/basicexport.cpp app/basicexport.hpp)
-endif()
-        
+add_executable(pamplemousse
+    app/pamplemousse.cpp
+    app/testrun.cpp app/testrun.hpp
+    app/modeloutput.cpp app/modeloutput.hpp
+    app/basicexport.cpp app/basicexport.hpp)
 target_link_libraries(pamplemousse libpamplemousse)
 target_link_libraries(pamplemousse ${LUA_LIBRARIES})
+target_compile_options(pamplemousse PRIVATE -Wextra -Werror)
 
-if(MSVC)
-  target_compile_definitions(libpamplemousse PRIVATE NOMINMAX _USE_MATH_DEFINES)
-  target_compile_definitions(pamplemousse PRIVATE NOMINMAX _USE_MATH_DEFINES)
-  target_compile_definitions(libpamplemousse_test PRIVATE NOMINMAX _USE_MATH_DEFINES)
-else()
-  target_compile_options(libpamplemousse PRIVATE -Wshadow -Wall -Wextra -pedantic -Werror)
-  target_compile_options(pamplemousse PRIVATE -Wshadow -Wall -Wextra -pedantic -Werror)
-endif()
-
+cuti_creates_test_target(libpamplemousse_test libpamplemousse
+    unit_tests/testutils.cpp
+    unit_tests/testutils.hpp
+    unit_tests/test_function.cpp
+    unit_tests/test_miningmodel.cpp
+    unit_tests/test_naivebayes.cpp
+    unit_tests/test_predicate.cpp
+    unit_tests/test_ruleset.cpp
+    unit_tests/test_scorecard.cpp
+    unit_tests/test_supportvectormachine.cpp
+    unit_tests/test_transform.cpp
+    unit_tests/test_tree.cpp)
+target_link_libraries(libpamplemousse_test PRIVATE ${LUA_LIBRARIES})
