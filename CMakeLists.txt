@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package( Lua REQUIRED )
+
 find_package( tinyxml2 REQUIRED )
 
 include_directories(${LUA_INCLUDE_DIR} . common tinyxml2::tinyxml2)
