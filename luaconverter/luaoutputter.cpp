@@ -24,6 +24,8 @@
 const char * LuaOutputter::OUTPUT_NAME = "output";
 const char * LuaOutputter::INPUT_NAME = "input";
 const char * LuaOutputter::OVERFLOW_NAME = "overflow";
+const char * LuaOutputter::LUA_INFINITY = "math.huge";
+
 
 LuaOutputter::LuaOutputter(std::ostream & output, unsigned int options) :
     m_output(output),

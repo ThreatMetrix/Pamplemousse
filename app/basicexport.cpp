@@ -95,16 +95,6 @@ void PMMLExporter::addFunctionHeader(LuaOutputter & output, const std::vector<PM
         first = false;
     }
 
-    if (PMMLDocument::hasInfinityValue)
-    {
-        if (!first)
-        {
-            output.comma();
-        }
-        first = false;
-        output.keyword(PMMLDocument::PMML_INFINITY);
-    }
-
     for (const auto & input : inputColumns)
     {
         if (const auto field = input.field)
@@ -200,10 +190,10 @@ bool PMMLExporter::createScript(const char * sourceFile, LuaOutputter & luaOutpu
     {
         return false;
     }
-    
+
     populateIOWithDictionary(inputs, builder.context().getInputs());
     populateIOWithDictionary(outputs, builder.context().getOutputs());
-    
+
     if (luaOutputter.lowercase())
     {
         const PMMLDocument::DataDictionary & dataDictionary = builder.context().getInputs();
@@ -292,7 +282,12 @@ bool PMMLExporter::createScript(const char * sourceFile, LuaOutputter & luaOutpu
     {
         addFunctionHeader(luaOutputter, tableInput);
     }
-    
+
+    if (PMMLDocument::hasInfinityValue)
+    {
+        luaOutputter.keyword("local").keyword(PMMLDocument::PMML_INFINITY).keyword("=").keyword(LuaOutputter::LUA_INFINITY).endline();
+    }
+
     LuaConverter::convertAstToLua(astTree, luaOutputter);
     luaOutputter.endBlock();
     return true;

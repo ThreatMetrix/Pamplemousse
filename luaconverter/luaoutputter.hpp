@@ -35,6 +35,7 @@ public:
     static const char * OUTPUT_NAME;
     static const char * INPUT_NAME;
     static const char * OVERFLOW_NAME;
+    static const char * LUA_INFINITY;
     
     typedef std::unordered_map<PMMLDocument::ConstFieldDescriptionPtr, int> OverflowedVariables;
     typedef std::unordered_map<PMMLDocument::ConstFieldDescriptionPtr, PMMLDocument::ConstFieldDescriptionPtr> AliasedVariables;
