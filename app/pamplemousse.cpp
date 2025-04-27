@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
     double epsilon = 0.0001;
     std::vector<PMMLExporter::ModelOutput> inputs;
     std::vector<PMMLExporter::ModelOutput> outputs;
-    int c;
+    int8_t c;
     
 #ifndef _WIN32
     while ((c = getopt_long(argc, argv, OPTSTRING, longopts, NULL)) != -1)
