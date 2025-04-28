@@ -62,8 +62,8 @@ jobs:
         uses: lukka/run-cmake@v10
         with:
           cmakeGenerator: 'Ninja' 
-          configurePreset: 'ninja-multi-vcpkg'
-          buildPreset: 'ninja-multi-vcpkg'
+          configurePreset: 'default'
+          buildPreset: 'default'
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           useVcpkgToolchainFile: true
