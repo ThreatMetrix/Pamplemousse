@@ -61,7 +61,9 @@ jobs:
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
         uses: lukka/run-cmake@v10
         with:
-          cmakeGenerator: 'Ninja'  
+          cmakeGenerator: 'Ninja' 
+          configurePreset: 'ninja-multi-vcpkg'
+          buildPreset: 'ninja-multi-vcpkg'
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           useVcpkgToolchainFile: true
