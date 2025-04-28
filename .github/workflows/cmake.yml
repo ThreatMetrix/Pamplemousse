@@ -35,7 +35,7 @@ jobs:
         uses: lukka/get-cmake@latest
       - name: Install Deps (Mac)
         if: startsWith(matrix.os, 'macos')
-        run: brew install automake gperf
+        run: brew install automake gperf libtool
       - name: Select SDK (Mac)
         if: startsWith(matrix.os, 'macos')
         uses: maxim-lobanov/setup-xcode@v1
