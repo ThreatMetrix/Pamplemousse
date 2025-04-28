@@ -46,7 +46,7 @@ jobs:
         run: sudo apt-get install qtbase5-dev gperf autopoint
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
-        uses: lukka/run-vcpkg@v6
+        uses: lukka/run-vcpkg@v11
         with:
           # Just install vcpkg for now, do not install any ports in this step yet.
           setupOnly: true
@@ -59,7 +59,7 @@ jobs:
           # Ensure the vcpkg artifacts are cached, they are generated in the 'CMAKE_BINARY_DIR/vcpkg_installed'.
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
-        uses: lukka/run-cmake@v3
+        uses: lukka/run-cmake@latest
         with:
           cmakeGenerator: 'Ninja'  
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
