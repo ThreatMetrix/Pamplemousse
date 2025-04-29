@@ -33,6 +33,8 @@ jobs:
           submodules: true
       - name: Get CMake
         uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.31.7
       - name: Install Deps (Mac)
         if: startsWith(matrix.os, 'macos')
         run: brew install automake gperf libtool
