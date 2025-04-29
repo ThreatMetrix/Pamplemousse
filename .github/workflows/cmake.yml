@@ -63,7 +63,7 @@ jobs:
         with:
           cmakeGenerator: 'Ninja' 
           configurePreset: 'ninja-multi-vcpkg'
-          buildPreset: 'ninja-vcpkg'
+          buildPreset: 'ninja-vcpkg-release'
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           useVcpkgToolchainFile: true
