@@ -759,8 +759,7 @@ namespace
     void buildMapValueTable(AstBuilder & builder, const std::vector<MapRow> & bins, const std::vector<PMMLDocument::ConstFieldDescriptionPtr> & fields,
                             PMMLDocument::FieldType outputFieldType, size_t bottom, size_t top, size_t checked, PMMLDocument::ConstFieldDescriptionPtr variable)
     {
-        size_t range = top - bottom;
-        assert(range > 0);
+        assert((top - bottom) > 0);
         
         // Every in column has been checked, output the answer
         if (checked == fields.size())
@@ -1235,7 +1234,7 @@ namespace
         {
             if (nParameters < found->minArgs || nParameters > found->maxArgs)
             {
-                char buffer[50];
+                char buffer[4096];
                 if (found->maxArgs == (std::numeric_limits<size_t>::max)())
                 {
                     snprintf(buffer, sizeof(buffer), "%s expects >= %zu arguments, got %zu", functionName, found->minArgs, nParameters);
