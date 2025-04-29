@@ -21,6 +21,7 @@
 #include "function.hpp"
 #include "conversioncontext.hpp"
 #include "luaconverter/luaoutputter.hpp"
+#include <limits>
 #include <algorithm>
 #include <assert.h>
 
