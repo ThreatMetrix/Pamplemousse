@@ -37,7 +37,7 @@ jobs:
           cmakeVersion: 3.31.7
       - name: Install Deps (Mac)
         if: startsWith(matrix.os, 'macos')
-        run: brew install automake gperf libtool
+        run: brew install automake gperf libtool python
       - name: Select SDK (Mac)
         if: startsWith(matrix.os, 'macos')
         uses: maxim-lobanov/setup-xcode@v1
