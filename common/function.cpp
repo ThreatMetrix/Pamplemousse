@@ -22,6 +22,7 @@
 #include "model/transformation.hpp"
 #include <algorithm>
 #include <cstring>
+#include <limits>
 
 #include <cmath>
 
