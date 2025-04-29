@@ -52,8 +52,6 @@ jobs:
         with:
           # Just install vcpkg for now, do not install any ports in this step yet.
           setupOnly: true
-          # Location of the vcpkg as submodule of the repository.
-          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           # Since the cache must be invalidated when content of the vcpkg.json file changes, let's
           # compute its hash and append this to the computed cache's key.
           appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
@@ -64,8 +62,8 @@ jobs:
         uses: lukka/run-cmake@v10
         with:
           cmakeGenerator: 'Ninja' 
-          configurePreset: 'default'
-          buildPreset: 'default'
+          configurePreset: 'ninja-multi-vcpkg'
+          buildPreset: 'ninja-vcpkg'
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           useVcpkgToolchainFile: true
