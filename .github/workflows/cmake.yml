@@ -64,6 +64,8 @@ jobs:
         uses: lukka/run-cmake@v10
         with:
           cmakeGenerator: 'Ninja' 
+          configurePreset: 'default'
+          buildPreset: 'default'
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           useVcpkgToolchainFile: true
