@@ -14,42 +14,47 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+       # windows is failing due to a 404 in the vcpkg deps
+       # macos is failing cause something can't find python3 even tho python is installed
+       # os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
         include:
-          - os: windows-latest
-            triplet: x64-windows
-            artifact: pamplemousse.exe
+          #- os: windows-latest
+          #  triplet: x64-windows
+          #  artifact: pamplemousse.exe
           - os: ubuntu-latest
             triplet: x64-linux
             artifact: pamplemousse
-          - os: macos-latest
-            triplet: x64-osx
-            artifact: pamplemousse
+          #- os: macos-latest
+          #  triplet: arm64-osx
+          #  artifact: pamplemousse
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true
       - name: Get CMake
         uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.31.7
       - name: Install Deps (Mac)
         if: startsWith(matrix.os, 'macos')
-        run: brew install automake gperf
+        run: brew install automake gperf libtool python
       - name: Select SDK (Mac)
         if: startsWith(matrix.os, 'macos')
-        run: sudo xcode-select -s /Applications/Xcode_12.app/Contents/Developer; xcrun --show-sdk-version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
       - name: Install Deps (Linux)
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install qtbase5-dev gperf autopoint
       # Cache/Restore the vcpkg's build artifacts using a vcpkg.json manifest.
       - name: Run vcpkg
-        uses: lukka/run-vcpkg@v6
+        uses: lukka/run-vcpkg@v11
         with:
           # Just install vcpkg for now, do not install any ports in this step yet.
           setupOnly: true
-          # Location of the vcpkg as submodule of the repository.
-          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           # Since the cache must be invalidated when content of the vcpkg.json file changes, let's
           # compute its hash and append this to the computed cache's key.
           appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
@@ -57,15 +62,17 @@ jobs:
           # Ensure the vcpkg artifacts are cached, they are generated in the 'CMAKE_BINARY_DIR/vcpkg_installed'.
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
-        uses: lukka/run-cmake@v3
+        uses: lukka/run-cmake@v10
         with:
-          cmakeGenerator: 'Ninja'  
+          cmakeGenerator: 'Ninja' 
+          configurePreset: 'ninja-multi-vcpkg'
+          buildPreset: 'ninja-vcpkg-release'
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: pamplemousse-${{ matrix.triplet }}
           path: |

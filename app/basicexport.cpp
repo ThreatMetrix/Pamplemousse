@@ -132,7 +132,7 @@ static void addOutput(AstBuilder & builder, const PMMLExporter::ModelOutput & cu
     if (customOutput.decimalPoints >= 0)
     {
         // Convert it to a string with the right precision
-        char formatString[10];
+        char formatString[20];
         snprintf(formatString, sizeof(formatString), "%%.%if", customOutput.decimalPoints);
         builder.constant(formatString, PMMLDocument::TYPE_STRING);
         builder.swapNodes(-1, -2);
