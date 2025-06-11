@@ -137,7 +137,7 @@ namespace
         // Array is stored in space delimeted string, chop it up into potential variables while honouring quotations
         // and stick it into a Lua set: e.g. {["valuea"] = true, ["valueb"] = true}
         PMMLArrayIterator iterator(array->GetText());
-        for (; iterator.isValid(); ++iterator)
+        for (; iterator.hasMore(); ++iterator)
         {
             builder.constant(iterator.stringStart(), iterator.stringEnd() - iterator.stringStart(), fieldType);
             nArgs++;
