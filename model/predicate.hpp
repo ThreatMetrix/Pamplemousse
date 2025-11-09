@@ -36,7 +36,12 @@ public:
     PMMLArrayIterator & operator++();
     PMMLArrayIterator operator++(int);
     bool isValid() const { return m_upto != m_stringStart; }
-    bool hasMore() const { return m_upto < m_endPtr; }
+    bool hasMore() const
+    {
+        bool stringNotEmpty = m_stringStart != m_upto;
+        bool more = m_upto < m_endPtr || (stringNotEmpty && m_upto <= m_endPtr);
+        return more;
+    }
     bool hasUnterminatedQuote() const { return m_hasUnterminatedQuote; }
     const char * stringStart() const { return m_stringStart; }
     const char * stringEnd() const { return m_upto; }
