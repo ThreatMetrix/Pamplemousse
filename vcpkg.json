@@ -7,10 +7,6 @@
     "dependencies": [
 	"tinyxml2",
 	"lua",
-	"cppunit",
-        {
-	    "name": "qt5",
-	    "platform": "!linux"
-	}
+	"cppunit"
     ]
 }
