@@ -93,4 +93,4 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: |
-            **/${{matrix.artifact}}
+            **/pamplemousse-${{ matrix.triplet }}.zip
