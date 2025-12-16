@@ -74,13 +74,9 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
-      - name: List all files recursively in the repository
-        run: find .
-        # Optional: redirect the output to a file
-        # run: find . -type f > all_files.txt
       - uses: actions/upload-artifact@v4
         with:
           name: pamplemousse-${{ matrix.triplet }}
           path: |
-            '${{github.workspace}}/builds/Release/${{matrix.artifact}}'
-            '${{github.workspace}}/builds/Release/*.dll'
+            '${{github.workspace}}/builds/ninja-multi-vcpkg/Release/${{matrix.artifact}}'
+            '${{github.workspace}}/builds/ninja-multi-vcpkg/Release/*.dll'
