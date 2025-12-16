@@ -74,6 +74,15 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
+      - name: List all files recursively in the repository linux
+        if: startsWith(matrix.os, 'ubuntu')
+        run: find .
+      - name: List all files recursively in the repository macos
+        if: startsWith(matrix.os, 'macos')
+        run: find .
+      - name: List all files recursively in the repository windows
+        if: startsWith(matrix.os, 'windows')
+        run: Get-ChildItem -Recurse
       - uses: actions/upload-artifact@v4
         with:
           name: pamplemousse-${{ matrix.triplet }}
