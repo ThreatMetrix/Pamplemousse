@@ -74,6 +74,11 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
+      - name: Get all yaml files
+        id: filelist
+        uses: the-coding-turtle/ga-file-list@v0.1
+        with:
+          file_extension: ".exe"
       - uses: actions/upload-artifact@v4
         with:
           name: pamplemousse-${{ matrix.triplet }}
