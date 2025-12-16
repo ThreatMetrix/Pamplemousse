@@ -76,7 +76,7 @@ jobs:
           buildDirectory: '${{github.workspace}}/build'
       - name: List all files recursively in the repository linux
         if: startsWith(matrix.os, 'ubuntu')
-        run: find .
+        run: cwd ; find .
       - name: List all files recursively in the repository macos
         if: startsWith(matrix.os, 'macos')
         run: find .
@@ -87,5 +87,4 @@ jobs:
         with:
           name: pamplemousse-${{ matrix.triplet }}
           path: |
-            '${{github.workspace}}/builds/ninja-multi-vcpkg/Release/${{matrix.artifact}}'
-            '${{github.workspace}}/builds/ninja-multi-vcpkg/Release/*.dll'
+            '${{github.workspace}}/**/${{matrix.artifact}}'
