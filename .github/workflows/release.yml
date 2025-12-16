@@ -1,0 +1,5 @@
+name: Release Binaries
+on:
+  push:
+    tags:
+      - 'v*'
