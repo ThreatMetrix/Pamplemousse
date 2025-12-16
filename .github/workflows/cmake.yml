@@ -80,15 +80,10 @@ jobs:
           path: |
             **/${{matrix.artifact}}
       - name: rename outputs
-        uses: nearform-actions/github-action-copy-files@master
+        uses: canastro/copy-file-action@master
         with:
           source: builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }}
-          destination: builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}
-          options: |
-            {
-              "overwrite": true,
-              "flat": true
-            }
+          target: builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}
       - name: List all files recursively in the repository linux
         if: startsWith(matrix.os, 'ubuntu')
         run: pwd ; find .
