@@ -79,6 +79,16 @@ jobs:
           name: pamplemousse-${{ matrix.triplet }}
           path: |
             **/${{matrix.artifact}}
+      - name: rename outputs
+        users: nearform-actions/github-action-copy-files@v1
+        with:
+          source: builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }}
+          destination: builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}
+          options: |
+            {
+              "overwrite": true,
+              "flat": true
+            }
       - name: List all files recursively in the repository linux
         if: startsWith(matrix.os, 'ubuntu')
         run: pwd ; find .
@@ -92,5 +102,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: |
-            **/pamplemousse-${{ matrix.triplet }}.zip
+          files: builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}
