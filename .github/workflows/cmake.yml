@@ -30,11 +30,6 @@ jobs:
           - os: macos-latest
             triplet: arm64-osx
             artifact: pamplemousse
-        exclude:
-          - os: windows-latest
-            c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
 
     steps:
       - name: Checkout
