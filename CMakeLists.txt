@@ -90,7 +90,7 @@ else()
         app/modeloutput.cpp app/modeloutput.hpp
         app/basicexport.cpp app/basicexport.hpp)
 endif()
-        
+
 target_link_libraries(pamplemousse libpamplemousse)
 target_link_libraries(pamplemousse ${LUA_LIBRARIES})
 
