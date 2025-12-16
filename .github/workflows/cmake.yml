@@ -78,5 +78,5 @@ jobs:
         with:
           name: pamplemousse-${{ matrix.triplet }}
           path: |
-            '${{github.workspace}}/Release/${{matrix.artifact}}'
-            '${{github.workspace}}/Release/*.dll'
+            '${{github.workspace}}/builds/Release/${{matrix.artifact}}'
+            '${{github.workspace}}/builds/Release/*.dll'
