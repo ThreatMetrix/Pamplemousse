@@ -74,17 +74,21 @@ jobs:
           useVcpkgToolchainFile: true
           vcpkgTriplet: ${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_TRIPLET_OUT }}
           buildDirectory: '${{github.workspace}}/build'
-      #- name: List all files recursively in the repository linux
-      #  if: startsWith(matrix.os, 'ubuntu')
-      #  run: pwd ; find .
-      #- name: List all files recursively in the repository macos
-      #  if: startsWith(matrix.os, 'macos')
-      #  run: pwd ; find .
-      #- name: List all files recursively in the repository windows
-      #  if: startsWith(matrix.os, 'windows')
-      #  run: Get-ChildItem -Recurse
       - uses: actions/upload-artifact@v4
         with:
           name: pamplemousse-${{ matrix.triplet }}
           path: |
             **/${{matrix.artifact}}
+      - name: rename outputs
+        shell: bash
+        run: |
+          cp builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }} builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}-${{ matrix.artifact }}
+      # - name: List all files recursively in the repository
+      #  if: startsWith(matrix.os, 'ubuntu')
+      #  shell: bash
+      #  run: pwd ; find .
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}-${{ matrix.artifact }}
