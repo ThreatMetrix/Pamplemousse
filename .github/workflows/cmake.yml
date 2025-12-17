@@ -80,10 +80,9 @@ jobs:
           path: |
             **/${{matrix.artifact}}
       - name: rename outputs
-        uses: canastro/copy-file-action@master
-        with:
-          source: builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }}
-          target: builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}
+        shell: bash
+        run: |
+          cp builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }} builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }}-${{ matrix.triplet }}
       - name: List all files recursively in the repository linux
         if: startsWith(matrix.os, 'ubuntu')
         run: pwd ; find .
@@ -97,4 +96,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}
+          files: builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }}-${{ matrix.triplet }}
