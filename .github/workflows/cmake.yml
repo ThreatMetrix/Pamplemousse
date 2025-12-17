@@ -82,18 +82,13 @@ jobs:
       - name: rename outputs
         shell: bash
         run: |
-          cp builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }} builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }}-${{ matrix.triplet }}
-      - name: List all files recursively in the repository linux
-        if: startsWith(matrix.os, 'ubuntu')
-        run: pwd ; find .
-      - name: List all files recursively in the repository macos
-        if: startsWith(matrix.os, 'macos')
-        run: pwd ; find .
-      - name: List all files recursively in the repository windows
-        if: startsWith(matrix.os, 'windows')
-        run: Get-ChildItem -Recurse
+          cp builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }} builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}-${{ matrix.artifact }}
+      # - name: List all files recursively in the repository
+      #  if: startsWith(matrix.os, 'ubuntu')
+      #  shell: bash
+      #  run: pwd ; find .
       - name: Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: builds/ninja-multi-vcpkg/Release/${{ matrix.artifact }}-${{ matrix.triplet }}
+          files: builds/ninja-multi-vcpkg/Release/${{ matrix.triplet }}-${{ matrix.artifact }}
