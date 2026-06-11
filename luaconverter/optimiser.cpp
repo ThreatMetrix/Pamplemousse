@@ -118,6 +118,15 @@ public:
             traverseNode<maintainAssertions>(ctx, node.children.back(), counter, visitor, &innerAssertions);
         }
     }
+
+    static void process(Function::ForPairsLoop, Analyser::AnalyserContext & ctx, AstNode & node, size_t & counter, ASTVisitor & visitor, Analyser::NonNoneAssertionStackGuard * parentAssertions)
+    {
+        if (node.children.size() == 4)
+        {
+            traverseNode<maintainAssertions>(ctx, node.children[2], counter, visitor, nullptr);
+            traverseNode<maintainAssertions>(ctx, node.children[3], counter, visitor, parentAssertions);
+        }
+    }
     
     static void process(Function::Block, Analyser::AnalyserContext & ctx, AstNode & node, size_t & counter, ASTVisitor & visitor, Analyser::NonNoneAssertionStackGuard * parentAssertions)
     {

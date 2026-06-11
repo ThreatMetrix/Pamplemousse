@@ -1,0 +1,2354 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+	<Header>
+		<Application name="JPMML-XGBoost command-line application" version="1.9.8"/>
+		<Timestamp>2026-06-10T23:18:29Z</Timestamp>
+	</Header>
+	<DataDictionary>
+		<DataField name="_target" optype="categorical" dataType="integer">
+			<Value value="0"/>
+			<Value value="1"/>
+		</DataField>
+		<DataField name="median_age_Fname" optype="continuous" dataType="float">
+			<Value value="NaN" property="missing"/>
+		</DataField>
+		<DataField name="q60_age_Fname" optype="continuous" dataType="float">
+			<Value value="NaN" property="missing"/>
+		</DataField>
+		<DataField name="q70_age_Fname" optype="continuous" dataType="float">
+			<Value value="NaN" property="missing"/>
+		</DataField>
+		<DataField name="q80_age_Fname" optype="continuous" dataType="float">
+			<Value value="NaN" property="missing"/>
+		</DataField>
+		<DataField name="q90_age_Fname" optype="continuous" dataType="float">
+			<Value value="NaN" property="missing"/>
+		</DataField>
+	</DataDictionary>
+	<MiningModel functionName="classification" algorithmName="XGBoost (GBTree)" x-mathContext="float">
+		<MiningSchema>
+			<MiningField name="_target" usageType="target"/>
+			<MiningField name="median_age_Fname"/>
+			<MiningField name="q60_age_Fname"/>
+			<MiningField name="q70_age_Fname"/>
+			<MiningField name="q80_age_Fname"/>
+			<MiningField name="q90_age_Fname"/>
+		</MiningSchema>
+		<Segmentation multipleModelMethod="modelChain" missingPredictionTreatment="returnMissing">
+			<Segment id="1">
+				<True/>
+				<MiningModel functionName="regression" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="median_age_Fname"/>
+						<MiningField name="q60_age_Fname"/>
+						<MiningField name="q70_age_Fname"/>
+						<MiningField name="q80_age_Fname"/>
+						<MiningField name="q90_age_Fname"/>
+					</MiningSchema>
+					<Output>
+						<OutputField name="xgbValue" optype="continuous" dataType="float" isFinalResult="false"/>
+					</Output>
+					<Segmentation multipleModelMethod="sum" missingPredictionTreatment="returnMissing">
+						<Segment id="1">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.021139603">
+									<True/>
+									<Node score="-0.013965824">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="67.17043"/>
+										<Node score="-0.025549354">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="58.59548"/>
+											<Node score="-0.031062497">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="50.091717"/>
+												<Node score="-0.032664347">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="44.594112"/>
+												</Node>
+											</Node>
+											<Node score="-0.028696852">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="55.471596"/>
+											</Node>
+										</Node>
+										<Node score="-0.020277778">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="62.475018"/>
+											<Node score="-0.022547586">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.19644"/>
+											</Node>
+										</Node>
+										<Node score="-0.017657004">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.69815"/>
+										</Node>
+									</Node>
+									<Node score="0.001977785">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="63.835728"/>
+										<Node score="-0.006744915">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="59.356606"/>
+											<Node score="-0.011244463">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="54.96783"/>
+											</Node>
+										</Node>
+										<Node score="-0.001285859">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="61.92197"/>
+										</Node>
+									</Node>
+									<Node score="0.011969712">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="69.735794"/>
+										<Node score="0.006559084">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="66.96783"/>
+										</Node>
+									</Node>
+									<Node score="0.0149926655">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="2">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q70_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.020751435">
+									<True/>
+									<Node score="-0.01259196">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="62.89117"/>
+										<Node score="-0.027422769">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="52.202602"/>
+											<Node score="-0.030896287">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="43.430527"/>
+												<Node score="-0.03210719">
+													<SimplePredicate field="q70_age_Fname" operator="lessThan" value="36.73648"/>
+												</Node>
+											</Node>
+											<Node score="-0.029313114">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="46.77344"/>
+											</Node>
+										</Node>
+										<Node score="-0.01990132">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="58.141"/>
+											<Node score="-0.022824813">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="56.07666"/>
+											</Node>
+										</Node>
+										<Node score="-0.016474448">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.32238"/>
+										</Node>
+									</Node>
+									<Node score="0.0024274858">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="64.31212"/>
+										<Node score="-0.0054201335">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.046543"/>
+											<Node score="-0.009826266">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="65.3963"/>
+											</Node>
+										</Node>
+										<Node score="-8.641225E-4">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="62.272415"/>
+										</Node>
+									</Node>
+									<Node score="0.012597875">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="71.25256"/>
+										<Node score="0.006791997">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="66.96783"/>
+										</Node>
+									</Node>
+									<Node score="0.016261974">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="3">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q80_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.019863913">
+									<True/>
+									<Node score="-0.013600079">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="67.1896"/>
+										<Node score="-0.02503483">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="63.904175"/>
+											<Node score="-0.030392285">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.2731"/>
+												<Node score="-0.03193655">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.713894"/>
+												</Node>
+											</Node>
+											<Node score="-0.027784653">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="61.853523"/>
+											</Node>
+										</Node>
+										<Node score="-0.020891136">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="62.417522"/>
+											<Node score="-0.023340108">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.342915"/>
+											</Node>
+										</Node>
+										<Node score="-0.01731995">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.67351"/>
+										</Node>
+									</Node>
+									<Node score="0.0018103354">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="77.82889"/>
+										<Node score="-0.008112713">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="72.34497"/>
+											<Node score="-3.6882292E-4">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="72.64887"/>
+											</Node>
+										</Node>
+										<Node score="0.009807971">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="77.24298"/>
+										</Node>
+									</Node>
+									<Node score="0.010168555">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="82.79808"/>
+										<Node score="0.017144596">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="82.25873"/>
+										</Node>
+									</Node>
+									<Node score="0.015100486">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="86.83915"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="4">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q80_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.019928262">
+									<True/>
+									<Node score="-0.01319725">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="67.77002"/>
+										<Node score="-0.024618475">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="63.904175"/>
+											<Node score="-0.029391447">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.601643"/>
+												<Node score="-0.031237312">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="53.127995"/>
+												</Node>
+											</Node>
+											<Node score="-0.027229816">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="61.853523"/>
+											</Node>
+										</Node>
+										<Node score="-0.0202752">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="62.55989"/>
+											<Node score="-0.02281528">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.70979"/>
+											</Node>
+										</Node>
+										<Node score="-0.016869089">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.678986"/>
+										</Node>
+									</Node>
+									<Node score="0.0013246089">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="77.82889"/>
+										<Node score="-0.007876877">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="72.34497"/>
+											<Node score="-5.39093E-5">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="72.67625"/>
+											</Node>
+										</Node>
+										<Node score="0.006152582">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="79.41136"/>
+										</Node>
+									</Node>
+									<Node score="0.009999483">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="82.79808"/>
+										<Node score="0.016937202">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="82.25873"/>
+										</Node>
+									</Node>
+									<Node score="0.015100279">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="87.81109"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="5">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q60_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.022864241">
+									<True/>
+									<Node score="-0.01141063">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="60.06571"/>
+										<Node score="-0.024425441">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="49.379875"/>
+											<Node score="-0.029255612">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="40.459957"/>
+												<Node score="-0.030364558">
+													<SimplePredicate field="q60_age_Fname" operator="lessThan" value="33.13347"/>
+												</Node>
+											</Node>
+											<Node score="-0.026913274">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="44.821354"/>
+											</Node>
+										</Node>
+										<Node score="-0.018213637">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="56.019165"/>
+											<Node score="-0.021301106">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="51.356606"/>
+											</Node>
+										</Node>
+										<Node score="-0.01445585">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="58.028748"/>
+										</Node>
+									</Node>
+									<Node score="0.0040938393">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.24298"/>
+										<Node score="-0.0039174915">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.648872"/>
+											<Node score="-0.007717701">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.321697"/>
+											</Node>
+										</Node>
+										<Node score="-5.8534447E-6">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="63.195072"/>
+										</Node>
+									</Node>
+									<Node score="0.01232276">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="71.25256"/>
+										<Node score="0.008158846">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.018294672">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="76.95551"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="6">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q70_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.019877048">
+									<True/>
+									<Node score="-0.010991678">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="63.430527"/>
+										<Node score="-0.024188166">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="63.942505"/>
+											<Node score="-0.029018845">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.30048"/>
+												<Node score="-0.03052534">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.815193"/>
+												</Node>
+											</Node>
+											<Node score="-0.026603479">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="61.57974"/>
+											</Node>
+										</Node>
+										<Node score="-0.018284202">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="58.141"/>
+											<Node score="-0.021358553">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="68.50924"/>
+											</Node>
+										</Node>
+										<Node score="-0.015281991">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.431896"/>
+										</Node>
+									</Node>
+									<Node score="4.019986E-4">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="73.06229"/>
+										<Node score="-0.0042725476">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="68.18343"/>
+											<Node score="-0.00842201">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="65.3963"/>
+											</Node>
+										</Node>
+										<Node score="0.0072037727">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="79.1102"/>
+										</Node>
+									</Node>
+									<Node score="0.012652868">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="78.8282"/>
+										<Node score="0.008382469">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="75.780975"/>
+										</Node>
+									</Node>
+									<Node score="0.017002145">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="83.512665"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="7">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q70_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.01880192">
+									<True/>
+									<Node score="-0.011522148">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="62.89117"/>
+										<Node score="-0.02531009">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="52.42163"/>
+											<Node score="-0.028618021">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="43.195072"/>
+												<Node score="-0.029741554">
+													<SimplePredicate field="q70_age_Fname" operator="lessThan" value="36.755646"/>
+												</Node>
+											</Node>
+											<Node score="-0.027192742">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="46.77344"/>
+											</Node>
+										</Node>
+										<Node score="-0.018398734">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="58.141"/>
+											<Node score="-0.021112127">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="56.054756"/>
+											</Node>
+										</Node>
+										<Node score="-0.015086606">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.500343"/>
+										</Node>
+									</Node>
+									<Node score="0.003117919">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.39973"/>
+										<Node score="-0.0056419">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="63.331963"/>
+											<Node score="-0.00917426">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.21013"/>
+											</Node>
+										</Node>
+										<Node score="-6.3906383E-4">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.008463527">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="73.27858"/>
+										<Node score="0.012913693">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="72.410675"/>
+										</Node>
+									</Node>
+									<Node score="0.014249832">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="8">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q70_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.018501204">
+									<True/>
+									<Node score="-0.010167592">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="60.197124"/>
+										<Node score="-0.021862026">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="54.40657"/>
+											<Node score="-0.02692129">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="46.77344"/>
+												<Node score="-0.028897082">
+													<SimplePredicate field="q70_age_Fname" operator="lessThan" value="42.387405"/>
+												</Node>
+											</Node>
+											<Node score="-0.024977677">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="52.095825"/>
+											</Node>
+										</Node>
+										<Node score="-0.016381497">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="60.4052"/>
+											<Node score="-0.019656483">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="57.41547"/>
+											</Node>
+										</Node>
+										<Node score="-0.0136509">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.891853"/>
+										</Node>
+									</Node>
+									<Node score="0.0031610837">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.39973"/>
+										<Node score="-0.004175084">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="63.66598"/>
+											<Node score="-0.0073117213">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.92471"/>
+											</Node>
+										</Node>
+										<Node score="-3.1460304E-4">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.00852954">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="73.28679"/>
+										<Node score="0.014087123">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="71.66872"/>
+										</Node>
+									</Node>
+									<Node score="0.014059842">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="9">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.020177564">
+									<True/>
+									<Node score="-0.010340366">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.950718"/>
+										<Node score="-0.021984968">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.25804"/>
+											<Node score="-0.02663208">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="53.319645"/>
+												<Node score="-0.028802771">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="46.896645"/>
+												</Node>
+											</Node>
+											<Node score="-0.024508147">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="56.14237"/>
+											</Node>
+										</Node>
+										<Node score="-0.015728308">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.870636"/>
+											<Node score="-0.019365206">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.930183"/>
+											</Node>
+										</Node>
+										<Node score="-0.013160597">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="56.454483"/>
+										</Node>
+									</Node>
+									<Node score="0.0030678252">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.39973"/>
+										<Node score="-0.004104481">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="63.687885"/>
+											<Node score="-0.0074602263">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.0397"/>
+											</Node>
+										</Node>
+										<Node score="-3.6978477E-4">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.012208872">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="74.2998"/>
+										<Node score="0.008200577">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="72.70911"/>
+										</Node>
+									</Node>
+									<Node score="0.015952228">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="79.88501"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="10">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.01984223">
+									<True/>
+									<Node score="-0.010666374">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="60.221767"/>
+										<Node score="-0.022347055">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="64.095825"/>
+											<Node score="-0.027456699">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.52772"/>
+												<Node score="-0.02890743">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.85079"/>
+												</Node>
+											</Node>
+											<Node score="-0.024880396">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="62.07803"/>
+											</Node>
+										</Node>
+										<Node score="-0.015129435">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="55.58111"/>
+											<Node score="-0.019441182">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="70.26694"/>
+											</Node>
+										</Node>
+										<Node score="-0.015097745">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="69.39356"/>
+										</Node>
+									</Node>
+									<Node score="0.0030308478">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.39973"/>
+										<Node score="-0.003713398">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="64.12594"/>
+											<Node score="-0.007132331">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.07529"/>
+											</Node>
+										</Node>
+										<Node score="-9.4368734E-5">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.012073653">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="74.2998"/>
+										<Node score="0.008083454">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="72.70911"/>
+										</Node>
+									</Node>
+									<Node score="0.015740244">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="79.88501"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="11">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q60_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.018257597">
+									<True/>
+									<Node score="-0.010282543">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="60.22998"/>
+										<Node score="-0.025589883">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="49.598904"/>
+											<Node score="-0.0251875">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="42.973305"/>
+												<Node score="-0.02738448">
+													<SimplePredicate field="q60_age_Fname" operator="lessThan" value="40.125942"/>
+												</Node>
+											</Node>
+											<Node score="-0.021865692">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="44.950035"/>
+											</Node>
+										</Node>
+										<Node score="-0.016565362">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="55.96441"/>
+											<Node score="-0.019420883">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="51.356606"/>
+											</Node>
+										</Node>
+										<Node score="-0.013257065">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="58.028748"/>
+										</Node>
+									</Node>
+									<Node score="0.0037220058">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.36071"/>
+										<Node score="-0.0037678564">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.424366"/>
+											<Node score="-0.006922103">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.17659"/>
+											</Node>
+										</Node>
+										<Node score="-1.669271E-5">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="63.192333"/>
+										</Node>
+									</Node>
+									<Node score="0.011059168">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="71.25256"/>
+										<Node score="0.006834722">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.01437"/>
+										</Node>
+									</Node>
+									<Node score="0.01416854">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="12">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.017418522">
+									<True/>
+									<Node score="-0.0097825285">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.980835"/>
+										<Node score="-0.021216419">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.342915"/>
+											<Node score="-0.026802987">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="50.07255"/>
+												<Node score="-0.028142642">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="40.32854"/>
+												</Node>
+											</Node>
+											<Node score="-0.024292018">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="55.778233"/>
+											</Node>
+										</Node>
+										<Node score="-0.015009405">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.681725"/>
+											<Node score="-0.018379414">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="62.236824"/>
+											</Node>
+										</Node>
+										<Node score="-0.0125882495">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="56.55852"/>
+										</Node>
+									</Node>
+									<Node score="0.0029640899">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.31485"/>
+										<Node score="-0.003489258">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="64.19713"/>
+											<Node score="-0.006899112">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.19302"/>
+											</Node>
+										</Node>
+										<Node score="-7.5119395E-5">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.0070615923">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="73.28679"/>
+										<Node score="0.011360738">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="76.89528"/>
+										</Node>
+									</Node>
+									<Node score="0.013121301">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="13">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q70_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.019017264">
+									<True/>
+									<Node score="-0.010473551">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="62.89117"/>
+										<Node score="-0.0230185">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="52.42163"/>
+											<Node score="-0.026321495">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="43.419575"/>
+												<Node score="-0.027526103">
+													<SimplePredicate field="q70_age_Fname" operator="lessThan" value="36.881588"/>
+												</Node>
+											</Node>
+											<Node score="-0.024758153">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="48.358658"/>
+											</Node>
+										</Node>
+										<Node score="-0.016787529">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="58.141"/>
+											<Node score="-0.019300554">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="56.054756"/>
+											</Node>
+										</Node>
+										<Node score="-0.013716683">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.46475"/>
+										</Node>
+									</Node>
+									<Node score="0.0028502173">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.31485"/>
+										<Node score="-0.0047228313">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="63.178646"/>
+											<Node score="-0.008089373">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.50308"/>
+											</Node>
+										</Node>
+										<Node score="-5.4135144E-4">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.011510327">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="74.2998"/>
+										<Node score="0.007647268">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="72.70911"/>
+										</Node>
+									</Node>
+									<Node score="0.014997832">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="79.88501"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="14">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q70_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.015757209">
+									<True/>
+									<Node score="-0.01148355">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="62.762493"/>
+										<Node score="-0.022234015">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="57.29774"/>
+											<Node score="-0.02637038">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="49.141685"/>
+												<Node score="-0.027545713">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="39.27447"/>
+												</Node>
+											</Node>
+											<Node score="-0.024266675">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="54.321697"/>
+											</Node>
+										</Node>
+										<Node score="-0.017554956">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="62.38193"/>
+											<Node score="-0.01979585">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.9206"/>
+											</Node>
+										</Node>
+										<Node score="-0.014218718">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="65.5551"/>
+										</Node>
+									</Node>
+									<Node score="4.3476903E-4">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="72.1451"/>
+										<Node score="-0.0039034367">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="68.14784"/>
+											<Node score="-0.00805237">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="65.16632"/>
+											</Node>
+										</Node>
+										<Node score="0.0066278535">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="72.58316"/>
+										</Node>
+									</Node>
+									<Node score="0.0053016264">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="75.980835"/>
+										<Node score="0.010390562">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="76.89528"/>
+										</Node>
+									</Node>
+									<Node score="0.011246351">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="78.8282"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="15">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.019940281">
+									<True/>
+									<Node score="-0.008655628">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="55.8193"/>
+										<Node score="-0.020807285">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="64.02738"/>
+											<Node score="-0.025842559">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.423683"/>
+												<Node score="-0.027234318">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.675564"/>
+												</Node>
+											</Node>
+											<Node score="-0.023326162">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="62.020535"/>
+											</Node>
+										</Node>
+										<Node score="-0.014344729">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="72.80766"/>
+											<Node score="-0.01785766">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="69.0705"/>
+											</Node>
+										</Node>
+										<Node score="-0.012420157">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="50.872005"/>
+										</Node>
+									</Node>
+									<Node score="0.002490856">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.026695"/>
+										<Node score="-0.0050153374">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.36961"/>
+											<Node score="-0.010459736">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="71.321014"/>
+											</Node>
+										</Node>
+										<Node score="-5.4683065E-4">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="62.477757"/>
+										</Node>
+									</Node>
+									<Node score="0.010453114">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="71.25256"/>
+										<Node score="0.0061128493">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.01437"/>
+										</Node>
+									</Node>
+									<Node score="0.015702266">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="77.00479"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="16">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.0163941">
+									<True/>
+									<Node score="-0.009298489">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.74264"/>
+										<Node score="-0.02039493">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="58.683094"/>
+											<Node score="-0.02561427">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="50.069817"/>
+												<Node score="-0.026916584">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="39.37851"/>
+												</Node>
+											</Node>
+											<Node score="-0.023216965">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="55.471596"/>
+											</Node>
+										</Node>
+										<Node score="-0.014140404">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.6653"/>
+											<Node score="-0.01754407">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="62.19028"/>
+											</Node>
+										</Node>
+										<Node score="-0.011828023">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="56.48734"/>
+										</Node>
+									</Node>
+									<Node score="0.0026856412">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.31759"/>
+										<Node score="-0.0034853853">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="64.00548"/>
+											<Node score="-0.006646012">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.993156"/>
+											</Node>
+										</Node>
+										<Node score="-1.221908E-4">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.0066542346">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="73.28679"/>
+										<Node score="0.011038399">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="76.73922"/>
+										</Node>
+									</Node>
+									<Node score="0.0123821935">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="17">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.016172387">
+									<True/>
+									<Node score="-0.009642803">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.805614"/>
+										<Node score="-0.020444863">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="63.9206"/>
+											<Node score="-0.025186734">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.549625"/>
+												<Node score="-0.026637191">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.828884"/>
+												</Node>
+											</Node>
+											<Node score="-0.02278997">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="61.853523"/>
+											</Node>
+										</Node>
+										<Node score="-0.013833474">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="69.456535"/>
+											<Node score="-0.017660856">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="55.687885"/>
+											</Node>
+										</Node>
+										<Node score="-0.013775245">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="55.18138"/>
+										</Node>
+									</Node>
+									<Node score="2.1305111E-4">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.33949"/>
+										<Node score="-0.0032696181">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="64.30116"/>
+											<Node score="-0.0064542396">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.146477"/>
+											</Node>
+										</Node>
+										<Node score="0.0038858133">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="78.01232"/>
+										</Node>
+									</Node>
+									<Node score="0.006269281">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="73.28679"/>
+										<Node score="0.010472067">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="82.2423"/>
+										</Node>
+									</Node>
+									<Node score="0.012174779">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="18">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.017719554">
+									<True/>
+									<Node score="-0.008911121">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.622177"/>
+										<Node score="-0.01970322">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.25804"/>
+											<Node score="-0.02465244">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="50.083504"/>
+												<Node score="-0.02601039">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="44.684464"/>
+												</Node>
+											</Node>
+											<Node score="-0.022525482">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="55.509926"/>
+											</Node>
+										</Node>
+										<Node score="-0.013714476">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.681725"/>
+											<Node score="-0.016993761">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.930183"/>
+											</Node>
+										</Node>
+										<Node score="-0.011438948">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="56.654346"/>
+										</Node>
+									</Node>
+									<Node score="0.0026609295">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.37782"/>
+										<Node score="-0.0035017678">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="63.775497"/>
+											<Node score="-0.006538036">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.19302"/>
+											</Node>
+										</Node>
+										<Node score="-2.5845264E-4">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.010400423">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="74.2998"/>
+										<Node score="0.006895177">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="72.413414"/>
+										</Node>
+									</Node>
+									<Node score="0.013915553">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="79.88501"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="19">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q80_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.015954351">
+									<True/>
+									<Node score="-0.010382181">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="66.72416"/>
+										<Node score="-0.021370085">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="62.417522"/>
+											<Node score="-0.024938814">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="56.11225"/>
+												<Node score="-0.026086617">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.85079"/>
+												</Node>
+											</Node>
+											<Node score="-0.02306436">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="60.563995"/>
+											</Node>
+										</Node>
+										<Node score="-0.016658142">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="62.417522"/>
+											<Node score="-0.019106952">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="65.70568"/>
+											</Node>
+										</Node>
+										<Node score="-0.013238198">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.870636"/>
+										</Node>
+									</Node>
+									<Node score="9.537653E-4">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="77.82889"/>
+										<Node score="-0.0068849926">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="70.850105"/>
+											<Node score="-0.0025515219">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="72.49829"/>
+											</Node>
+										</Node>
+										<Node score="0.010460895">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="75.441475"/>
+										</Node>
+									</Node>
+									<Node score="0.0077075465">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="82.79808"/>
+										<Node score="0.013917835">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="82.25873"/>
+										</Node>
+									</Node>
+									<Node score="0.011497624">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="87.81109"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="20">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.015445961">
+									<True/>
+									<Node score="-0.009191636">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.718002"/>
+										<Node score="-0.019523645">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="64.095825"/>
+											<Node score="-0.024403417">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.49213"/>
+												<Node score="-0.025821788">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.85079"/>
+												</Node>
+											</Node>
+											<Node score="-0.02188376">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="62.143738"/>
+											</Node>
+										</Node>
+										<Node score="-0.012875519">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="55.613964"/>
+											<Node score="-0.016746527">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="70.26694"/>
+											</Node>
+										</Node>
+										<Node score="-0.013065652">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="69.43737"/>
+										</Node>
+									</Node>
+									<Node score="0.002626998">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.39973"/>
+										<Node score="-0.003604347">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="63.838467"/>
+											<Node score="-0.0064334124">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.74675"/>
+											</Node>
+										</Node>
+										<Node score="-2.180857E-4">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.0049309717">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="72.70911"/>
+										<Node score="0.0101145515">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="81.79056"/>
+										</Node>
+									</Node>
+									<Node score="0.011162949">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="21">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q60_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.018619409">
+									<True/>
+									<Node score="-0.011434419">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.542778"/>
+										<Node score="-0.022853347">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="49.379875"/>
+											<Node score="-0.022237156">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="42.973305"/>
+												<Node score="-0.024372315">
+													<SimplePredicate field="q60_age_Fname" operator="lessThan" value="40.262833"/>
+												</Node>
+											</Node>
+											<Node score="-0.019158795">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="44.81588"/>
+											</Node>
+										</Node>
+										<Node score="-0.014273581">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="56.03833"/>
+											<Node score="-0.016782984">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="51.356606"/>
+											</Node>
+										</Node>
+										<Node score="-0.009098186">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="54.03422"/>
+										</Node>
+									</Node>
+									<Node score="0.002183436">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.026695"/>
+										<Node score="-0.0033932512">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.36961"/>
+											<Node score="-0.0062751994">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.946613"/>
+											</Node>
+										</Node>
+										<Node score="-6.609925E-4">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="62.376453"/>
+										</Node>
+									</Node>
+									<Node score="0.01000023">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+										<Node score="0.0060317423">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.015276196">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="76.93635"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="22">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.015722016">
+									<True/>
+									<Node score="-0.009810398">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="66.95962"/>
+										<Node score="-0.020286104">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="57.366188"/>
+											<Node score="-0.024086634">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="49.092403"/>
+												<Node score="-0.025242684">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="40.325806"/>
+												</Node>
+											</Node>
+											<Node score="-0.022263924">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="53.659138"/>
+											</Node>
+										</Node>
+										<Node score="-0.015849391">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.97399"/>
+											<Node score="-0.01779454">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.641342"/>
+											</Node>
+										</Node>
+										<Node score="-0.012747669">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.8679"/>
+										</Node>
+									</Node>
+									<Node score="0.0013882803">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="64.31212"/>
+										<Node score="-0.0050892727">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="58.87748"/>
+											<Node score="-0.007973931">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="54.96783"/>
+											</Node>
+										</Node>
+										<Node score="-0.0013405917">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="61.84531"/>
+										</Node>
+									</Node>
+									<Node score="0.008492408">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="69.735794"/>
+										<Node score="0.0046279635">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="66.83094"/>
+										</Node>
+									</Node>
+									<Node score="0.010978986">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="23">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q60_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.01811626">
+									<True/>
+									<Node score="-0.008685371">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.685146"/>
+										<Node score="-0.01901212">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="49.54141"/>
+											<Node score="-0.02340091">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="40.37235"/>
+												<Node score="-0.024490707">
+													<SimplePredicate field="q60_age_Fname" operator="lessThan" value="32.594112"/>
+												</Node>
+											</Node>
+											<Node score="-0.0213169">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="44.821354"/>
+											</Node>
+										</Node>
+										<Node score="-0.017132059">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="55.55647"/>
+											<Node score="-0.014185756">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="50.59548"/>
+											</Node>
+										</Node>
+										<Node score="-0.011129743">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="58.028748"/>
+										</Node>
+									</Node>
+									<Node score="0.0033932975">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.36071"/>
+										<Node score="-0.0028656276">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="61.103355"/>
+											<Node score="-0.0059894635">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.17659"/>
+											</Node>
+										</Node>
+										<Node score="2.881083E-4">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="63.55647"/>
+										</Node>
+									</Node>
+									<Node score="0.00942461">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="71.25256"/>
+										<Node score="0.0060067694">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.014059966">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="77.01574"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="24">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.017706357">
+									<True/>
+									<Node score="-0.007508084">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="55.8193"/>
+										<Node score="-0.0184733">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="64.095825"/>
+											<Node score="-0.023439106">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.366188"/>
+												<Node score="-0.024868794">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.84531"/>
+												</Node>
+											</Node>
+											<Node score="-0.020955572">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="62.160164"/>
+											</Node>
+										</Node>
+										<Node score="-0.012529767">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="72.911705"/>
+											<Node score="-0.015749183">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="68.89802"/>
+											</Node>
+										</Node>
+										<Node score="-0.010625552">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="50.88022"/>
+										</Node>
+									</Node>
+									<Node score="0.0028692824">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.24298"/>
+										<Node score="-0.004534842">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.40794"/>
+											<Node score="-0.009835572">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="69.63724"/>
+											</Node>
+										</Node>
+										<Node score="-7.8979494E-5">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="63.195072"/>
+										</Node>
+									</Node>
+									<Node score="0.009519141">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+										<Node score="0.005847753">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.014595559">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="76.97468"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="25">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.017666304">
+									<True/>
+									<Node score="-0.0073638735">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="55.8193"/>
+										<Node score="-0.018413328">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="63.983574"/>
+											<Node score="-0.022787474">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.52772"/>
+												<Node score="-0.024466308">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="53.127995"/>
+												</Node>
+											</Node>
+											<Node score="-0.020758308">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="61.891853"/>
+											</Node>
+										</Node>
+										<Node score="-0.012375067">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="72.89802"/>
+											<Node score="-0.015517194">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="69.01301"/>
+											</Node>
+										</Node>
+										<Node score="-0.010453506">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="50.88022"/>
+										</Node>
+									</Node>
+									<Node score="0.00291918">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.27858"/>
+										<Node score="-0.004163367">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.501026"/>
+											<Node score="-0.00851475">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="71.41958"/>
+											</Node>
+										</Node>
+										<Node score="-1.007256E-4">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="63.192333"/>
+										</Node>
+									</Node>
+									<Node score="0.009459822">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+										<Node score="0.005888743">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.014320614">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="77.07871"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="26">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q70_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.01309902">
+									<True/>
+									<Node score="-0.011272521">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.89733"/>
+										<Node score="-0.019403309">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="63.282684"/>
+											<Node score="-0.023247886">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="56.11225"/>
+												<Node score="-0.024421943">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.85079"/>
+												</Node>
+											</Node>
+											<Node score="-0.02139332">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="60.402466"/>
+											</Node>
+										</Node>
+										<Node score="-0.013946069">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="57.41547"/>
+											<Node score="-0.016794084">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="67.94798"/>
+											</Node>
+										</Node>
+										<Node score="-0.016129274">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="64.82683"/>
+										</Node>
+									</Node>
+									<Node score="-4.202565E-4">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="69.60712"/>
+										<Node score="-0.005437703">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="65.31143"/>
+											<Node score="-0.0073982463">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="64.410675"/>
+											</Node>
+										</Node>
+										<Node score="-0.003136083">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="68.14784"/>
+										</Node>
+									</Node>
+									<Node score="0.0018957035">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="75.77824"/>
+										<Node score="0.0061983364">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="81.86174"/>
+										</Node>
+									</Node>
+									<Node score="0.009201507">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="78.8282"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="27">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.014744696">
+									<True/>
+									<Node score="-0.00717198">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="55.778233"/>
+										<Node score="-0.017883437">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="63.904175"/>
+											<Node score="-0.022939911">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="56.33402"/>
+												<Node score="-0.024215212">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.85079"/>
+												</Node>
+											</Node>
+											<Node score="-0.020473158">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="62.143738"/>
+											</Node>
+										</Node>
+										<Node score="-0.01261934">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="72.911705"/>
+											<Node score="-0.016111072">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="66.95688"/>
+											</Node>
+										</Node>
+										<Node score="-0.010244827">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="50.88022"/>
+										</Node>
+									</Node>
+									<Node score="0.0019016494">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.02122"/>
+										<Node score="-0.0047521666">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.032856"/>
+											<Node score="-0.01200696">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="66.96783"/>
+											</Node>
+										</Node>
+										<Node score="-9.071396E-4">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="62.009583"/>
+										</Node>
+									</Node>
+									<Node score="0.008839993">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="71.26078"/>
+										<Node score="0.0054387785">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.011118447">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="28">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.01389327">
+									<True/>
+									<Node score="-0.00807937">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.74264"/>
+										<Node score="-0.017473549">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.25804"/>
+											<Node score="-0.022598436">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="50.091717"/>
+												<Node score="-0.023984589">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="39.446953"/>
+												</Node>
+											</Node>
+											<Node score="-0.020217912">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="55.471596"/>
+											</Node>
+										</Node>
+										<Node score="-0.0121300155">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.172485"/>
+											<Node score="-0.014838407">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.930183"/>
+											</Node>
+										</Node>
+										<Node score="-0.010757692">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="65.59617"/>
+										</Node>
+									</Node>
+									<Node score="0.0022954792">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.31485"/>
+										<Node score="-0.0031349726">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="63.720737"/>
+											<Node score="-0.005638558">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.74675"/>
+											</Node>
+										</Node>
+										<Node score="-1.909628E-4">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										</Node>
+									</Node>
+									<Node score="0.0053373934">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="73.34702"/>
+										<Node score="0.009459961">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="76.73922"/>
+										</Node>
+									</Node>
+									<Node score="0.010373119">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="29">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q70_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.014362817">
+									<True/>
+									<Node score="-0.009897101">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.859"/>
+										<Node score="-0.018656863">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="52.689938"/>
+											<Node score="-0.02222526">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="43.394936"/>
+												<Node score="-0.023433387">
+													<SimplePredicate field="q70_age_Fname" operator="lessThan" value="36.755646"/>
+												</Node>
+											</Node>
+											<Node score="-0.020460786">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="49.842575"/>
+											</Node>
+										</Node>
+										<Node score="-0.016531648">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="57.41547"/>
+											<Node score="-0.014102504">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="46.844627"/>
+											</Node>
+										</Node>
+										<Node score="-0.012023858">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="59.852158"/>
+										</Node>
+									</Node>
+									<Node score="0.0013408781">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="64.251884"/>
+										<Node score="-0.004088408">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="59.761806"/>
+											<Node score="-0.0070812968">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="64.55305"/>
+											</Node>
+										</Node>
+										<Node score="-9.5632946E-4">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="62.009583"/>
+										</Node>
+									</Node>
+									<Node score="0.0077533806">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="69.735794"/>
+										<Node score="0.004246435">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="66.96783"/>
+										</Node>
+									</Node>
+									<Node score="0.009931577">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="30">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q70_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.012460463">
+									<True/>
+									<Node score="-0.010609935">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.612595"/>
+										<Node score="-0.018816778">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="62.551678"/>
+											<Node score="-0.022557367">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="55.397675"/>
+												<Node score="-0.023650574">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.535934"/>
+												</Node>
+											</Node>
+											<Node score="-0.020600349">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="60.594112"/>
+											</Node>
+										</Node>
+										<Node score="-0.013160102">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="57.40178"/>
+											<Node score="-0.016200535">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="67.72348"/>
+											</Node>
+										</Node>
+										<Node score="-0.015106503">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="65.05955"/>
+										</Node>
+									</Node>
+									<Node score="-3.603111E-4">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="69.59617"/>
+										<Node score="-0.005020016">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="65.31143"/>
+											<Node score="-0.0070137987">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="64.410675"/>
+											</Node>
+										</Node>
+										<Node score="-0.0029168844">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="68.142365"/>
+										</Node>
+									</Node>
+									<Node score="0.0013292355">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="75.4935"/>
+										<Node score="0.0059094676">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="81.5551"/>
+										</Node>
+									</Node>
+									<Node score="0.008312849">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="78.8282"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="31">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q60_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.016493427">
+									<True/>
+									<Node score="-0.0076129944">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.718002"/>
+										<Node score="-0.017494788">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="49.409992"/>
+											<Node score="-0.021844331">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="40.262833"/>
+												<Node score="-0.023190944">
+													<SimplePredicate field="q60_age_Fname" operator="lessThan" value="29.533195"/>
+												</Node>
+											</Node>
+											<Node score="-0.019849166">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="43.830254"/>
+											</Node>
+										</Node>
+										<Node score="-0.012349536">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="56.04107"/>
+											<Node score="-0.014901927">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="51.356606"/>
+											</Node>
+										</Node>
+										<Node score="-0.009632355">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="58.028748"/>
+										</Node>
+									</Node>
+									<Node score="0.0016815369">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.026695"/>
+										<Node score="-0.0026487594">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="60.553047"/>
+											<Node score="-0.005231983">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.143738"/>
+											</Node>
+										</Node>
+										<Node score="-6.747726E-4">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="61.84805"/>
+										</Node>
+									</Node>
+									<Node score="0.008589237">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+										<Node score="0.0051638437">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.013250369">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="77.00479"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="32">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.013177294">
+									<True/>
+									<Node score="-0.008050369">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.548256"/>
+										<Node score="-0.016871264">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="64.06297"/>
+											<Node score="-0.021769604">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="57.52772"/>
+												<Node score="-0.023267027">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.85079"/>
+												</Node>
+											</Node>
+											<Node score="-0.019281743">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="61.98768"/>
+											</Node>
+										</Node>
+										<Node score="-0.010393868">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="69.12799"/>
+											<Node score="-0.01434783">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="57.204655"/>
+											</Node>
+										</Node>
+										<Node score="-0.011403257">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="53.64271"/>
+										</Node>
+									</Node>
+									<Node score="-5.8287736E-5">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="68.39973"/>
+										<Node score="-0.0027759224">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="64.00548"/>
+											<Node score="-0.00538339">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.74675"/>
+											</Node>
+										</Node>
+										<Node score="0.0028119434">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="79.10198"/>
+										</Node>
+									</Node>
+									<Node score="0.004824688">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="73.35797"/>
+										<Node score="0.008547815">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="82.13552"/>
+										</Node>
+									</Node>
+									<Node score="0.009714725">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="33">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.0129172765">
+									<True/>
+									<Node score="-0.0023316892">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="65.56332"/>
+										<Node score="-0.019565113">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="56.859684"/>
+											<Node score="-0.021703476">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="49.59069"/>
+												<Node score="-0.02303309">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="39.827515"/>
+												</Node>
+											</Node>
+											<Node score="-0.017291445">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="42.351814"/>
+											</Node>
+										</Node>
+										<Node score="-0.013814995">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.908283"/>
+											<Node score="-0.01593557">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.342915"/>
+											</Node>
+										</Node>
+										<Node score="-0.010708291">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="60.884327"/>
+										</Node>
+									</Node>
+									<Node score="-8.859896E-5">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="66.663925"/>
+										<Node score="-0.0049811057">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="61.63176"/>
+											<Node score="-0.0073923175">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="59.980835"/>
+											</Node>
+										</Node>
+										<Node score="-0.002755911">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="64.30116"/>
+										</Node>
+									</Node>
+									<Node score="0.002906236">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="72.6653"/>
+										<Node score="0.0070311916">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="76.89254"/>
+										</Node>
+									</Node>
+									<Node score="0.009202051">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="34">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q60_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.012754326">
+									<True/>
+									<Node score="-0.008598396">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="58.028748"/>
+										<Node score="-0.01802274">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="62.628338"/>
+											<Node score="-0.021739071">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="56.11225"/>
+												<Node score="-0.022945065">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.535934"/>
+												</Node>
+											</Node>
+											<Node score="-0.019770483">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="60.314854"/>
+											</Node>
+										</Node>
+										<Node score="-0.013218532">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="69.029434"/>
+											<Node score="-0.015770774">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="65.70568"/>
+											</Node>
+										</Node>
+										<Node score="-0.011039855">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="53.546886"/>
+										</Node>
+									</Node>
+									<Node score="7.4414327E-4">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="67.77824"/>
+										<Node score="-0.0042790603">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.937714"/>
+											<Node score="-0.0071012704">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="60.22998"/>
+											</Node>
+										</Node>
+										<Node score="-0.0015884271">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="65.31964"/>
+										</Node>
+									</Node>
+									<Node score="0.003293652">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="72.6653"/>
+										<Node score="0.008224401">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="81.53046"/>
+										</Node>
+									</Node>
+									<Node score="0.008997196">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="76.32033"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="35">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q70_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.011001605">
+									<True/>
+									<Node score="-0.00913372">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.88912"/>
+										<Node score="-0.017306063">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="57.47844"/>
+											<Node score="-0.021437488">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="49.141685"/>
+												<Node score="-0.022724023">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="39.37851"/>
+												</Node>
+											</Node>
+											<Node score="-0.01937372">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="54.30801"/>
+											</Node>
+										</Node>
+										<Node score="-0.013170407">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="62.417522"/>
+											<Node score="-0.0152093265">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.73443"/>
+											</Node>
+										</Node>
+										<Node score="-0.0108397305">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.27926"/>
+										</Node>
+									</Node>
+									<Node score="8.2159904E-4">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="72.99931"/>
+										<Node score="-0.0029697379">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="68.14784"/>
+											<Node score="-0.0061547505">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="64.555786"/>
+											</Node>
+										</Node>
+										<Node score="0.005399828">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="72.82957"/>
+										</Node>
+									</Node>
+									<Node score="0.008062833">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="78.8282"/>
+										<Node score="0.0051407446">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="75.780975"/>
+										</Node>
+									</Node>
+									<Node score="0.01396819">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="82.99247"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="36">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q70_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.011345597">
+									<True/>
+									<Node score="-0.009128832">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="61.612595"/>
+										<Node score="-0.01722971">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="56.898014"/>
+											<Node score="-0.02116854">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="49.14716"/>
+												<Node score="-0.022528753">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="40.29021"/>
+												</Node>
+											</Node>
+											<Node score="-0.019166242">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="54.51061"/>
+											</Node>
+										</Node>
+										<Node score="-0.013355823">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.716633"/>
+											<Node score="-0.015375404">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.342915"/>
+											</Node>
+										</Node>
+										<Node score="-0.01094639">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.172485"/>
+										</Node>
+									</Node>
+									<Node score="-3.071085E-4">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="69.59617"/>
+										<Node score="-0.0045028077">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="65.17728"/>
+											<Node score="-0.006308989">
+												<SimplePredicate field="q70_age_Fname" operator="lessThan" value="64.410675"/>
+											</Node>
+										</Node>
+										<Node score="-0.0026142083">
+											<SimplePredicate field="q70_age_Fname" operator="lessThan" value="68.172485"/>
+										</Node>
+									</Node>
+									<Node score="0.0021788676">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="75.43053"/>
+										<Node score="0.009201425">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="73.20192"/>
+										</Node>
+									</Node>
+									<Node score="0.007583164">
+										<SimplePredicate field="q70_age_Fname" operator="lessThan" value="78.8282"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="37">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q80_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.012969226">
+									<True/>
+									<Node score="0.02816168">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.870636"/>
+										<Node score="-0.019251775">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="56.084873"/>
+											<Node score="-0.021062778">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="49.092403"/>
+												<Node score="-0.02235686">
+													<SimplePredicate field="q80_age_Fname" operator="lessThan" value="40.309376"/>
+												</Node>
+											</Node>
+											<Node score="-0.017152535">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="39.30185"/>
+											</Node>
+										</Node>
+										<Node score="-0.012969365">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.82341"/>
+											<Node score="-0.015197141">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="59.676933"/>
+											</Node>
+										</Node>
+										<Node score="-0.010252987">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="61.84531"/>
+										</Node>
+									</Node>
+									<Node score="1.989748E-4">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="63.77002"/>
+										<Node score="-0.0049953936">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="58.171116"/>
+											<Node score="-0.0074484926">
+												<SimplePredicate field="q80_age_Fname" operator="lessThan" value="68.24641"/>
+											</Node>
+										</Node>
+										<Node score="-0.0024110272">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="61.24846"/>
+										</Node>
+									</Node>
+									<Node score="0.006991804">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="69.59617"/>
+										<Node score="0.0034556452">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.01437"/>
+										</Node>
+									</Node>
+									<Node score="0.008848559">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="72.10404"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="38">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q60_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.0153643815">
+									<True/>
+									<Node score="-0.008835636">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="57.98768"/>
+										<Node score="-0.016302139">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="48.887062"/>
+											<Node score="-0.020374725">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="40.262833"/>
+												<Node score="-0.021545684">
+													<SimplePredicate field="q60_age_Fname" operator="lessThan" value="33.141685"/>
+												</Node>
+											</Node>
+											<Node score="-0.018314604">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="44.821354"/>
+											</Node>
+										</Node>
+										<Node score="-0.016527882">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="51.915127"/>
+											<Node score="-0.012018016">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="46.732376"/>
+											</Node>
+										</Node>
+										<Node score="-0.011099811">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="55.597534"/>
+										</Node>
+									</Node>
+									<Node score="0.0014550645">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.01574"/>
+										<Node score="-0.0040882076">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.833675"/>
+											<Node score="-0.006655232">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="60.21903"/>
+											</Node>
+										</Node>
+										<Node score="-0.0011791311">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="61.946613"/>
+										</Node>
+									</Node>
+									<Node score="0.0075452616">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="71.32922"/>
+										<Node score="0.0045349053">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.011578361">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="76.93087"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="39">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="median_age_Fname"/>
+									<MiningField name="q60_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.015202249">
+									<True/>
+									<Node score="-0.008646939">
+										<SimplePredicate field="q60_age_Fname" operator="lessThan" value="58.028748"/>
+										<Node score="-0.017901432">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="47.98631"/>
+											<Node score="-0.020461766">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="40.271046"/>
+												<Node score="-0.021825042">
+													<SimplePredicate field="q60_age_Fname" operator="lessThan" value="29.295004"/>
+												</Node>
+											</Node>
+											<Node score="-0.015224257">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="38.450375"/>
+											</Node>
+										</Node>
+										<Node score="-0.01673553">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="51.356606"/>
+											<Node score="-0.012759653">
+												<SimplePredicate field="median_age_Fname" operator="lessThan" value="46.086243"/>
+											</Node>
+										</Node>
+										<Node score="-0.011120877">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="55.701572"/>
+										</Node>
+									</Node>
+									<Node score="0.0014898186">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="65.02122"/>
+										<Node score="-0.0039463975">
+											<SimplePredicate field="q60_age_Fname" operator="lessThan" value="62.937714"/>
+											<Node score="-0.0065241302">
+												<SimplePredicate field="q60_age_Fname" operator="lessThan" value="60.22998"/>
+											</Node>
+										</Node>
+										<Node score="-0.0010971399">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="62.009583"/>
+										</Node>
+									</Node>
+									<Node score="0.007463704">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="71.26078"/>
+										<Node score="0.0044270703">
+											<SimplePredicate field="median_age_Fname" operator="lessThan" value="67.32375"/>
+										</Node>
+									</Node>
+									<Node score="0.011362049">
+										<SimplePredicate field="median_age_Fname" operator="lessThan" value="77.00479"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="40">
+							<True/>
+							<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction" x-mathContext="float">
+								<MiningSchema>
+									<MiningField name="q80_age_Fname"/>
+									<MiningField name="q90_age_Fname"/>
+								</MiningSchema>
+								<Node score="0.01136797">
+									<True/>
+									<Node score="-0.00978214">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="64.870636"/>
+										<Node score="-0.017712494">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="61.932922"/>
+											<Node score="-0.020899637">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="55.238876"/>
+												<Node score="-0.022023596">
+													<SimplePredicate field="q90_age_Fname" operator="lessThan" value="49.535934"/>
+												</Node>
+											</Node>
+											<Node score="-0.019439012">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="58.080765"/>
+											</Node>
+										</Node>
+										<Node score="-0.012522779">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="61.867214"/>
+											<Node score="-0.01497521">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="65.70568"/>
+											</Node>
+										</Node>
+										<Node score="0.0032843663">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="64.20534"/>
+										</Node>
+									</Node>
+									<Node score="-0.004334015">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="72.34497"/>
+										<Node score="-0.0072352006">
+											<SimplePredicate field="q80_age_Fname" operator="lessThan" value="68.02738"/>
+											<Node score="-0.0050527174">
+												<SimplePredicate field="q90_age_Fname" operator="lessThan" value="71.164955"/>
+											</Node>
+										</Node>
+										<Node score="-5.01026E-4">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="74.8282"/>
+										</Node>
+									</Node>
+									<Node score="9.836631E-4">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="77.82889"/>
+										<Node score="0.0073332842">
+											<SimplePredicate field="q90_age_Fname" operator="lessThan" value="77.17454"/>
+										</Node>
+									</Node>
+									<Node score="0.006425114">
+										<SimplePredicate field="q80_age_Fname" operator="lessThan" value="86.83915"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+					</Segmentation>
+				</MiningModel>
+			</Segment>
+			<Segment id="2">
+				<True/>
+				<RegressionModel functionName="classification" normalizationMethod="logit" x-mathContext="float">
+					<MiningSchema>
+						<MiningField name="_target" usageType="target"/>
+						<MiningField name="xgbValue"/>
+					</MiningSchema>
+					<Output>
+						<OutputField name="probability(0)" optype="continuous" dataType="float" feature="probability" value="0"/>
+						<OutputField name="probability(1)" optype="continuous" dataType="float" feature="probability" value="1"/>
+					</Output>
+					<RegressionTable intercept="0.0" targetCategory="1">
+						<NumericPredictor name="xgbValue" coefficient="1.0"/>
+					</RegressionTable>
+					<RegressionTable intercept="0.0" targetCategory="0"/>
+				</RegressionModel>
+			</Segment>
+		</Segmentation>
+	</MiningModel>
+</PMML>

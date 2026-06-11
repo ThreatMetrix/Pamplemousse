@@ -141,6 +141,7 @@ const FunctionTable functionTable = {{
     const Definition sortTableDef = {"table.sort", FUNCTIONLIKE, PMMLDocument::TYPE_VOID, LuaOutputter::PRECEDENCE_TOP, MISSING_IF_ANY_ARGUMENT_IS_MISSING };
     const Definition insertToTableDef = {"table.insert", FUNCTIONLIKE, PMMLDocument::TYPE_VOID,LuaOutputter::PRECEDENCE_TOP, MISSING_IF_ANY_ARGUMENT_IS_MISSING};
     const Definition listLengthDef = {"#", UNARY_OPERATOR, PMMLDocument::TYPE_NUMBER, LuaOutputter::PRECEDENCE_UNARY, MISSING_IF_ANY_ARGUMENT_IS_MISSING};
+    const Definition forPairsLoopDef = {nullptr, FOR_PAIRS_LOOP, PMMLDocument::TYPE_VOID, LuaOutputter::PRECEDENCE_TOP, NEVER_MISSING};
 
     // These are for predicate
     // Surrogate's lua function is defined as an "or" to allow it to be expressed as A or B or C... iff the type is not bool

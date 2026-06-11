@@ -72,6 +72,7 @@ namespace Function
         LAMBDA,
         RUN_LAMBDA,
         RETURN_STATEMENT,
+        FOR_PAIRS_LOOP,
         UNSUPPORTED
     };
     enum MissingValueRule
@@ -208,6 +209,7 @@ namespace Function
     extern const Definition sortTableDef;
     extern const Definition insertToTableDef;
     extern const Definition listLengthDef;
+    extern const Definition forPairsLoopDef;
     
     struct CustomDefinition
     {

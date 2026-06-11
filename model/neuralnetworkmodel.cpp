@@ -585,6 +585,11 @@ namespace
 
 bool NeuralNetworkModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ModelConfig & config)
 {
+    if (config.contributionsTable)
+    {
+        builder.parsingError("--contributions is only supported on tree models and additive ensembles thereof", node->GetLineNum());
+        return false;
+    }
     const char * activationFunctionName = node->Attribute("activationFunction");
     if (activationFunctionName == nullptr)
     {
