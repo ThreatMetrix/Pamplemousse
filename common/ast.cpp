@@ -282,6 +282,10 @@ void AstBuilder::declare(PMMLDocument::ConstFieldDescriptionPtr description, Has
     {
         popNodesIntoVector(children, 1);
     }
+    if (description)
+    {
+        description->declared = true;
+    }
     m_stack.emplace_back(m_nextID++, DECLARATION_DEF, description, std::move(children));
 }
 

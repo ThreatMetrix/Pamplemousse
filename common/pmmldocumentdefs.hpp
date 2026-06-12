@@ -107,6 +107,15 @@ namespace PMMLDocument
         std::string luaName;
         unsigned int id;
         mutable size_t overflowAssignment = 0;
+        // Tracks whether AstBuilder::declare has emitted a declaration for
+        // this field. Used by Output processing to suppress redundant
+        // re-declarations when an inner model's <OutputField> shares its
+        // name (and therefore its FieldDescription) with an enclosing
+        // model's already-declared output, which would otherwise emit a
+        // shadowing `local` that breaks the parent's accumulator
+        // (CatBoost-style PMML where every TreeModel segment redeclares
+        // the parent MiningModel's predicted-value output).
+        mutable bool declared = false;
     };
     typedef std::shared_ptr<const FieldDescription> ConstFieldDescriptionPtr;
     typedef std::unordered_map<std::string, ConstFieldDescriptionPtr> DataDictionary;

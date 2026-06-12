@@ -347,6 +347,62 @@ public:
         CPPUNIT_ASSERT_EQUAL(4.735000  + 6.768966 + 5.640000, predictedSepalLength);
     }
     
+    // Reproduces the CatBoost-style PMML pattern where the parent
+    // regression MiningModel's OutputField name matches the target field
+    // name, and each inner TreeModel segment also declares an
+    // <OutputField> with that same name. Without the fix, every segment
+    // emits `local <name> = model_output` that shadows the parent's
+    // accumulator, so the SUM aggregation across segments is lost and
+    // only the last tree's prediction (doubled by the shadow) survives.
+    void testRegressionSumWithSegmentOutputs()
+    {
+        tinyxml2::XMLDocument document;
+        CPPUNIT_ASSERT_EQUAL(tinyxml2::XML_SUCCESS, document.LoadFile(getPathToFile("MiningModelRegressionAverage.pmml").c_str()));
+        tinyxml2::XMLElement * miningModel = document.RootElement()->FirstChildElement("MiningModel");
+        CPPUNIT_ASSERT(miningModel != nullptr);
+        tinyxml2::XMLElement * segmentation = miningModel->FirstChildElement("Segmentation");
+        CPPUNIT_ASSERT(segmentation != nullptr);
+        segmentation->SetAttribute("multipleModelMethod", "sum");
+
+        // Rename the parent's OutputField to match the target name so that
+        // parent and segments resolve to the same FieldDescription, which
+        // is the collision pattern catboost-exported PMML produces.
+        tinyxml2::XMLElement * parentOutput = miningModel->FirstChildElement("Output");
+        CPPUNIT_ASSERT(parentOutput != nullptr);
+        tinyxml2::XMLElement * parentOutputField = parentOutput->FirstChildElement("OutputField");
+        CPPUNIT_ASSERT(parentOutputField != nullptr);
+        parentOutputField->SetAttribute("name", "sepal_length");
+
+        for (tinyxml2::XMLElement * segment = segmentation->FirstChildElement("Segment");
+             segment != nullptr; segment = segment->NextSiblingElement("Segment"))
+        {
+            tinyxml2::XMLElement * tree = segment->FirstChildElement("TreeModel");
+            CPPUNIT_ASSERT(tree != nullptr);
+            tinyxml2::XMLElement * miningSchema = tree->FirstChildElement("MiningSchema");
+            CPPUNIT_ASSERT(miningSchema != nullptr);
+            tinyxml2::XMLElement * output = document.NewElement("Output");
+            tinyxml2::XMLElement * field = document.NewElement("OutputField");
+            field->SetAttribute("name", "sepal_length");
+            field->SetAttribute("optype", "continuous");
+            field->SetAttribute("dataType", "double");
+            field->SetAttribute("feature", "predictedValue");
+            output->InsertEndChild(field);
+            tree->InsertAfterChild(miningSchema, output);
+        }
+
+        lua_State * L = makeState(document);
+
+        double predictedSepalLength;
+
+        CPPUNIT_ASSERT(executeModel(L, "petal_length", 2.0, "petal_width", 1.5, "sepal_width", 3));
+        CPPUNIT_ASSERT_EQUAL(true, getValue(L, "sepal_length", predictedSepalLength));
+        CPPUNIT_ASSERT_EQUAL(5.005660 + 6.413333 + 5.005660, predictedSepalLength);
+
+        CPPUNIT_ASSERT(executeModel(L, "petal_length", 4.0, "petal_width", 2.5, "sepal_width", 3));
+        CPPUNIT_ASSERT_EQUAL(true, getValue(L, "sepal_length", predictedSepalLength));
+        CPPUNIT_ASSERT_EQUAL(4.735000  + 6.768966 + 5.640000, predictedSepalLength);
+    }
+
     void testRegressionMax()
     {
         tinyxml2::XMLDocument document;
@@ -382,6 +438,7 @@ public:
     CPPUNIT_TEST(testRegressionWeightedAverage);
     CPPUNIT_TEST(testRegressionMedian);
     CPPUNIT_TEST(testRegressionSum);
+    CPPUNIT_TEST(testRegressionSumWithSegmentOutputs);
     CPPUNIT_TEST(testRegressionMax);
     CPPUNIT_TEST_SUITE_END();
 };

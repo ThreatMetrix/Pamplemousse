@@ -250,7 +250,19 @@ bool Output::addOutputValues(AstBuilder & builder, const tinyxml2::XMLElement * 
             auto description = builder.context().getFieldDescription(name);
             // Outputs should have already had descriptions added in findAllOutputs.
             assert(description);
-            
+
+            // If an enclosing model has already declared this output (its
+            // FieldDescription is shared globally because outputs are
+            // unscoped), skip this redundant declaration. Re-emitting
+            // `local <name> = ...` here would shadow the parent's
+            // accumulator and break sum/average aggregation across inner
+            // segments that each declare a colliding <OutputField> --
+            // the pattern catboost-exported PMML uses.
+            if (description->declared)
+            {
+                continue;
+            }
+
             const char * feature = iterator->Attribute("feature");
             bool gotValue = false;
             if (feature == nullptr || strcmp("predictedValue", feature) == 0)
