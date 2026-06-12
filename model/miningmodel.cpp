@@ -505,18 +505,18 @@ namespace MiningModel
             size_t innerBlockSize = 1;
             if (config.contributionsTable)
             {
-                // ORIGIN_SPECIAL (not ORIGIN_OUTPUT) so the optimiser does not
-                // alias these submodel-scratch locals onto an input feature
-                // variable; if it did, the merge-into-parent loop below would
-                // read/write the feature and corrupt downstream tree evals.
-                subModelConfig.contributionsTable = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "model_contributions", PMMLDocument::ORIGIN_SPECIAL);
+                // Default origin (ORIGIN_TEMPORARY) so the optimiser can spill
+                // these per-segment scratch locals into the overflow array
+                // when the ensemble has too many trees to fit in Lua's
+                // 200-locals-per-function budget.
+                subModelConfig.contributionsTable = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "model_contributions");
                 builder.function(Function::makeTuple, 0);
                 builder.declare(subModelConfig.contributionsTable, AstBuilder::HAS_INITIAL_VALUE);
                 innerBlockSize++;
             }
             if (config.biasAccumulator)
             {
-                subModelConfig.biasAccumulator = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "model_bias", PMMLDocument::ORIGIN_SPECIAL);
+                subModelConfig.biasAccumulator = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "model_bias");
                 builder.constant(0);
                 builder.declare(subModelConfig.biasAccumulator, AstBuilder::HAS_INITIAL_VALUE);
                 innerBlockSize++;
