@@ -1031,3 +1031,49 @@ bool MiningModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node,
     builder.parsingError("No segmentation element in MiningModel", node->GetLineNum());
     return false;
 }
+
+size_t MiningModel::applyRescaleToContributions(AstBuilder & builder,
+                                                const PMMLDocument::ModelConfig & config,
+                                                bool hasFactor, double factor,
+                                                bool hasConstant, double constant)
+{
+    size_t emitted = 0;
+    const bool factorActive = hasFactor && factor != 1.0;
+
+    if (config.contributionsTable && factorActive)
+    {
+        // for k,v in pairs(contributionsTable) do contributionsTable[k] = v * factor end
+        auto key = builder.context().createVariable(PMMLDocument::TYPE_STRING, "contribution_key", PMMLDocument::ORIGIN_SPECIAL);
+        auto value = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "contribution_value", PMMLDocument::ORIGIN_SPECIAL);
+
+        builder.field(value);
+        builder.constant(factor);
+        builder.function(Function::functionTable.names.times, 2);
+        builder.field(key);
+        builder.assignIndirect(config.contributionsTable, 1);
+
+        AstNode body = builder.popNode();
+        addForPairsLoop(builder, config.contributionsTable, key, value, std::move(body));
+        emitted++;
+    }
+
+    if (config.biasAccumulator && (factorActive || (hasConstant && constant != 0.0)))
+    {
+        // bias = bias * factor + constant
+        builder.field(config.biasAccumulator);
+        if (factorActive)
+        {
+            builder.constant(factor);
+            builder.function(Function::functionTable.names.times, 2);
+        }
+        if (hasConstant && constant != 0.0)
+        {
+            builder.constant(constant);
+            builder.function(Function::functionTable.names.plus, 2);
+        }
+        builder.assign(config.biasAccumulator);
+        emitted++;
+    }
+
+    return emitted;
+}

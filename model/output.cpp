@@ -21,6 +21,7 @@
 #include "conversioncontext.hpp"
 #include "document.hpp"
 #include "transformation.hpp"
+#include "miningmodel.hpp"
 #include <algorithm>
 
 namespace
@@ -134,6 +135,10 @@ void Output::doTargetPostprocessing(AstBuilder & builder, const tinyxml2::XMLEle
             }
             
             double val;
+            double rescaleFactor = 1.0;
+            double rescaleConstant = 0.0;
+            bool hasRescaleFactor = false;
+            bool hasRescaleConstant = false;
             if (target->QueryAttribute("max", &val) == tinyxml2::XML_SUCCESS)
             {
                 builder.constant(val);
@@ -151,12 +156,16 @@ void Output::doTargetPostprocessing(AstBuilder & builder, const tinyxml2::XMLEle
                 builder.constant(val);
                 builder.function(Function::functionTable.names.times, 2);
                 doneAnythingUseful = true;
+                rescaleFactor = val;
+                hasRescaleFactor = true;
             }
             if (target->QueryAttribute("rescaleConstant", &val) == tinyxml2::XML_SUCCESS)
             {
                 builder.constant(val);
                 builder.function(Function::functionTable.names.plus, 2);
                 doneAnythingUseful = true;
+                rescaleConstant = val;
+                hasRescaleConstant = true;
             }
             
             if (const char * castInteger = target->Attribute("castInteger"))
@@ -186,6 +195,16 @@ void Output::doTargetPostprocessing(AstBuilder & builder, const tinyxml2::XMLEle
                 // Get rid of the field ref.
                 builder.popNode();
             }
+
+            // Mirror the linear part of the score's rescale onto the
+            // contribution bias accumulator (and contribution table if
+            // factor != 1) so that bias + sum(contribs) tracks the rescaled
+            // score. Nonlinear ops (min/max/castInteger) intentionally do
+            // not propagate to contributions.
+            blockSize += MiningModel::applyRescaleToContributions(
+                builder, modelConfig,
+                hasRescaleFactor, rescaleFactor,
+                hasRescaleConstant, rescaleConstant);
         }
     }
 }
