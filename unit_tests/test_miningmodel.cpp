@@ -403,6 +403,53 @@ public:
         CPPUNIT_ASSERT_EQUAL(4.735000  + 6.768966 + 5.640000, predictedSepalLength);
     }
 
+    // Defensive coverage: ensures the fix only suppresses RE-declarations
+    // of an already-declared output. Inner TreeModel segments that declare
+    // their own <OutputField> with a UNIQUE name (no collision with the
+    // parent or with the target field) must still produce correct sum
+    // aggregation in the parent's PredictedSepalLength output.
+    void testRegressionSumWithUniqueSegmentOutputs()
+    {
+        tinyxml2::XMLDocument document;
+        CPPUNIT_ASSERT_EQUAL(tinyxml2::XML_SUCCESS, document.LoadFile(getPathToFile("MiningModelRegressionAverage.pmml").c_str()));
+        tinyxml2::XMLElement * miningModel = document.RootElement()->FirstChildElement("MiningModel");
+        CPPUNIT_ASSERT(miningModel != nullptr);
+        tinyxml2::XMLElement * segmentation = miningModel->FirstChildElement("Segmentation");
+        CPPUNIT_ASSERT(segmentation != nullptr);
+        segmentation->SetAttribute("multipleModelMethod", "sum");
+
+        int idx = 0;
+        for (tinyxml2::XMLElement * segment = segmentation->FirstChildElement("Segment");
+             segment != nullptr; segment = segment->NextSiblingElement("Segment"))
+        {
+            tinyxml2::XMLElement * tree = segment->FirstChildElement("TreeModel");
+            CPPUNIT_ASSERT(tree != nullptr);
+            tinyxml2::XMLElement * miningSchema = tree->FirstChildElement("MiningSchema");
+            CPPUNIT_ASSERT(miningSchema != nullptr);
+            tinyxml2::XMLElement * output = document.NewElement("Output");
+            tinyxml2::XMLElement * field = document.NewElement("OutputField");
+            std::string uniqueName = std::string("TreeScore") + std::to_string(idx++);
+            field->SetAttribute("name", uniqueName.c_str());
+            field->SetAttribute("optype", "continuous");
+            field->SetAttribute("dataType", "double");
+            field->SetAttribute("feature", "predictedValue");
+            output->InsertEndChild(field);
+            tree->InsertAfterChild(miningSchema, output);
+        }
+
+        lua_State * L = makeState(document);
+
+        double predictedSepalLength;
+
+        CPPUNIT_ASSERT(executeModel(L, "petal_length", 2.0, "petal_width", 1.5, "sepal_width", 3));
+        CPPUNIT_ASSERT_EQUAL(true, getValue(L, "PredictedSepalLength", predictedSepalLength));
+        CPPUNIT_ASSERT_EQUAL(5.005660 + 6.413333 + 5.005660, predictedSepalLength);
+
+        CPPUNIT_ASSERT(executeModel(L, "petal_length", 4.0, "petal_width", 2.5, "sepal_width", 3));
+        CPPUNIT_ASSERT_EQUAL(true, getValue(L, "PredictedSepalLength", predictedSepalLength));
+        CPPUNIT_ASSERT_EQUAL(4.735000  + 6.768966 + 5.640000, predictedSepalLength);
+    }
+
     void testRegressionMax()
     {
         tinyxml2::XMLDocument document;
@@ -439,6 +486,7 @@ public:
     CPPUNIT_TEST(testRegressionMedian);
     CPPUNIT_TEST(testRegressionSum);
     CPPUNIT_TEST(testRegressionSumWithSegmentOutputs);
+    CPPUNIT_TEST(testRegressionSumWithUniqueSegmentOutputs);
     CPPUNIT_TEST(testRegressionMax);
     CPPUNIT_TEST_SUITE_END();
 };
