@@ -83,19 +83,26 @@ namespace
         return true;
     }
 
-    lua_State * makeContributionsState(const RescaleParams & rescale = {})
+    double getTableNumber(lua_State * L, const char * key)
     {
-        tinyxml2::XMLDocument document;
-        if (document.LoadFile(getPathToFile("XGBoostBinaryLogistic.pmml").c_str()) != tinyxml2::XML_SUCCESS)
-        {
-            return nullptr;
-        }
+        lua_pushstring(L, key);
+        lua_gettable(L, -2);
+        const double out = lua_tonumber(L, -1);
+        lua_pop(L, 1);
+        return out;
+    }
 
-        if (!injectRescaleIntoXGBoostFixture(document, rescale))
-        {
-            return nullptr;
-        }
-
+    // Build a Lua function `func(<features...>)` that returns
+    // (raw_score, contribsTable) using the given PMML document. The
+    // contribsTable has a "__bias__" entry alongside per-feature contributions.
+    // `outputFieldName` must match the field convertPMML produces as the model's
+    // raw regression score (e.g. "xgbValue" for XGBoost-modelChain fixtures,
+    // "PredictedSepalLength" for the regression-average fixture, target field
+    // name for bare TreeModel).
+    lua_State * makeContributionsStateForDocument(tinyxml2::XMLDocument & document,
+                                                  const char * outputFieldName,
+                                                  const std::vector<const char *> & inputFeatures)
+    {
         AstBuilder builder;
         auto contributionsTable = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "__contributions__", PMMLDocument::ORIGIN_OUTPUT);
         auto biasAccumulator = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "__bias__", PMMLDocument::ORIGIN_OUTPUT);
@@ -118,7 +125,7 @@ namespace
         builder.constant("__bias__", PMMLDocument::TYPE_STRING);
         builder.assignIndirect(contributionsTable, 1);
 
-        auto rawScore = builder.context().getFieldDescription("xgbValue");
+        auto rawScore = builder.context().getFieldDescription(outputFieldName);
         if (!rawScore)
         {
             return nullptr;
@@ -134,15 +141,11 @@ namespace
         PMMLDocument::optimiseAST(astTree, output);
 
         output.function("func");
-        output.keyword("median_age_Fname");
-        output.comma();
-        output.keyword("q60_age_Fname");
-        output.comma();
-        output.keyword("q70_age_Fname");
-        output.comma();
-        output.keyword("q80_age_Fname");
-        output.comma();
-        output.keyword("q90_age_Fname");
+        for (size_t i = 0; i < inputFeatures.size(); ++i)
+        {
+            if (i > 0) output.comma();
+            output.keyword(inputFeatures[i]);
+        }
         output.finishedArguments();
         LuaConverter::convertAstToLua(astTree, output);
         output.endBlock();
@@ -158,13 +161,21 @@ namespace
         return L;
     }
 
-    double getTableNumber(lua_State * L, const char * key)
+    lua_State * makeContributionsState(const RescaleParams & rescale = {})
     {
-        lua_pushstring(L, key);
-        lua_gettable(L, -2);
-        const double out = lua_tonumber(L, -1);
-        lua_pop(L, 1);
-        return out;
+        tinyxml2::XMLDocument document;
+        if (document.LoadFile(getPathToFile("XGBoostBinaryLogistic.pmml").c_str()) != tinyxml2::XML_SUCCESS)
+        {
+            return nullptr;
+        }
+
+        if (!injectRescaleIntoXGBoostFixture(document, rescale))
+        {
+            return nullptr;
+        }
+
+        return makeContributionsStateForDocument(document, "xgbValue",
+            {"median_age_Fname", "q60_age_Fname", "q70_age_Fname", "q80_age_Fname", "q90_age_Fname"});
     }
 }
 
@@ -300,6 +311,136 @@ public:
         lua_close(L);
     }
 
+    // Verify the AVERAGE / WEIGHTEDAVERAGE multipleModelMethod paths in
+    // miningmodel.cpp::doRegressionSegments correctly merge per-segment
+    // contributions and divide by total weight. The Saabas invariant
+    // `predicted == bias + sum(contribs)` must hold.
+    void testWeightedAverageContributions()
+    {
+        tinyxml2::XMLDocument document;
+        CPPUNIT_ASSERT_EQUAL(tinyxml2::XML_SUCCESS,
+            document.LoadFile(getPathToFile("MiningModelRegressionAverage.pmml").c_str()));
+
+        // Make "continent" a numeric field so it can be passed positionally
+        // alongside the other doubles. The regression-average fixture splits on
+        // continent string values, but Pamplemousse's --contributions handles
+        // numeric splits in the trees we exercise here; for this test we don't
+        // visit any continent-based split, so we only need a placeholder value.
+        lua_State * L = makeContributionsStateForDocument(document, "PredictedSepalLength",
+            {"petal_length", "petal_width", "day", "continent", "sepal_width"});
+        CPPUNIT_ASSERT(L != nullptr);
+
+        struct AverageCase { double petal_length, petal_width, day, continent, sepal_width; };
+        const AverageCase cases[] = {
+            {2.0, 0.5, 100.0, 1.0, 3.0},
+            {5.5, 1.8, 200.0, 2.0, 3.4},
+            {4.2, 1.2, 150.0, 1.5, 2.9},
+        };
+
+        for (const auto & c : cases)
+        {
+            lua_getglobal(L, "func");
+            lua_pushnumber(L, c.petal_length);
+            lua_pushnumber(L, c.petal_width);
+            lua_pushnumber(L, c.day);
+            lua_pushnumber(L, c.continent);
+            lua_pushnumber(L, c.sepal_width);
+            CPPUNIT_ASSERT_EQUAL(0, lua_pcall(L, 5, 2, 0));
+
+            const double rawScore = lua_tonumber(L, -2);
+            CPPUNIT_ASSERT(lua_istable(L, -1));
+
+            // Sum every entry in the contribs table EXCEPT __bias__.
+            double sum = 0;
+            lua_pushnil(L);
+            while (lua_next(L, -2) != 0)
+            {
+                const char * key = lua_tostring(L, -2);
+                if (key && std::string(key) != "__bias__")
+                {
+                    sum += lua_tonumber(L, -1);
+                }
+                lua_pop(L, 1);
+            }
+
+            const double bias = getTableNumber(L, "__bias__");
+            // Saabas invariant: regression score equals bias plus per-feature
+            // contributions, summed across all weighted-average segments.
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(rawScore, bias + sum, 1e-6);
+            lua_pop(L, 2);
+        }
+
+        lua_close(L);
+    }
+
+    // Verify --contributions works for a bare <TreeModel> (no MiningModel
+    // wrapper). The bias-init path at model/treemodel.cpp seeds the bias
+    // accumulator with the root node's score; per-edge contributions accumulate
+    // as the tree is walked. Saabas invariant must hold.
+    void testBareTreeModelContributions()
+    {
+        tinyxml2::XMLDocument document;
+        CPPUNIT_ASSERT_EQUAL(tinyxml2::XML_SUCCESS,
+            document.LoadFile(getPathToFile("TreeNoTrueChild.pmml").c_str()));
+
+        // Default noTrueChildStrategy=returnNullPrediction would leave the
+        // result null when the input doesn't enter the explicit child, which is
+        // not interesting for path attribution. returnLastPrediction makes the
+        // tree always emit a value (the last node reached on the path) so we
+        // can verify the invariant cleanly.
+        tinyxml2::XMLElement * tree = document.RootElement()->FirstChildElement("TreeModel");
+        CPPUNIT_ASSERT(tree != nullptr);
+        tree->SetAttribute("noTrueChildStrategy", "returnLastPrediction");
+
+        // The fixture has no Output element; inject one so convertPMML produces
+        // a named output field we can grab from the generated Lua function.
+        tinyxml2::XMLElement * output = document.NewElement("Output");
+        tinyxml2::XMLElement * outputField = document.NewElement("OutputField");
+        outputField->SetAttribute("name", "predicted");
+        outputField->SetAttribute("feature", "predictedValue");
+        outputField->SetAttribute("dataType", "double");
+        outputField->SetAttribute("optype", "continuous");
+        output->InsertEndChild(outputField);
+        tree->InsertAfterChild(tree->FirstChildElement("MiningSchema"), output);
+
+        lua_State * L = makeContributionsStateForDocument(document, "predicted", {"prob1"});
+        CPPUNIT_ASSERT(L != nullptr);
+
+        // prob1 > 0.33: enters the child node (score=1). Saabas: bias=0 (root),
+        // contribs[prob1] = 1 - 0 = 1, total = 1.
+        {
+            lua_getglobal(L, "func");
+            lua_pushnumber(L, 0.5);
+            CPPUNIT_ASSERT_EQUAL(0, lua_pcall(L, 1, 2, 0));
+            const double rawScore = lua_tonumber(L, -2);
+            CPPUNIT_ASSERT(lua_istable(L, -1));
+            const double bias = getTableNumber(L, "__bias__");
+            const double prob1Contrib = getTableNumber(L, "prob1");
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, rawScore, 1e-9);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, bias, 1e-9);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, prob1Contrib, 1e-9);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(rawScore, bias + prob1Contrib, 1e-9);
+            lua_pop(L, 2);
+        }
+
+        // prob1 <= 0.33: returnLastPrediction returns the root's score (0).
+        // No contributions accumulated. Saabas: bias=0, no contribs, total=0.
+        {
+            lua_getglobal(L, "func");
+            lua_pushnumber(L, 0.1);
+            CPPUNIT_ASSERT_EQUAL(0, lua_pcall(L, 1, 2, 0));
+            const double rawScore = lua_tonumber(L, -2);
+            CPPUNIT_ASSERT(lua_istable(L, -1));
+            const double bias = getTableNumber(L, "__bias__");
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, rawScore, 1e-9);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, bias, 1e-9);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(rawScore, bias, 1e-9);
+            lua_pop(L, 2);
+        }
+
+        lua_close(L);
+    }
+
     void testUnsupportedMiningMethod()
     {
         tinyxml2::XMLDocument document;
@@ -326,6 +467,8 @@ public:
     CPPUNIT_TEST(testXGBoostBinaryLogisticContributions);
     CPPUNIT_TEST(testRescaleConstantFoldedIntoBias);
     CPPUNIT_TEST(testRescaleFactorScalesContributions);
+    CPPUNIT_TEST(testWeightedAverageContributions);
+    CPPUNIT_TEST(testBareTreeModelContributions);
     CPPUNIT_TEST(testUnsupportedMiningMethod);
     CPPUNIT_TEST(testUnsupportedNonTreeModel);
     CPPUNIT_TEST_SUITE_END();
