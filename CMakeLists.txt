@@ -51,6 +51,7 @@ if (NOT DEFINED skip_tests)
         unit_tests/test_function.cpp
         unit_tests/test_miningmodel.cpp
         unit_tests/test_naivebayes.cpp
+        unit_tests/test_pmmldocumentdefs.cpp
         unit_tests/test_predicate.cpp
         unit_tests/test_ruleset.cpp
         unit_tests/test_scorecard.cpp
