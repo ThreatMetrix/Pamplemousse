@@ -82,7 +82,39 @@ namespace
         
         const char * defaultChildID = node->Attribute("defaultChild");
         bool foundDefaultChild = false;
-        
+
+        // If `defaultChild` is the LAST sibling AND missing-value-strategy is
+        // defaultChild, we can elide its predicate entirely and emit its body
+        // as the trailing `else` of the if-chain. The default child's
+        // OR-with-missing-clauses predicate is mathematically equivalent to
+        // "everything the strict preceding siblings rejected" when those
+        // siblings' predicates are mutually exclusive partitions of the
+        // input space (which is the case for binary tree splits).
+        //
+        // Gated off when missingValuePenalty is set: the penalty path
+        // (lines below) uses the default child's predicate to build the
+        // penalty conditional, so we can't elide it without restructuring
+        // that path too.
+        bool defaultChildIsLastSibling = false;
+        if (config.missingValueStrategy == MVS_DEFAULTCHILD && defaultChildID && !config.missingValuePenalty)
+        {
+            const tinyxml2::XMLElement * lastChild = nullptr;
+            for (const tinyxml2::XMLElement * c = firstChildNode; c; c = c->NextSiblingElement("Node"))
+            {
+                lastChild = c;
+            }
+            if (lastChild)
+            {
+                if (const char * lastID = lastChild->Attribute("id"))
+                {
+                    if (strcmp(lastID, defaultChildID) == 0)
+                    {
+                        defaultChildIsLastSibling = true;
+                    }
+                }
+            }
+        }
+
         size_t ifChainSize = 0;
 
         std::vector<AstNode> savedPredicatesForNotFound;
@@ -90,6 +122,7 @@ namespace
         {
             const char * thisID = childNode->Attribute("id");
             bool isDefaultChild = config.missingValueStrategy == MVS_DEFAULTCHILD && defaultChildID && thisID && strcmp(thisID, defaultChildID) == 0;
+            const bool elideAsElse = isDefaultChild && defaultChildIsLastSibling;
             
             const tinyxml2::XMLElement * predicate = PMMLDocument::skipExtensions(childNode->FirstChildElement());
             if (predicate == nullptr)
@@ -174,7 +207,16 @@ namespace
                 builder.block(2);
             }
             
-            // Add predicate
+            // Add predicate (skipped for the default-as-last optimisation,
+            // in which case this child becomes the trailing else of the
+            // if-chain and needs no predicate of its own).
+            if (elideAsElse)
+            {
+                ifChainSize += 1;  // Body only.
+                foundDefaultChild = true;
+                continue;
+            }
+
             builder.pushNode(predicateNode);
             ifChainSize += 2;  // One for the body, one for the predicate.
             
