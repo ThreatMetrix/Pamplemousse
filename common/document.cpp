@@ -115,7 +115,7 @@ void findAllInputs(const tinyxml2::XMLElement * element, std::unordered_set<std:
 }
 }
 
-bool PMMLDocument::convertPMML(AstBuilder & builder, const tinyxml2::XMLElement * documentRoot)
+bool PMMLDocument::convertPMML(AstBuilder & builder, const tinyxml2::XMLElement * documentRoot, const ModelConfig * initialConfig)
 {
     const tinyxml2::XMLElement * header = documentRoot->FirstChildElement();
     if (header == nullptr)
@@ -191,6 +191,10 @@ bool PMMLDocument::convertPMML(AstBuilder & builder, const tinyxml2::XMLElement 
     }
     
     ModelConfig config;
+    if (initialConfig)
+    {
+        config = *initialConfig;
+    }
     {
         // This thing is only used to get the target / predicted value from the mining schema.
         MiningSchemaStackGuard miningSchema(builder.context(), model->FirstChildElement("MiningSchema"));

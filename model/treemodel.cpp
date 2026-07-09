@@ -61,13 +61,38 @@ namespace
     struct TreeConfig
     {
         PMMLDocument::ModelConfig & config;
+        PMMLDocument::ConstFieldDescriptionPtr contributionsTable;
+        PMMLDocument::ConstFieldDescriptionPtr biasAccumulator;
         bool returnLastPrediction = false;
         MissingValueStrategy missingValueStrategy = MVS_NONE;
         PMMLDocument::ConstFieldDescriptionPtr totalNumberOfRecords;
         const char * missingValuePenalty = nullptr;
         PMMLDocument::ConstFieldDescriptionPtr totalMissingValuePenalty;
-        TreeConfig(PMMLDocument::ModelConfig & c) : config(c) {}
+        TreeConfig(PMMLDocument::ModelConfig & c) : config(c), contributionsTable(c.contributionsTable), biasAccumulator(c.biasAccumulator) {}
     };
+
+    const char * scoreOrZero(const tinyxml2::XMLElement * node)
+    {
+        // TODO: Missing internal-node scores make path attribution degenerate for non-JPMML-XGBoost PMML.
+        const char * score = node ? node->Attribute("score") : nullptr;
+        return score ? score : "0";
+    }
+
+    void addContribution(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr contributionsTable,
+                         const char * fieldName, const char * parentScore, const char * childScore)
+    {
+        builder.constant(fieldName, PMMLDocument::TYPE_STRING);
+        builder.fieldIndirect(contributionsTable, 1);
+        builder.defaultValue("0");
+
+        builder.constant(childScore, PMMLDocument::TYPE_NUMBER);
+        builder.constant(parentScore, PMMLDocument::TYPE_NUMBER);
+        builder.function(Function::functionTable.names.minus, 2);
+        builder.function(Function::functionTable.names.plus, 2);
+
+        builder.constant(fieldName, PMMLDocument::TYPE_STRING);
+        builder.assignIndirect(contributionsTable, 1);
+    }
     
     bool parseTreeNode(AstBuilder & builder, const tinyxml2::XMLElement * node, TreeConfig & config)
     {
@@ -163,6 +188,24 @@ namespace
             if (!parseTreeNode(builder, childNode, config))
             {
                 return false;
+            }
+
+            if (config.contributionsTable)
+            {
+                if (strcmp(predicate->Name(), "SimplePredicate") == 0)
+                {
+                    if (const char * fieldName = predicate->Attribute("field"))
+                    {
+                        AstNode bodyNode = builder.popNode();
+                        addContribution(builder, config.contributionsTable, fieldName, scoreOrZero(node), scoreOrZero(childNode));
+                        builder.pushNode(std::move(bodyNode));
+                        builder.block(2);
+                    }
+                }
+                else
+                {
+                    // JPMML-XGBoost split nodes use SimplePredicate; True/False/Compound/SimpleSet do not carry path attribution here.
+                }
             }
             
             // Add a penalty clause.
@@ -595,6 +638,17 @@ bool TreeModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node,
         treeConfig.totalMissingValuePenalty = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "missingValuePenalty");
         builder.constant("1", PMMLDocument::TYPE_NUMBER);
         builder.declare(treeConfig.totalMissingValuePenalty, AstBuilder::HAS_INITIAL_VALUE);
+        blockSize++;
+    }
+
+    if (treeConfig.contributionsTable && treeConfig.biasAccumulator)
+    {
+        const tinyxml2::XMLElement * rootNode = node->FirstChildElement("Node");
+        builder.field(treeConfig.biasAccumulator);
+        builder.defaultValue("0");
+        builder.constant(scoreOrZero(rootNode), PMMLDocument::TYPE_NUMBER);
+        builder.function(Function::functionTable.names.plus, 2);
+        builder.assign(treeConfig.biasAccumulator);
         blockSize++;
     }
     

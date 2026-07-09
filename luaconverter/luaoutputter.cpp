@@ -78,6 +78,15 @@ LuaOutputter & LuaOutputter::startWhile()
     return *this;
 }
 
+LuaOutputter & LuaOutputter::startFor()
+{
+    assert(isBlock(getContext()));
+    keyword("for");
+    m_indentLevel++;
+    m_stack.push_back(WHILE_PREDICATE);
+    return *this;
+}
+
 LuaOutputter & LuaOutputter::function()
 {
     keyword("function(");
@@ -437,4 +446,3 @@ LuaOutputter & LuaOutputter::closeBracket()
     m_spaceState = AFTER_KEYWORD;
     return *this;
 }
-

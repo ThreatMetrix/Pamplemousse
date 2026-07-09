@@ -53,6 +53,7 @@ namespace LuaConverter
         static void process(Function::Lambda, Analyser::AnalyserContext & context, const AstNode & node, DefaultIfMissing defaultIfMissing, LuaOutputter & output);
         static void process(Function::RunLambda, Analyser::AnalyserContext & context, const AstNode & node, DefaultIfMissing defaultIfMissing, LuaOutputter & output);
         static void process(Function::ReturnStatement, Analyser::AnalyserContext & context, const AstNode & node, DefaultIfMissing defaultIfMissing, LuaOutputter & output);
+        static void process(Function::ForPairsLoop, Analyser::AnalyserContext & context, const AstNode & node, DefaultIfMissing defaultIfMissing, LuaOutputter & output);
     };
     
     class MissingClauseConverter

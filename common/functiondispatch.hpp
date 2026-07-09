@@ -56,6 +56,7 @@ namespace Function
     class Lambda : public FunctionTypeBase{};
     class RunLambda : public FunctionTypeBase{};
     class ReturnStatement : public FunctionTypeBase{};
+    class ForPairsLoop : public FunctionTypeBase{};
     
     
     template<typename ReturnType, class Dispatcher, typename... Ts>
@@ -155,7 +156,10 @@ namespace Function
                 
             case RETURN_STATEMENT:
                 return dispatcher.process(ReturnStatement(), args...);
-                
+
+            case FOR_PAIRS_LOOP:
+                return dispatcher.process(ForPairsLoop(), args...);
+                 
             case UNSUPPORTED:
                 break;
         }

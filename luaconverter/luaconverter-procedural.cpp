@@ -115,9 +115,28 @@ void LuaConverter::Converter::process(Function::IfChain, Analyser::AnalyserConte
             continuingNonNullAssertions.addAssertionsForCheck(*predicate, Analyser::ASSUME_NOT_TRUE);
         }
     }
-    
     if (hasStartedBlock)
     {
         output.endBlock();
     }
+}
+
+void LuaConverter::Converter::process(Function::ForPairsLoop, Analyser::AnalyserContext & context, const AstNode & node, DefaultIfMissing, LuaOutputter & output)
+{
+    assert(node.children.size() == 4);
+    assert(node.children[0].function().functionType == Function::FIELD_REF);
+    assert(node.children[1].function().functionType == Function::FIELD_REF);
+
+    output.startFor();
+    output.rawField(node.children[0].fieldDescription);
+    output.comma();
+    output.rawField(node.children[1].fieldDescription);
+    output.keyword("in pairs");
+    output.openParen();
+    convertAstToLuaWithNullAssertions(context, node.children[2], DEFAULT_TO_NIL, output);
+    output.closeParen();
+    output.endPredicate();
+    convertAstSkipNullChecks(context, node.children[3], DEFAULT_TO_NIL, output);
+    output.endline();
+    output.endBlock();
 }

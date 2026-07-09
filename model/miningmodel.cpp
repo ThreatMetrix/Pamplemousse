@@ -68,6 +68,11 @@ namespace MiningModel
             }
         }
     }
+
+    size_t mergeContributionsFromSubModel(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr contributionsTable,
+                                          PMMLDocument::ConstFieldDescriptionPtr subContributionsTable, const char * weight);
+    size_t addBiasFromSubModel(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr biasAccumulator,
+                               PMMLDocument::ConstFieldDescriptionPtr subBiasAccumulator, const char * weight);
     
     
     size_t copyResultsFromSubModel(AstBuilder & builder, const PMMLDocument::ModelConfig & config, const PMMLDocument::ModelConfig & subModelConfig)
@@ -113,6 +118,16 @@ namespace MiningModel
                 blockSize++;
             }
         }
+
+        if (config.contributionsTable && subModelConfig.contributionsTable)
+        {
+            blockSize += mergeContributionsFromSubModel(builder, config.contributionsTable, subModelConfig.contributionsTable, nullptr);
+        }
+
+        if (config.biasAccumulator && subModelConfig.biasAccumulator)
+        {
+            blockSize += addBiasFromSubModel(builder, config.biasAccumulator, subModelConfig.biasAccumulator, nullptr);
+        }
         
         return blockSize;
     }
@@ -146,6 +161,90 @@ namespace MiningModel
             blockSize++;
         }
         return blockSize;
+    }
+
+    void addForPairsLoop(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr table, PMMLDocument::ConstFieldDescriptionPtr key,
+                         PMMLDocument::ConstFieldDescriptionPtr value, AstNode body)
+    {
+        builder.field(key);
+        builder.field(value);
+        builder.field(table);
+        builder.pushNode(std::move(body));
+        builder.function(Function::forPairsLoopDef, 4);
+    }
+
+    size_t mergeContributionsFromSubModel(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr contributionsTable,
+                                          PMMLDocument::ConstFieldDescriptionPtr subContributionsTable, const char * weight)
+    {
+        auto key = builder.context().createVariable(PMMLDocument::TYPE_STRING, "contribution_key", PMMLDocument::ORIGIN_SPECIAL);
+        auto value = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "contribution_value", PMMLDocument::ORIGIN_SPECIAL);
+
+        builder.field(key);
+        builder.fieldIndirect(contributionsTable, 1);
+        builder.defaultValue("0");
+        builder.field(value);
+        if (weight)
+        {
+            builder.constant(weight, PMMLDocument::TYPE_NUMBER);
+            builder.function(Function::functionTable.names.times, 2);
+        }
+        builder.function(Function::functionTable.names.plus, 2);
+        builder.field(key);
+        builder.assignIndirect(contributionsTable, 1);
+
+        AstNode body = builder.popNode();
+        addForPairsLoop(builder, subContributionsTable, key, value, std::move(body));
+        return 1;
+    }
+
+    size_t divideContributions(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr contributionsTable,
+                               PMMLDocument::ConstFieldDescriptionPtr factor)
+    {
+        auto key = builder.context().createVariable(PMMLDocument::TYPE_STRING, "contribution_key", PMMLDocument::ORIGIN_SPECIAL);
+        auto value = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "contribution_value", PMMLDocument::ORIGIN_SPECIAL);
+
+        builder.field(value);
+        builder.field(factor);
+        builder.function(Function::functionTable.names.divide, 2);
+        builder.field(key);
+        builder.assignIndirect(contributionsTable, 1);
+
+        AstNode body = builder.popNode();
+        addForPairsLoop(builder, contributionsTable, key, value, std::move(body));
+        return 1;
+    }
+
+    size_t addBiasFromSubModel(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr biasAccumulator,
+                               PMMLDocument::ConstFieldDescriptionPtr subBiasAccumulator, const char * weight)
+    {
+        builder.field(biasAccumulator);
+        builder.defaultValue("0");
+        builder.field(subBiasAccumulator);
+        builder.defaultValue("0");
+        if (weight)
+        {
+            builder.constant(weight, PMMLDocument::TYPE_NUMBER);
+            builder.function(Function::functionTable.names.times, 2);
+        }
+        builder.function(Function::functionTable.names.plus, 2);
+        builder.assign(biasAccumulator);
+        return 1;
+    }
+
+    const char * unsupportedContributionsMethod(MultipleModelMethod modelMethod)
+    {
+        switch(modelMethod)
+        {
+            case MAJORITYVOTE:
+            case WEIGHTEDMAJORITYVOTE:
+            case MAX:
+            case MEDIAN:
+            case SELECTFIRST:
+            case SELECTALL:
+                return MUTLIPLE_MODEL_METHOD_NAME[modelMethod];
+            default:
+                return nullptr;
+        }
     }
     
     size_t setupAccumulatorsForProbabilities(AstBuilder & builder, PMMLDocument::ModelConfig & config, const MultipleModelMethod modelMethod)
@@ -301,6 +400,8 @@ namespace MiningModel
             {
                 PMMLDocument::ModelConfig subModuleConfig;
                 // This model is used purely for chaining.
+                subModuleConfig.contributionsTable = config.contributionsTable;
+                subModuleConfig.biasAccumulator = config.biasAccumulator;
                 if (!PMMLDocument::parseModel(builder, model, subModuleConfig))
                 {
                     return false;
@@ -309,7 +410,17 @@ namespace MiningModel
             else
             {
                 // The child model outputs in the same way as the parent.
-                if (!PMMLDocument::parseModel(builder, model, config))
+                auto contributionsTable = config.contributionsTable;
+                auto biasAccumulator = config.biasAccumulator;
+                if (modelMethod == MODELCHAIN)
+                {
+                    config.contributionsTable = nullptr;
+                    config.biasAccumulator = nullptr;
+                }
+                const bool parsed = PMMLDocument::parseModel(builder, model, config);
+                config.contributionsTable = contributionsTable;
+                config.biasAccumulator = biasAccumulator;
+                if (!parsed)
                 {
                     return false;
                 }
@@ -360,7 +471,7 @@ namespace MiningModel
     }
 
     // This handles all other multiple model methods for regression models.
-    bool doRegressionSegments(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr outputValueName, PMMLDocument::FieldType outputType,
+    bool doRegressionSegments(AstBuilder & builder, PMMLDocument::ModelConfig & config, PMMLDocument::ConstFieldDescriptionPtr outputValueName, PMMLDocument::FieldType outputType,
                               PMMLDocument::ConstFieldDescriptionPtr countName, const tinyxml2::XMLElement * segmentation, const MultipleModelMethod modelMethod,
                               double & constCount)
     {
@@ -391,12 +502,30 @@ namespace MiningModel
             subModelConfig.outputValueName = builder.context().createVariable(outputType, "model_output");
             subModelConfig.outputType = outputType;
             subModelConfig.function = PMMLDocument::FUNCTION_REGRESSION;
+            size_t innerBlockSize = 1;
+            if (config.contributionsTable)
+            {
+                // Default origin (ORIGIN_TEMPORARY) so the optimiser can spill
+                // these per-segment scratch locals into the overflow array
+                // when the ensemble has too many trees to fit in Lua's
+                // 200-locals-per-function budget.
+                subModelConfig.contributionsTable = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "model_contributions");
+                builder.function(Function::makeTuple, 0);
+                builder.declare(subModelConfig.contributionsTable, AstBuilder::HAS_INITIAL_VALUE);
+                innerBlockSize++;
+            }
+            if (config.biasAccumulator)
+            {
+                subModelConfig.biasAccumulator = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "model_bias");
+                builder.constant(0);
+                builder.declare(subModelConfig.biasAccumulator, AstBuilder::HAS_INITIAL_VALUE);
+                innerBlockSize++;
+            }
             if (!PMMLDocument::parseModel(builder, model, subModelConfig))
             {
                 return false;
             }
-            size_t innerBlockSize = 1;
-            
+             
             if (modelMethod == SUM ||
                 modelMethod == WEIGHTEDAVERAGE ||
                 modelMethod == AVERAGE)
@@ -415,6 +544,18 @@ namespace MiningModel
                 builder.function(Function::functionTable.names.plus, 2);
                 builder.assign(outputValueName);
                 innerBlockSize++;
+
+                if (config.contributionsTable && subModelConfig.contributionsTable)
+                {
+                    innerBlockSize += mergeContributionsFromSubModel(builder, config.contributionsTable, subModelConfig.contributionsTable,
+                                                                     modelMethod == WEIGHTEDAVERAGE ? weight : nullptr);
+                }
+
+                if (config.biasAccumulator && subModelConfig.biasAccumulator)
+                {
+                    innerBlockSize += addBiasFromSubModel(builder, config.biasAccumulator, subModelConfig.biasAccumulator,
+                                                          modelMethod == WEIGHTEDAVERAGE ? weight : nullptr);
+                }
             }
             else if (modelMethod == MEDIAN)
             {
@@ -690,6 +831,14 @@ namespace MiningModel
                          const char * method, const tinyxml2::XMLElement * segmentation)
     {
         const MultipleModelMethod modelMethod = getMiningModelFromString(method);
+        if (config.contributionsTable)
+        {
+            if (const char * unsupported = unsupportedContributionsMethod(modelMethod))
+            {
+                builder.parsingError("multipleModelMethod is not supported with --contributions", unsupported, node->GetLineNum());
+                return false;
+            }
+        }
         switch(modelMethod)
         {
             case INVALID:
@@ -710,12 +859,11 @@ namespace MiningModel
                 builder.declare(countVariable, AstBuilder::HAS_INITIAL_VALUE);
             
                 double constCount = 0;
-                if (!doRegressionSegments(builder, accumVariable, config.outputType, countVariable, segmentation, modelMethod, constCount))
+                if (!doRegressionSegments(builder, config, accumVariable, config.outputType, countVariable, segmentation, modelMethod, constCount))
                 {
                     return false;
                 }
                 
-                builder.field(accumVariable);
                 builder.field(countVariable);
                 // Add a constant count to the calculated count
                 if (constCount > 0)
@@ -723,10 +871,29 @@ namespace MiningModel
                     builder.constant(constCount);
                     builder.function(Function::functionTable.names.sum, 2);
                 }
+                auto totalCountVariable = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "total_count");
+                builder.declare(totalCountVariable, AstBuilder::HAS_INITIAL_VALUE);
+
+                builder.field(accumVariable);
+                builder.field(totalCountVariable);
                 builder.function(Function::functionTable.names.divide, 2);
                 builder.declare(config.outputValueName, AstBuilder::HAS_INITIAL_VALUE);
-                
-                builder.block(4);
+
+                size_t blockSize = 5;
+                if (config.contributionsTable)
+                {
+                    blockSize += divideContributions(builder, config.contributionsTable, totalCountVariable);
+                }
+                if (config.biasAccumulator)
+                {
+                    builder.field(config.biasAccumulator);
+                    builder.field(totalCountVariable);
+                    builder.function(Function::functionTable.names.divide, 2);
+                    builder.assign(config.biasAccumulator);
+                    blockSize++;
+                }
+
+                builder.block(blockSize);
                 return true;
             }
             case MEDIAN:
@@ -736,7 +903,7 @@ namespace MiningModel
                 builder.declare(accumVariable, AstBuilder::NO_INITIAL_VALUE);
                 
                 double constCount = 0;
-                if (!doRegressionSegments(builder, accumVariable, config.outputType, nullptr, segmentation, modelMethod, constCount))
+                if (!doRegressionSegments(builder, config, accumVariable, config.outputType, nullptr, segmentation, modelMethod, constCount))
                 {
                     return false;
                 }
@@ -779,7 +946,7 @@ namespace MiningModel
                 builder.constant(0);
                 builder.declare(config.outputValueName, AstBuilder::HAS_INITIAL_VALUE);
                 double constCount = 0;
-                if (!doRegressionSegments(builder, config.outputValueName, config.outputType, nullptr, segmentation, modelMethod, constCount))
+                if (!doRegressionSegments(builder, config, config.outputValueName, config.outputType, nullptr, segmentation, modelMethod, constCount))
                 {
                     return false;
                 }
@@ -801,6 +968,14 @@ namespace MiningModel
                              const char * method, const tinyxml2::XMLElement * segmentation)
     {
         const MultipleModelMethod modelMethod = getMiningModelFromString(method);
+        if (config.contributionsTable)
+        {
+            if (const char * unsupported = unsupportedContributionsMethod(modelMethod))
+            {
+                builder.parsingError("multipleModelMethod is not supported with --contributions", unsupported, node->GetLineNum());
+                return false;
+            }
+        }
         switch(modelMethod)
         {
             case INVALID:
@@ -855,4 +1030,50 @@ bool MiningModel::parse(AstBuilder & builder, const tinyxml2::XMLElement * node,
 
     builder.parsingError("No segmentation element in MiningModel", node->GetLineNum());
     return false;
+}
+
+size_t MiningModel::applyRescaleToContributions(AstBuilder & builder,
+                                                const PMMLDocument::ModelConfig & config,
+                                                bool hasFactor, double factor,
+                                                bool hasConstant, double constant)
+{
+    size_t emitted = 0;
+    const bool factorActive = hasFactor && factor != 1.0;
+
+    if (config.contributionsTable && factorActive)
+    {
+        // for k,v in pairs(contributionsTable) do contributionsTable[k] = v * factor end
+        auto key = builder.context().createVariable(PMMLDocument::TYPE_STRING, "contribution_key", PMMLDocument::ORIGIN_SPECIAL);
+        auto value = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "contribution_value", PMMLDocument::ORIGIN_SPECIAL);
+
+        builder.field(value);
+        builder.constant(factor);
+        builder.function(Function::functionTable.names.times, 2);
+        builder.field(key);
+        builder.assignIndirect(config.contributionsTable, 1);
+
+        AstNode body = builder.popNode();
+        addForPairsLoop(builder, config.contributionsTable, key, value, std::move(body));
+        emitted++;
+    }
+
+    if (config.biasAccumulator && (factorActive || (hasConstant && constant != 0.0)))
+    {
+        // bias = bias * factor + constant
+        builder.field(config.biasAccumulator);
+        if (factorActive)
+        {
+            builder.constant(factor);
+            builder.function(Function::functionTable.names.times, 2);
+        }
+        if (hasConstant && constant != 0.0)
+        {
+            builder.constant(constant);
+            builder.function(Function::functionTable.names.plus, 2);
+        }
+        builder.assign(config.biasAccumulator);
+        emitted++;
+    }
+
+    return emitted;
 }

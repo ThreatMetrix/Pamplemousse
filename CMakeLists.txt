@@ -48,6 +48,7 @@ if (NOT DEFINED skip_tests)
     cuti_creates_test_target(libpamplemousse_test libpamplemousse
         unit_tests/testutils.cpp
         unit_tests/testutils.hpp
+        unit_tests/test_contributions.cpp
         unit_tests/test_function.cpp
         unit_tests/test_miningmodel.cpp
         unit_tests/test_naivebayes.cpp
@@ -103,4 +104,3 @@ else()
   target_compile_options(libpamplemousse PRIVATE -Wshadow -Wall -Wextra -pedantic -Werror)
   target_compile_options(pamplemousse PRIVATE -Wshadow -Wall -Wextra -pedantic -Werror)
 endif()
-

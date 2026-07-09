@@ -33,7 +33,8 @@ namespace PMMLExporter
     // inputs and outputs are both io parameters. If they are non-empty, they will be used. If they are empty, we will populate them from the model.
     bool createScript(const char * sourceFile, LuaOutputter & luaOutputter,
                       std::vector<PMMLExporter::ModelOutput> & inputs, std::vector<PMMLExporter::ModelOutput> & outputs,
-                      Format inputFormat = Format::AS_MULTI_ARG, Format outputFormat = Format::AS_MULTI_ARG);
+                      Format inputFormat = Format::AS_MULTI_ARG, Format outputFormat = Format::AS_MULTI_ARG,
+                      const char * contributionsAttribute = nullptr);
     void addFunctionHeader(LuaOutputter & output, const std::vector<PMMLExporter::ModelOutput> & inputColumns);
     void addMultiReturnStatement(AstBuilder & builder, const std::vector<PMMLExporter::ModelOutput> & customOutputs);
     void addTableReturnStatement(AstBuilder & builder, const std::vector<PMMLExporter::ModelOutput> & customOutputs);

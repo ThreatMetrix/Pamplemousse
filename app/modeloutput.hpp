@@ -28,9 +28,11 @@ namespace PMMLExporter
         std::string modelOutput;
         std::string variableOrAttribute;
         PMMLDocument::ConstFieldDescriptionPtr field;
+        PMMLDocument::ConstFieldDescriptionPtr biasField;
         double factor = 1;
         double coefficient = 0;
         int decimalPoints = -1;
+        bool isContributions = false;
         
         ModelOutput(const std::string & mo, const std::string & voa,
                     PMMLDocument::ConstFieldDescriptionPtr field = PMMLDocument::ConstFieldDescriptionPtr());

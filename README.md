@@ -33,6 +33,33 @@ You can see a help message by running pamplemousse without parameters.
 
 Alternatively, if your requirements become more complex, you may use pamplemousse as a library and implement your own input/output logic to the model.
 
+### Per-feature contributions
+
+For tree models and additive ensembles thereof, Pamplemousse can emit
+per-feature path-attribution contributions alongside the score:
+
+```
+pamplemousse --convert --contributions feature_contribs model.pmml > model.lua
+```
+
+For each tree, the generated Lua walks the decision path once and attributes
+the delta `score[child] − score[parent]` to the field tested in the child
+predicate. A separate `__bias__` entry carries `base_score + Σ_trees
+score[root]` so the additive identity `raw_score = __bias__ + Σ contributions`
+holds exactly.
+
+This is the variant produced by XGBoost's own
+`predict(pred_contribs=True, approx_contribs=True)`. It is suitable for
+reason-code / adverse-action use cases where the ranking of features by
+`|contribution|` is what matters; for classifiers with a link function,
+contributions sum to the raw margin (pre-link), not the post-link
+probability, but ranking is preserved across monotonic links.
+
+Supported only for `TreeModel` and for `MiningModel` whose
+`multipleModelMethod` is `sum`, `weightedSum`, `average`, or `modelChain`
+wrapping one of those. Any other model type or ensemble method produces a
+hard error at conversion time when `--contributions` is set.
+
 ## How much of PMML does it support?
 * [Trees](http://dmg.org/pmml/v4-3/TreeModel.html)
 * [Neural Networks](http://dmg.org/pmml/v4-3/NeuralNetwork.html)

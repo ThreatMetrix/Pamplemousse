@@ -105,6 +105,7 @@ static void printUsage(const char * programName, option* longopts)
         "Use table for inputs",
         "Use multiple parameters for outputs",
         "Use table for outputs",
+        "Output per-feature contributions to a custom attribute.",
         nullptr
     };
     
@@ -180,16 +181,18 @@ int main(int argc, char *argv[])
         { "input_table",no_argument,     &inputFormat, int(PMMLExporter::Format::AS_TABLE) },
         { "output_multi",no_argument,    &outputFormat,int(PMMLExporter::Format::AS_MULTI_ARG) },
         { "output_table",no_argument,    &outputFormat,int(PMMLExporter::Format::AS_TABLE) },
+        { "contributions",required_argument,NULL,       'x' },
         { NULL,        0,                NULL,          0 }
     };
     
-    static constexpr char OPTSTRING[] = "id:v:o:f:p:he:TC";
+    static constexpr char OPTSTRING[] = "id:v:o:f:p:he:x:TC";
 
     const char * dataFile   = nullptr;
     const char * verifyFile = nullptr;
     const char * outputFile = nullptr;
     bool insensitive = false;
     double epsilon = 0.0001;
+    const char * contributionsAttribute = nullptr;
     std::vector<PMMLExporter::ModelOutput> inputs;
     std::vector<PMMLExporter::ModelOutput> outputs;
     int8_t c;
@@ -240,6 +243,10 @@ int main(int argc, char *argv[])
             {
                 outputs.emplace_back(customOutput, customOutput);
             }
+        }
+        else if (c == 'x')
+        {
+            contributionsAttribute = optarg;
         }
         else if (c == 'h')
         {
@@ -313,7 +320,7 @@ int main(int argc, char *argv[])
     {
         LuaOutputter output(outputFile ? outFileStream : std::cout, insensitive ? LuaOutputter::OPTION_LOWERCASE : 0);
 
-        if (!PMMLExporter::createScript(sourceFile, output, inputs, outputs, PMMLExporter::Format(inputFormat), PMMLExporter::Format(outputFormat)))
+        if (!PMMLExporter::createScript(sourceFile, output, inputs, outputs, PMMLExporter::Format(inputFormat), PMMLExporter::Format(outputFormat), contributionsAttribute))
         {
             return -1;
         }

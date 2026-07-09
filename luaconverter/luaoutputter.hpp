@@ -157,6 +157,7 @@ public:
     LuaOutputter & startElseIf();
     LuaOutputter & startElse();
     LuaOutputter & startWhile();
+    LuaOutputter & startFor();
     LuaOutputter & function();
     LuaOutputter & function(const char * functionName);
     LuaOutputter & finishedArguments();

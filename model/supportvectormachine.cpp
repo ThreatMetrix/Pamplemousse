@@ -686,6 +686,11 @@ bool parseWithKernel(AstBuilder & builder, const tinyxml2::XMLElement * node, co
 bool SupportVectorMachine::parse(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ModelConfig & config)
 {
     ASSERT_AST_BUILDER_ONE_NEW_NODE(builder);
+    if (config.contributionsTable)
+    {
+        builder.parsingError("--contributions is only supported on tree models and additive ensembles thereof", node->GetLineNum());
+        return false;
+    }
     if (node->FirstChildElement("LinearKernelType"))
     {
         LinearKernel kernel;
@@ -724,4 +729,3 @@ bool SupportVectorMachine::parse(AstBuilder & builder, const tinyxml2::XMLElemen
         return false;
     }
 }
-

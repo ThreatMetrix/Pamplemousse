@@ -24,6 +24,24 @@
 namespace MiningModel
 {
     bool parse(AstBuilder & builder, const tinyxml2::XMLElement * node, PMMLDocument::ModelConfig & config);
+
+    // Apply the same linear transform (x -> x*factor + constant) that
+    // <Target rescaleFactor="..." rescaleConstant="..."/> applies to the
+    // model's score output, so the Saabas invariant
+    //     bias + sum(per-feature contributions) == model_score
+    // continues to hold for the contribution bundle.
+    //
+    // - The bias accumulator (if set) is updated in place.
+    // - Each entry of the contributions table (if set) is multiplied by
+    //   factor when factor != 1.0; rescaleConstant only affects the bias.
+    // No-op (and emits nothing) if neither factor nor constant is set or
+    // the model has no biasAccumulator/contributionsTable to update.
+    //
+    // Returns the number of statements emitted (added to blockSize by caller).
+    size_t applyRescaleToContributions(AstBuilder & builder,
+                                       const PMMLDocument::ModelConfig & config,
+                                       bool hasFactor, double factor,
+                                       bool hasConstant, double constant);
 }
 
 #endif /* miningmodel_hpp */

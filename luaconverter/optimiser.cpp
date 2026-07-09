@@ -118,6 +118,21 @@ public:
             traverseNode<maintainAssertions>(ctx, node.children.back(), counter, visitor, &innerAssertions);
         }
     }
+
+    static void process(Function::ForPairsLoop, Analyser::AnalyserContext & ctx, AstNode & node, size_t & counter, ASTVisitor & visitor, Analyser::NonNoneAssertionStackGuard * /*parentAssertions*/)
+    {
+        if (node.children.size() == 4)
+        {
+            traverseNode<maintainAssertions>(ctx, node.children[2], counter, visitor, nullptr);
+            // The body of `for k,v in pairs(t) do ... end` runs zero or more
+            // times depending on the table's contents, so any non-none
+            // assertion the body establishes must NOT propagate to the
+            // surrounding scope (the body might never run). Mirrors what
+            // `process(Function::Lambda, ...)` above does for the same reason.
+            Analyser::NonNoneAssertionStackGuard innerAssertions(ctx);
+            traverseNode<maintainAssertions>(ctx, node.children[3], counter, visitor, &innerAssertions);
+        }
+    }
     
     static void process(Function::Block, Analyser::AnalyserContext & ctx, AstNode & node, size_t & counter, ASTVisitor & visitor, Analyser::NonNoneAssertionStackGuard * parentAssertions)
     {

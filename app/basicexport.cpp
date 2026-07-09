@@ -142,16 +142,70 @@ static void addOutput(AstBuilder & builder, const PMMLExporter::ModelOutput & cu
     }
 }
 
+static void addForPairsLoop(AstBuilder & builder, PMMLDocument::ConstFieldDescriptionPtr table, PMMLDocument::ConstFieldDescriptionPtr key,
+                            PMMLDocument::ConstFieldDescriptionPtr value, AstNode body)
+{
+    builder.field(key);
+    builder.field(value);
+    builder.field(table);
+    builder.pushNode(std::move(body));
+    builder.function(Function::forPairsLoopDef, 4);
+}
+
+static PMMLDocument::ConstFieldDescriptionPtr prepareContributionOutput(AstBuilder & builder, const PMMLExporter::ModelOutput & customOutput)
+{
+    auto result = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "contributions_output", PMMLDocument::ORIGIN_OUTPUT);
+    builder.function(Function::makeTuple, 0);
+    builder.declare(result, AstBuilder::HAS_INITIAL_VALUE);
+
+    auto key = builder.context().createVariable(PMMLDocument::TYPE_STRING, "contribution_key", PMMLDocument::ORIGIN_SPECIAL);
+    auto value = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "contribution_value", PMMLDocument::ORIGIN_SPECIAL);
+    builder.field(value);
+    builder.field(key);
+    builder.assignIndirect(result, 1);
+    AstNode body = builder.popNode();
+    addForPairsLoop(builder, customOutput.field, key, value, std::move(body));
+
+    builder.field(customOutput.biasField);
+    builder.constant("__bias__", PMMLDocument::TYPE_STRING);
+    builder.assignIndirect(result, 1);
+
+    return result;
+}
+
+static void addContributionOutput(AstBuilder & builder, const PMMLExporter::ModelOutput & customOutput)
+{
+    builder.field(prepareContributionOutput(builder, customOutput));
+}
+
 void PMMLExporter::addMultiReturnStatement(AstBuilder & builder, const std::vector<PMMLExporter::ModelOutput> & customOutputs)
 {
-    size_t goodOutputs = std::count_if(customOutputs.begin(), customOutputs.end(), [&builder](const PMMLExporter::ModelOutput & output){
+    std::vector<PMMLDocument::ConstFieldDescriptionPtr> preparedContributionOutputs(customOutputs.size());
+    for (size_t i = 0; i < customOutputs.size(); ++i)
+    {
+        if (customOutputs[i].field && customOutputs[i].isContributions)
+        {
+            preparedContributionOutputs[i] = prepareContributionOutput(builder, customOutputs[i]);
+        }
+    }
+
+    size_t goodOutputs = 0;
+    for (size_t i = 0; i < customOutputs.size(); ++i)
+    {
+        const PMMLExporter::ModelOutput & output = customOutputs[i];
         if (output.field)
         {
-            addOutput(builder, output);
-            return true;
+            if (output.isContributions)
+            {
+                builder.field(preparedContributionOutputs[i]);
+            }
+            else
+            {
+                addOutput(builder, output);
+            }
+            goodOutputs++;
         }
-        return false;
-    });
+    }
     builder.function(ReturnStatement, goodOutputs);
 }
 
@@ -163,7 +217,14 @@ void PMMLExporter::addTableReturnStatement(AstBuilder & builder, const std::vect
     {
         if (output.field)
         {
-            addOutput(builder, output);
+            if (output.isContributions)
+            {
+                addContributionOutput(builder, output);
+            }
+            else
+            {
+                addOutput(builder, output);
+            }
             builder.constant(output.variableOrAttribute, PMMLDocument::TYPE_STRING);
             builder.assignIndirect(var, 1);
         }
@@ -176,7 +237,7 @@ void PMMLExporter::addTableReturnStatement(AstBuilder & builder, const std::vect
 
 bool PMMLExporter::createScript(const char * sourceFile, LuaOutputter & luaOutputter,
                                 std::vector<PMMLExporter::ModelOutput> & inputs, std::vector<PMMLExporter::ModelOutput> & outputs,
-                                Format inputFormat, Format outputFormat)
+                                Format inputFormat, Format outputFormat, const char * contributionsAttribute)
 {
     tinyxml2::XMLDocument doc(sourceFile);
     if (doc.LoadFile(sourceFile) != tinyxml2::XML_SUCCESS)
@@ -186,9 +247,36 @@ bool PMMLExporter::createScript(const char * sourceFile, LuaOutputter & luaOutpu
     }
     
     AstBuilder builder;
-    if (!PMMLDocument::convertPMML( builder, doc.RootElement() ))
+    PMMLDocument::ModelConfig modelConfig;
+    PMMLDocument::ModelConfig * modelConfigPtr = nullptr;
+    PMMLDocument::ConstFieldDescriptionPtr contributionsTable;
+    PMMLDocument::ConstFieldDescriptionPtr biasAccumulator;
+    if (contributionsAttribute)
+    {
+        contributionsTable = builder.context().createVariable(PMMLDocument::TYPE_TABLE, "__contributions__", PMMLDocument::ORIGIN_OUTPUT);
+        biasAccumulator = builder.context().createVariable(PMMLDocument::TYPE_NUMBER, "__bias__", PMMLDocument::ORIGIN_OUTPUT);
+        modelConfig.contributionsTable = contributionsTable;
+        modelConfig.biasAccumulator = biasAccumulator;
+        modelConfigPtr = &modelConfig;
+    }
+    if (!PMMLDocument::convertPMML( builder, doc.RootElement(), modelConfigPtr ))
     {
         return false;
+    }
+
+    if (contributionsAttribute)
+    {
+        AstNode model = builder.popNode();
+        builder.function(Function::makeTuple, 0);
+        builder.declare(contributionsTable, AstBuilder::HAS_INITIAL_VALUE);
+        builder.constant(0);
+        builder.declare(biasAccumulator, AstBuilder::HAS_INITIAL_VALUE);
+        builder.pushNode(std::move(model));
+        builder.block(3);
+
+        outputs.emplace_back("__contributions__", contributionsAttribute, contributionsTable);
+        outputs.back().biasField = biasAccumulator;
+        outputs.back().isContributions = true;
     }
 
     populateIOWithDictionary(inputs, builder.context().getInputs());
@@ -221,6 +309,10 @@ bool PMMLExporter::createScript(const char * sourceFile, LuaOutputter & luaOutpu
 
     size_t countBound = std::count_if(outputs.begin(), outputs.end(), [&builder](PMMLExporter::ModelOutput & output)
     {
+        if (output.isContributions && output.field)
+        {
+            return true;
+        }
         if (output.bindToModel(builder.context()))
             return true;
         std::cerr << "Output \"" <<  output.modelOutput << "\" was not found in the model." << std::endl;

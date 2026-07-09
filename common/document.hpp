@@ -56,6 +56,8 @@ namespace PMMLDocument
         ConstFieldDescriptionPtr reasonCodeValueName;
         // This variable is where the best probability should be written to.
         ConstFieldDescriptionPtr bestProbabilityValueName;
+        ConstFieldDescriptionPtr contributionsTable;
+        ConstFieldDescriptionPtr biasAccumulator;
         // This represents the type of output this model is exprected to deliver, or TYPE_INVALID if it doesn't matter.
         PMMLDocument::FieldType outputType;
         ConstFieldDescriptionPtr targetField;
@@ -95,7 +97,7 @@ namespace PMMLDocument
     
     
     // This is a high level function that takes a root node of a PMML document and emits Lua source code.
-    bool convertPMML(AstBuilder & builder, const tinyxml2::XMLElement * documentRoot);
+    bool convertPMML(AstBuilder & builder, const tinyxml2::XMLElement * documentRoot, const ModelConfig * initialConfig = nullptr);
 }
 
 #endif /* document_hpp */
