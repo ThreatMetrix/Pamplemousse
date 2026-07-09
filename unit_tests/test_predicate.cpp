@@ -770,6 +770,118 @@ public:
         CPPUNIT_ASSERT_EQUAL(false, executeSimpleQuery(L, "test", "model_year", nullptr));
     }
 
+    // Regression test for MLA-1783 (commit 157b486): an empty quoted string
+    // ("") at the start of a SimpleSetPredicate array used to cause the entire
+    // array to be discarded, because the iterator's old isValid() check
+    // (m_upto != m_stringStart) was false after parsing "" (both pointers end
+    // up at the closing quote). The fix swapped the loop termination check
+    // from isValid() to hasMore() in model/predicate.cpp, which uses
+    // m_upto < m_endPtr (and now also handles barewords-at-end via MLA-2427).
+    //
+    // Without the fix: the generated Lua set is empty, so isIn always returns
+    // false, including for the non-empty value "alpha" that follows.
+    void testSimpleSetWithLeadingEmptyString()
+    {
+        std::stringstream mystream;
+        Analyser::AnalyserContext analyserContext;
+        Analyser::NonNoneAssertionStackGuard nonnullassertions(analyserContext);
+
+        tinyxml2::XMLDocument document;
+        document.Parse("<SimpleSetPredicate field=\"category\" booleanOperator=\"isIn\">"
+                       "<Array n=\"3\" type=\"string\">&quot;&quot; &quot;alpha&quot; &quot;beta&quot;</Array>"
+                       "</SimpleSetPredicate>");
+        LuaOutputter outputter(mystream);
+        outputter.keyword("function test() return");
+        AstBuilder astBuilder;
+
+        PMMLDocument::ScopedVariableDefinitionStackGuard scope(astBuilder.context());
+        auto field = scope.addDataField("category", PMMLDocument::TYPE_STRING, PMMLDocument::ORIGIN_DATA_DICTIONARY, PMMLDocument::OPTYPE_CONTINUOUS);
+        astBuilder.context().addDefaultMiningField("category", field);
+
+        CPPUNIT_ASSERT_EQUAL(true, Predicate::parse(astBuilder, document.RootElement()));
+        LuaConverter::convertAstToLua(astBuilder.topNode(), outputter);
+        outputter.keyword("end");
+
+        lua_State * L = luaL_newstate();
+        if (luaL_dostring(L, mystream.str().c_str()))
+        {
+            std::string message = lua_tostring(L, -1);
+            CPPUNIT_ASSERT_MESSAGE(message, false);
+        }
+
+        // All three array entries should be in the set: the empty string and
+        // both later non-empty strings. Pre-fix, none of these matched.
+        CPPUNIT_ASSERT_EQUAL(true, executeSimpleQuery(L, "test", "category", ""));
+        CPPUNIT_ASSERT_EQUAL(true, executeSimpleQuery(L, "test", "category", "alpha"));
+        CPPUNIT_ASSERT_EQUAL(true, executeSimpleQuery(L, "test", "category", "beta"));
+        CPPUNIT_ASSERT_EQUAL(false, executeSimpleQuery(L, "test", "category", "gamma"));
+        CPPUNIT_ASSERT_EQUAL(false, executeSimpleQuery(L, "test", "category", nullptr));
+    }
+
+    // Regression test for MLA-2427 (commit 91ee2e0): the MLA-1783 fix used
+    // hasMore() = (m_upto < m_endPtr), which dropped the LAST element of any
+    // array whose final token is a bareword (unquoted), because such tokens
+    // leave m_upto sitting exactly at m_endPtr while m_stringStart still points
+    // inside the unread token. The follow-up fix added a clause:
+    //   m_upto <= m_endPtr && (m_stringStart != m_upto)
+    // so the last bareword is processed before termination.
+    //
+    // Without the fix: "78" is in the set but "80" is not, even though both
+    // are listed in the array. Quoted-string arrays don't trigger this bug
+    // because the closing quote sits before m_endPtr.
+    void testSimpleSetWithBarewordsAtEnd()
+    {
+        std::stringstream mystream;
+        Analyser::AnalyserContext analyserContext;
+        Analyser::NonNoneAssertionStackGuard nonnullassertions(analyserContext);
+
+        tinyxml2::XMLDocument document;
+        document.Parse("<SimpleSetPredicate field=\"year\" booleanOperator=\"isIn\">"
+                       "<Array n=\"3\" type=\"int\">70 78 80</Array>"
+                       "</SimpleSetPredicate>");
+        LuaOutputter outputter(mystream);
+        outputter.keyword("function test() return");
+        AstBuilder astBuilder;
+
+        PMMLDocument::ScopedVariableDefinitionStackGuard scope(astBuilder.context());
+        auto field = scope.addDataField("year", PMMLDocument::TYPE_NUMBER, PMMLDocument::ORIGIN_DATA_DICTIONARY, PMMLDocument::OPTYPE_CONTINUOUS);
+        astBuilder.context().addDefaultMiningField("year", field);
+
+        CPPUNIT_ASSERT_EQUAL(true, Predicate::parse(astBuilder, document.RootElement()));
+        LuaConverter::convertAstToLua(astBuilder.topNode(), outputter);
+        outputter.keyword("end");
+
+        lua_State * L = luaL_newstate();
+        if (luaL_dostring(L, mystream.str().c_str()))
+        {
+            std::string message = lua_tostring(L, -1);
+            CPPUNIT_ASSERT_MESSAGE(message, false);
+        }
+
+        // executeSimpleQuery pushes strings, but `year` is numeric so set
+        // membership is checked by number equality. Push numbers directly.
+        auto checkYear = [&](double yearValue) -> bool {
+            lua_pushnumber(L, yearValue);
+            lua_setglobal(L, "year");
+            lua_getglobal(L, "test");
+            if (lua_pcall(L, 0, 1, 0))
+            {
+                std::string message = lua_tostring(L, -1);
+                CPPUNIT_ASSERT_MESSAGE(message, false);
+            }
+            bool out = lua_toboolean(L, -1);
+            lua_pop(L, 1);
+            return out;
+        };
+
+        // All three array entries must match. The trailing "80" is the
+        // regression-critical one: pre-fix it was silently dropped.
+        CPPUNIT_ASSERT_EQUAL(true, checkYear(70));
+        CPPUNIT_ASSERT_EQUAL(true, checkYear(78));
+        CPPUNIT_ASSERT_EQUAL(true, checkYear(80));
+        CPPUNIT_ASSERT_EQUAL(false, checkYear(79));
+    }
+
     CPPUNIT_TEST_SUITE(TestPredicate);
     CPPUNIT_TEST(testSimplePredicate);
     CPPUNIT_TEST(testCompoundAndPredicate);
@@ -778,5 +890,7 @@ public:
     CPPUNIT_TEST(testMixedCompound);
     CPPUNIT_TEST(testSurrogate);
     CPPUNIT_TEST(testSimpleSet);
+    CPPUNIT_TEST(testSimpleSetWithLeadingEmptyString);
+    CPPUNIT_TEST(testSimpleSetWithBarewordsAtEnd);
     CPPUNIT_TEST_SUITE_END();
 };
